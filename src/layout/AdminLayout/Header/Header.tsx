@@ -1,7 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
-import Breadcrumb from '@layout/AdminLayout/Breadcrumb/Breadcrumb'
 import HeaderFeaturedNav from '@layout/AdminLayout/Header/HeaderFeaturedNav'
 import HeaderNotificationNav from '@layout/AdminLayout/Header/HeaderNotificationNav'
 import HeaderProfileNav from '@layout/AdminLayout/Header/HeaderProfileNav'
@@ -34,25 +33,10 @@ export default function Header(props: HeaderProps) {
         >
           <FontAwesomeIcon icon={faBars} />
         </Button>
-        <Link href="/" className="header-brand d-md-none">
-          <svg width="118" height="46">
-            <title>CoreUI Logo</title>
-            <use xlinkHref="/assets/brand/coreui.svg#full" />
-          </svg>
-        </Link>
-        <div className="header-nav d-none d-md-flex">
-          <HeaderFeaturedNav />
-        </div>
+        <div>Welcome Team 1 to AWAP 2023</div> {/* insert styles here */}
         <div className="header-nav ms-auto">
-          <HeaderNotificationNav />
-        </div>
-        <div className="header-nav ms-2">
           <HeaderProfileNav />
         </div>
-      </Container>
-      <div className="header-divider border-top my-2 ms-n2 me-n2" />
-      <Container fluid>
-        <Breadcrumb />
       </Container>
     </header>
   )

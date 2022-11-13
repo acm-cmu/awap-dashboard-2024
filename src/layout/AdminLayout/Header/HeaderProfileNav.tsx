@@ -1,21 +1,12 @@
 import {
-  Badge, Dropdown, Nav, NavItem,
+  Dropdown, Nav, NavItem,
 } from 'react-bootstrap'
 import Image from 'next/image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faBell,
-  faCreditCard,
-  faEnvelopeOpen,
-  faFile,
-  faMessage,
-  faUser,
-} from '@fortawesome/free-regular-svg-icons'
+import { faUser } from '@fortawesome/free-regular-svg-icons'
 import { PropsWithChildren } from 'react'
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import {
-  faGear, faListCheck, faLock, faPowerOff,
-} from '@fortawesome/free-solid-svg-icons'
+import { faPowerOff } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 
 type NavItemProps = {
@@ -36,13 +27,15 @@ const ProfileDropdownItem = (props: NavItemProps) => {
 export default function HeaderProfileNav() {
   return (
     <Nav>
+      {/*       <Link href="/profile" passHref legacyBehavior>Profile</Link>
+      <Link href="/login" passHref legacyBehavior>Logout</Link> */}
       <Dropdown as={NavItem}>
         <Dropdown.Toggle variant="link" bsPrefix="shadow-none" className="py-0 px-2 rounded-0" id="dropdown-profile">
           <div className="avatar position-relative">
             <Image
               fill
               className="rounded-circle"
-              src="/assets/img/avatars/8.jpg"
+              src="/assets/img/avatars/default.png"
               alt="user@email.com"
             />
           </div>
@@ -51,64 +44,7 @@ export default function HeaderProfileNav() {
           <Dropdown.Header className="bg-light fw-bold rounded-top">Account</Dropdown.Header>
           <Link href="/" passHref legacyBehavior>
             <Dropdown.Item>
-              <ProfileDropdownItem icon={faBell}>
-                Updates
-                <Badge bg="info" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faEnvelopeOpen}>
-                Updates
-                <Badge bg="success" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faListCheck}>
-                Tasks
-                <Badge bg="danger" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faMessage}>
-                Messages
-                <Badge bg="warning" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-
-          <Dropdown.Header className="bg-light fw-bold">Settings</Dropdown.Header>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
               <ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faGear}>Settings</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faCreditCard}>Payments</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faFile}>Projects</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-
-          <Dropdown.Divider />
-
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faLock}>Lock Account</ProfileDropdownItem>
             </Dropdown.Item>
           </Link>
           <Link href="/login" passHref legacyBehavior>
