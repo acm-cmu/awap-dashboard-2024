@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import { faEnvelope, faUser } from '@fortawesome/free-regular-svg-icons'
+import { faUser } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLock } from '@fortawesome/free-solid-svg-icons'
 import {
@@ -31,32 +31,18 @@ const Register: NextPage = () => {
           <Col md={6}>
             <Card className="mb-4 rounded-0">
               <Card.Body className="p-4">
-                <h1>Register</h1>
+                <h1 className="text-center">Register for AWAP 2023</h1>
                 <p className="text-black-50">Create your account</p>
 
                 <form onSubmit={register}>
                   <InputGroup className="mb-3">
                     <InputGroup.Text><FontAwesomeIcon icon={faUser} fixedWidth /></InputGroup.Text>
                     <Form.Control
-                      name="username"
+                      name="teamname"
                       required
                       disabled={submitting}
-                      placeholder="Username"
-                      aria-label="Username"
-                    />
-                  </InputGroup>
-
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text>
-                      <FontAwesomeIcon icon={faEnvelope} fixedWidth />
-                    </InputGroup.Text>
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      required
-                      disabled={submitting}
-                      placeholder="Email"
-                      aria-label="Email"
+                      placeholder="Team Name"
+                      aria-label="Team Name"
                     />
                   </InputGroup>
 
