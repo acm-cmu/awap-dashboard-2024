@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
-import HeaderProfileNav from '@layout/AdminLayout/Header/HeaderProfileNav'
+import HeaderProfileNav from '@layout/UserLayout/Header/HeaderProfileNav'
 import { Button, Container } from 'react-bootstrap'
 
 type HeaderProps = {
@@ -32,7 +32,7 @@ export default function Header(props: HeaderProps) {
         </Button>
         <div>Welcome Team 1 to AWAP 2023</div>
         <div className="header-nav ms-auto">
-        {/* insert styles here */}
+          {/* insert styles here */}
           <HeaderProfileNav />
         </div>
       </Container>
