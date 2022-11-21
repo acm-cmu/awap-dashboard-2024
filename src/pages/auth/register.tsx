@@ -7,10 +7,31 @@ import {
 } from 'react-bootstrap'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
+import { signIn } from 'next-auth/react'
 
 const Register: NextPage = () => {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [passwordRepeat, setPasswordRepeat] = useState('')
+
+  const login = async (e: SyntheticEvent) => {
+    e.stopPropagation() // prevent default form submission
+    e.preventDefault() // prevent default form submission
+
+    const res = await signIn('credentials', {
+      username,
+      password,
+      redirect: false,
+    })
+
+    if (res?.error) {
+      console.log('error', res?.error)
+    } else if (res?.ok) {
+      router.replace('/')
+    }
+  }
 
   const register = (e: SyntheticEvent) => {
     e.stopPropagation()
@@ -18,10 +39,32 @@ const Register: NextPage = () => {
 
     setSubmitting(true)
 
-    setTimeout(() => {
+    if (passwordRepeat !== password) {
+      console.log('passwords do not match')
+      alert('Passwords do not match')
       setSubmitting(false)
-      router.push('/')
-    }, 2000)
+      return
+    }
+
+    fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    })
+      .then((res) => res.status)
+      .then((status) => {
+        if (status === 400) {
+          console.log('error', 'user already exists')
+        } else if (status === 200) {
+          login(e)
+        }
+      })
+      .finally(() => setSubmitting(false))
   }
 
   return (
@@ -38,7 +81,8 @@ const Register: NextPage = () => {
                   <InputGroup className="mb-3">
                     <InputGroup.Text><FontAwesomeIcon icon={faUser} fixedWidth /></InputGroup.Text>
                     <Form.Control
-                      name="teamname"
+                      onChange={(e) => setUsername(e.target.value)}
+                      name="username"
                       required
                       disabled={submitting}
                       placeholder="Team Name"
@@ -49,6 +93,7 @@ const Register: NextPage = () => {
                   <InputGroup className="mb-3">
                     <InputGroup.Text><FontAwesomeIcon icon={faLock} fixedWidth /></InputGroup.Text>
                     <Form.Control
+                      onChange={(e) => setPassword(e.target.value)}
                       type="password"
                       name="password"
                       required
@@ -61,6 +106,7 @@ const Register: NextPage = () => {
                   <InputGroup className="mb-3">
                     <InputGroup.Text><FontAwesomeIcon icon={faLock} fixedWidth /></InputGroup.Text>
                     <Form.Control
+                      onChange={(e) => setPasswordRepeat(e.target.value)}
                       type="password"
                       name="password_repeat"
                       required
