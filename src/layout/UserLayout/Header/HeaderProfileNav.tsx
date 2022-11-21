@@ -8,6 +8,7 @@ import { PropsWithChildren } from 'react'
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faPowerOff } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 
 type NavItemProps = {
   icon: IconDefinition;
@@ -47,9 +48,11 @@ export default function HeaderProfileNav() {
               <ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
             </Dropdown.Item>
           </Link>
-          <Link href="/login" passHref legacyBehavior>
+          <Link href="/" passHref legacyBehavior>
             <Dropdown.Item>
-              <ProfileDropdownItem icon={faPowerOff}>Logout</ProfileDropdownItem>
+              <ProfileDropdownItem icon={faPowerOff}>
+                <a onClick={() => signOut()}>Sign Out</a>
+              </ProfileDropdownItem>
             </Dropdown.Item>
           </Link>
         </Dropdown.Menu>

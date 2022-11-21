@@ -4,6 +4,7 @@ import { faCalculator, faCode, faPencil } from '@fortawesome/free-solid-svg-icon
 import React, { PropsWithChildren } from 'react'
 import { Nav } from 'react-bootstrap'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 type SidebarNavItemProps = {
   href: string;
@@ -30,14 +31,26 @@ const SidebarNavItem = (props: SidebarNavItemProps) => {
   )
 }
 
+const ProtectedSidebarItems = () => {
+  const { status } = useSession()
+  if (status === 'authenticated') {
+    return (
+      <>
+        <SidebarNavItem icon={faCode} href="submissions">Submissions</SidebarNavItem>
+        <SidebarNavItem icon={faPencil} href="scrimmages">Scrimmages</SidebarNavItem>
+      </>
+    )
+  }
+  return null
+}
+
 export default function SidebarNav() {
   return (
     <ul className="list-unstyled">
       <SidebarNavItem icon={faStar} href="/">Home</SidebarNavItem>
       <SidebarNavItem icon={faFileLines} href="getting_started">Getting Started</SidebarNavItem>
       <SidebarNavItem icon={faCalculator} href="leaderboard">Leaderboard</SidebarNavItem>
-      <SidebarNavItem icon={faCode} href="submissions">Submissions</SidebarNavItem>
-      <SidebarNavItem icon={faPencil} href="scrimmages">Scrimmages</SidebarNavItem>
+      <ProtectedSidebarItems />
     </ul>
   )
 }
