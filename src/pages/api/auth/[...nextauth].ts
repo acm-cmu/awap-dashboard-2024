@@ -53,14 +53,11 @@ const authOptions: NextAuthOptions = {
 
         const hashedpassword: string = user.Item.password.S !== undefined ? user.Item.password.S : ''
 
-        // if user is found, compare password
-        compare(password, hashedpassword, (err, result) => {
-          if (err || !result) {
-            throw new Error('invalid credentials')
-          } else {
-            return true
-          }
-        })
+        const match = await compare(password, hashedpassword)
+
+        if (!match) {
+          throw new Error('invalid credentials')
+        }
 
         return { name: username }
       },

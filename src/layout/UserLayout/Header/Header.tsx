@@ -6,7 +6,6 @@ import { useSession, signIn } from 'next-auth/react'
 
 function Greeting() {
   const { data: session, status } = useSession()
-  console.log(session)
 
   if (status === 'authenticated') {
     return <h3>Hello {session.user.name}</h3>
