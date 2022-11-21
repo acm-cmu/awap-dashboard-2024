@@ -75,7 +75,7 @@ const Register: NextPage = () => {
             <Card className="mb-4 rounded-0">
               <Card.Body className="p-4">
                 <h1 className="text-center">Register for AWAP 2023</h1>
-                <p className="text-black-50">Create your account</p>
+                <p className="text-black-50">Create your team account</p>
 
                 <form onSubmit={register}>
                   <InputGroup className="mb-3">
