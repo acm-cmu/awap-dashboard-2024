@@ -1,34 +1,34 @@
-import { Dropdown, Nav, NavItem } from "react-bootstrap";
-import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-regular-svg-icons";
-import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { faPowerOff } from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/router";
-import { PropsWithChildren } from "react";
+import { Dropdown, Nav, NavItem } from 'react-bootstrap'
+import Image from 'next/image'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUser } from '@fortawesome/free-regular-svg-icons'
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { faPowerOff } from '@fortawesome/free-solid-svg-icons'
+import Link from 'next/link'
+import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { PropsWithChildren } from 'react'
 
 type NavItemProps = {
-  icon: IconDefinition;
-} & PropsWithChildren;
+  icon: IconDefinition
+} & PropsWithChildren
 
 const ProfileDropdownItem = (props: NavItemProps) => {
-  const { icon, children } = props;
+  const { icon, children } = props
 
   return (
     <>
       <FontAwesomeIcon className="me-2" icon={icon} fixedWidth />
       {children}
     </>
-  );
-};
+  )
+}
 
 export default function HeaderProfileNav() {
-  const router = useRouter();
+  const router = useRouter()
   const logout = async () => {
-    await signOut();
-  };
+    await signOut()
+  }
 
   return (
     <Nav>
@@ -67,5 +67,5 @@ export default function HeaderProfileNav() {
         </Dropdown.Menu>
       </Dropdown>
     </Nav>
-  );
+  )
 }

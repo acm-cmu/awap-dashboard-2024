@@ -3,11 +3,20 @@ import { faUser } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLock } from '@fortawesome/free-solid-svg-icons'
 import {
-  Button, Card, Col, Container, Form, InputGroup, Row,
+  Button,
+  Card,
+  Col,
+  Container,
+  Form,
+  InputGroup,
+  Row,
 } from 'react-bootstrap'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
 import { signIn } from 'next-auth/react'
+
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const Register: NextPage = () => {
   const router = useRouter()
@@ -40,8 +49,7 @@ const Register: NextPage = () => {
     setSubmitting(true)
 
     if (passwordRepeat !== password) {
-      console.log('passwords do not match')
-      alert('Passwords do not match')
+      toast.error('Passwords do not match!')
       setSubmitting(false)
       return
     }
@@ -59,8 +67,10 @@ const Register: NextPage = () => {
       .then((res) => res.status)
       .then((status) => {
         if (status === 400) {
-          console.log('error', 'user already exists')
+          toast.error('Username already exists!')
         } else if (status === 200) {
+          toast.dismiss()
+          toast.success('Account created successfully!', { autoClose: 2000 })
           login(e)
         }
       })
@@ -79,10 +89,14 @@ const Register: NextPage = () => {
 
                 <form onSubmit={register}>
                   <InputGroup className="mb-3">
-                    <InputGroup.Text><FontAwesomeIcon icon={faUser} fixedWidth /></InputGroup.Text>
+                    <InputGroup.Text>
+                      <FontAwesomeIcon icon={faUser} fixedWidth />
+                    </InputGroup.Text>
                     <Form.Control
                       onChange={(e) => setUsername(e.target.value)}
                       name="username"
+                      minLength={3}
+                      maxLength={20}
                       required
                       disabled={submitting}
                       placeholder="Team Name"
@@ -91,11 +105,15 @@ const Register: NextPage = () => {
                   </InputGroup>
 
                   <InputGroup className="mb-3">
-                    <InputGroup.Text><FontAwesomeIcon icon={faLock} fixedWidth /></InputGroup.Text>
+                    <InputGroup.Text>
+                      <FontAwesomeIcon icon={faLock} fixedWidth />
+                    </InputGroup.Text>
                     <Form.Control
                       onChange={(e) => setPassword(e.target.value)}
                       type="password"
                       name="password"
+                      minLength={8}
+                      maxLength={20}
                       required
                       disabled={submitting}
                       placeholder="Password"
@@ -104,11 +122,15 @@ const Register: NextPage = () => {
                   </InputGroup>
 
                   <InputGroup className="mb-3">
-                    <InputGroup.Text><FontAwesomeIcon icon={faLock} fixedWidth /></InputGroup.Text>
+                    <InputGroup.Text>
+                      <FontAwesomeIcon icon={faLock} fixedWidth />
+                    </InputGroup.Text>
                     <Form.Control
                       onChange={(e) => setPasswordRepeat(e.target.value)}
                       type="password"
                       name="password_repeat"
+                      minLength={8}
+                      maxLength={20}
                       required
                       disabled={submitting}
                       placeholder="Repeat password"
@@ -116,7 +138,12 @@ const Register: NextPage = () => {
                     />
                   </InputGroup>
 
-                  <Button type="submit" className="d-block w-100" disabled={submitting} variant="success">
+                  <Button
+                    type="submit"
+                    className="d-block w-100"
+                    disabled={submitting}
+                    variant="success"
+                  >
                     Create Account
                   </Button>
                 </form>

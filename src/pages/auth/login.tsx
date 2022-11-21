@@ -2,14 +2,14 @@ import { NextPage } from 'next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-regular-svg-icons'
 import { faLock } from '@fortawesome/free-solid-svg-icons'
-import {
-  Button,
-  Col, Container, Form, InputGroup, Row,
-} from 'react-bootstrap'
+import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap'
 import Link from 'next/link'
 import { SyntheticEvent, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
+
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const Login: NextPage = () => {
   const [username, setUsername] = useState('')
@@ -28,13 +28,16 @@ const Login: NextPage = () => {
     })
 
     if (res?.error) {
+      toast.error('Invalid Credentials!')
       console.log('error', res?.error)
     } else if (res?.ok) {
+      toast.dismiss()
       router.replace('/')
     }
   }
 
-  return (// render login form
+  return (
+    // render login form
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
       <Container>
         <Row className="justify-content-center align-items-center px-3">
@@ -43,20 +46,21 @@ const Login: NextPage = () => {
               <Col md={7} className="bg-white border p-5">
                 <div className="">
                   <h1>Login</h1>
-                  <p className="text-black-50">Sign In to your AWAP Dashboard</p>
+                  <p className="text-black-50">
+                    Sign In to your AWAP Dashboard
+                  </p>
 
                   <form onSubmit={login}>
                     <InputGroup className="mb-3">
                       <InputGroup.Text>
-                        <FontAwesomeIcon
-                          icon={faUser}
-                          fixedWidth
-                        />
+                        <FontAwesomeIcon icon={faUser} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
                         onChange={(e) => setUsername(e.target.value)}
                         type="text"
                         name="username"
+                        minLength={3}
+                        maxLength={20}
                         required
                         placeholder="Username"
                         aria-label="Username"
@@ -65,15 +69,14 @@ const Login: NextPage = () => {
 
                     <InputGroup className="mb-3">
                       <InputGroup.Text>
-                        <FontAwesomeIcon
-                          icon={faLock}
-                          fixedWidth
-                        />
+                        <FontAwesomeIcon icon={faLock} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
                         onChange={(e) => setPassword(e.target.value)}
                         type="password"
                         name="password"
+                        minLength={8}
+                        maxLength={20}
                         required
                         placeholder="Password"
                         aria-label="Password"
@@ -82,7 +85,13 @@ const Login: NextPage = () => {
 
                     <Row>
                       <Col xs={6}>
-                        <Button className="px-4" variant="primary" type="submit">Login</Button>
+                        <Button
+                          className="px-4"
+                          variant="primary"
+                          type="submit"
+                        >
+                          Login
+                        </Button>
                       </Col>
                     </Row>
                   </form>
@@ -94,11 +103,12 @@ const Login: NextPage = () => {
               >
                 <div className="text-center">
                   <h2>Sign up</h2>
-                  <p>
-                    Want to compete in AWAP 2023?
-                  </p>
+                  <p>Want to compete in AWAP 2023?</p>
                   <Link href="/auth/register">
-                    <button className="btn btn-lg btn-outline-light mt-3" type="button">
+                    <button
+                      className="btn btn-lg btn-outline-light mt-3"
+                      type="button"
+                    >
                       Register Now!
                     </button>
                   </Link>

@@ -8,12 +8,16 @@ function Greeting() {
   const { data: session, status } = useSession()
 
   if (status === 'authenticated') {
-    return <h3>Hello {session.user.name}</h3>
+    return (
+      <div>
+        Hello <strong>{session.user.name}</strong>
+      </div>
+    )
   }
   if (status === 'loading') {
-    return <h3>Loading...</h3>
+    return <div>Loading...</div>
   }
-  return <h3>AWAP 2023</h3>
+  return <div>AWAP 2023</div>
 }
 
 function Profile() {
@@ -38,8 +42,8 @@ function Profile() {
 }
 
 type HeaderProps = {
-  toggleSidebar: () => void;
-  toggleSidebarMd: () => void;
+  toggleSidebar: () => void
+  toggleSidebarMd: () => void
 }
 
 export default function Header(props: HeaderProps) {
