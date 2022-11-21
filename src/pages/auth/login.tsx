@@ -84,12 +84,6 @@ const Login: NextPage = () => {
                       <Col xs={6}>
                         <Button className="px-4" variant="primary" type="submit">Login</Button>
                       </Col>
-                      <Col xs={6} className="text-end">
-                        <Button className="px-0" variant="link" type="submit">
-                          Forgot
-                          password?
-                        </Button>
-                      </Col>
                     </Row>
                   </form>
                 </div>
@@ -101,7 +95,7 @@ const Login: NextPage = () => {
                 <div className="text-center">
                   <h2>Sign up</h2>
                   <p>
-                    Don't have an account, but want to compete in AWAP 2023?
+                    Want to compete in AWAP 2023?
                   </p>
                   <Link href="/auth/register">
                     <button className="btn btn-lg btn-outline-light mt-3" type="button">
