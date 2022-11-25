@@ -3,8 +3,9 @@ import { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
 import { useEffect } from 'react'
+import { Card } from 'react-bootstrap'
 
-const Scrimmages: NextPage = () => {
+const Submissions: NextPage = () => {
   const { status, data } = useSession()
 
   useEffect(() => {
@@ -14,11 +15,15 @@ const Scrimmages: NextPage = () => {
   if (status === 'authenticated') {
     return (
       <UserLayout>
-        <div>
-          This page is Protected for special people. like
-          {'\n'}
-          {JSON.stringify(data.user, null, 2)}
-        </div>
+        <Card>
+          <Card.Body>
+            <Card.Title>Scrimmages</Card.Title>
+            <Card.Text>
+              This page is Protected for special people. like
+              {JSON.stringify(data?.user, null, 2)}
+            </Card.Text>
+          </Card.Body>
+        </Card>
       </UserLayout>
     )
   }
@@ -26,4 +31,4 @@ const Scrimmages: NextPage = () => {
   return <div>loading</div>
 }
 
-export default Scrimmages
+export default Submissions

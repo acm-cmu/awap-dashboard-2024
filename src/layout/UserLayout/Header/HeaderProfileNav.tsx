@@ -52,7 +52,7 @@ export default function HeaderProfileNav() {
           <Dropdown.Header className="bg-light fw-bold rounded-top">
             Account
           </Dropdown.Header>
-          <Link href="/profile" passHref legacyBehavior>
+          <Link href="/user/profile" passHref legacyBehavior>
             <Dropdown.Item>
               <ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
             </Dropdown.Item>

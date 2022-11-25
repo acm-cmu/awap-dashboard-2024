@@ -1,4 +1,8 @@
-import { DynamoDB, DynamoDBClientConfig, GetItemCommand } from '@aws-sdk/client-dynamodb'
+import {
+  DynamoDB,
+  DynamoDBClientConfig,
+  GetItemCommand,
+} from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 
@@ -34,8 +38,11 @@ const authOptions: NextAuthOptions = {
         username: { label: 'Username', type: 'text', placeholder: 'awapteam' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials, req: NextApiRequest) {
-        const { username, password } = credentials as { username: string; password: string }
+      async authorize(credentials, req) {
+        const { username, password } = credentials as {
+          username: string
+          password: string
+        }
 
         const user = await client.send(
           new GetItemCommand({
@@ -51,7 +58,8 @@ const authOptions: NextAuthOptions = {
           throw new Error('invalid credentials')
         }
 
-        const hashedpassword: string = user.Item.password.S !== undefined ? user.Item.password.S : ''
+        const hashedpassword: string =
+          user.Item.password.S !== undefined ? user.Item.password.S : ''
 
         const match = await compare(password, hashedpassword)
 
@@ -59,10 +67,25 @@ const authOptions: NextAuthOptions = {
           throw new Error('invalid credentials')
         }
 
-        return { name: username }
+        return { name: username, role: user.Item.role.S }
       },
     }),
   ],
+  callbacks: {
+    jwt(params) {
+      // update token
+      if (params.user?.role) {
+        params.token.role = params.user.role
+      }
+      // return final_token
+      return params.token
+    },
+    async session({ session, token, user }) {
+      session.user.role = token.role
+      return session
+    },
+  },
+
   pages: {
     signIn: '/auth/login',
   },

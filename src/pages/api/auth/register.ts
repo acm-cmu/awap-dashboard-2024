@@ -1,5 +1,8 @@
 import {
-  DynamoDB, DynamoDBClientConfig, GetItemCommand, PutItemCommand,
+  DynamoDB,
+  DynamoDBClientConfig,
+  GetItemCommand,
+  PutItemCommand,
 } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 
@@ -22,7 +25,10 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 })
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const { username, password } = req.body
 
   const hashedpassword = await hash(password, 10)
@@ -45,6 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         Item: {
           username: { S: username },
           password: { S: hashedpassword },
+          role: { S: 'user' },
         },
       }),
     )
