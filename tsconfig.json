@@ -23,9 +23,11 @@
       "@models/*": ["src/models/*"],
       "@pages": ["src/pages"],
       "@store": ["src/store"],
-      "@styles/*": ["src/styles/*"]
+      "@styles/*": ["src/styles/*"],
+      "@services": ["src/services"],
+      "@services/*": ["src/services/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "exclude": ["node_modules"]
 }

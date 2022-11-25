@@ -1,16 +1,16 @@
-import {
-  Dropdown, Nav, NavItem,
-} from 'react-bootstrap'
+import { Dropdown, Nav, NavItem } from 'react-bootstrap'
 import Image from 'next/image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-regular-svg-icons'
-import { PropsWithChildren } from 'react'
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faPowerOff } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { PropsWithChildren } from 'react'
 
 type NavItemProps = {
-  icon: IconDefinition;
+  icon: IconDefinition
 } & PropsWithChildren
 
 const ProfileDropdownItem = (props: NavItemProps) => {
@@ -25,12 +25,20 @@ const ProfileDropdownItem = (props: NavItemProps) => {
 }
 
 export default function HeaderProfileNav() {
+  const router = useRouter()
+  const logout = async () => {
+    await signOut()
+  }
+
   return (
     <Nav>
-      {/*       <Link href="/profile" passHref legacyBehavior>Profile</Link>
-      <Link href="/login" passHref legacyBehavior>Logout</Link> */}
       <Dropdown as={NavItem}>
-        <Dropdown.Toggle variant="link" bsPrefix="shadow-none" className="py-0 px-2 rounded-0" id="dropdown-profile">
+        <Dropdown.Toggle
+          variant="link"
+          bsPrefix="shadow-none"
+          className="py-0 px-2 rounded-0"
+          id="dropdown-profile"
+        >
           <div className="avatar position-relative">
             <Image
               fill
@@ -41,15 +49,19 @@ export default function HeaderProfileNav() {
           </div>
         </Dropdown.Toggle>
         <Dropdown.Menu className="pt-0">
-          <Dropdown.Header className="bg-light fw-bold rounded-top">Account</Dropdown.Header>
-          <Link href="/" passHref legacyBehavior>
+          <Dropdown.Header className="bg-light fw-bold rounded-top">
+            Account
+          </Dropdown.Header>
+          <Link href="/user/profile" passHref legacyBehavior>
             <Dropdown.Item>
               <ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
             </Dropdown.Item>
           </Link>
-          <Link href="/login" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faPowerOff}>Logout</ProfileDropdownItem>
+          <Link href="/" passHref legacyBehavior>
+            <Dropdown.Item onClick={() => logout()}>
+              <ProfileDropdownItem icon={faPowerOff}>
+                Sign Out
+              </ProfileDropdownItem>
             </Dropdown.Item>
           </Link>
         </Dropdown.Menu>

@@ -1,11 +1,49 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
-import HeaderProfileNav from '@layout/AdminLayout/Header/HeaderProfileNav'
+import HeaderProfileNav from '@layout/UserLayout/Header/HeaderProfileNav'
 import { Button, Container } from 'react-bootstrap'
+import { useSession, signIn } from 'next-auth/react'
+
+function Greeting() {
+  const { data: session, status } = useSession()
+
+  if (status === 'authenticated') {
+    return (
+      <div>
+        Hello <strong>{session.user.name}</strong>
+      </div>
+    )
+  }
+  if (status === 'loading') {
+    return <div>Loading...</div>
+  }
+  return <div>AWAP 2023</div>
+}
+
+function Profile() {
+  const { status } = useSession()
+
+  if (status === 'authenticated') {
+    return <HeaderProfileNav />
+  }
+  if (status === 'loading') {
+    return <h3>Loading...</h3>
+  }
+  return (
+    <Button
+      variant="link"
+      className="header-toggler rounded-0 shadow-none"
+      type="button"
+      onClick={() => signIn()}
+    >
+      Sign In
+    </Button>
+  )
+}
 
 type HeaderProps = {
-  toggleSidebar: () => void;
-  toggleSidebarMd: () => void;
+  toggleSidebar: () => void
+  toggleSidebarMd: () => void
 }
 
 export default function Header(props: HeaderProps) {
@@ -30,10 +68,9 @@ export default function Header(props: HeaderProps) {
         >
           <FontAwesomeIcon icon={faBars} />
         </Button>
-        <div>Welcome Team 1 to AWAP 2023</div>
+        <Greeting />
         <div className="header-nav ms-auto">
-        {/* insert styles here */}
-          <HeaderProfileNav />
+          <Profile />
         </div>
       </Container>
     </header>

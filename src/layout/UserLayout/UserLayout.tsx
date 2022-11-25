@@ -3,12 +3,12 @@ import React, {
 } from 'react'
 import { useResizeDetector } from 'react-resize-detector'
 import Head from 'next/head'
-import Sidebar, { SidebarOverlay } from '@layout/AdminLayout/Sidebar/Sidebar'
-import Header from '@layout/AdminLayout/Header/Header'
-import Footer from '@layout/AdminLayout/Footer/Footer'
+import Sidebar, { SidebarOverlay } from '@layout/UserLayout/Sidebar/Sidebar'
+import Header from '@layout/UserLayout/Header/Header'
+import Footer from '@layout/UserLayout/Footer/Footer'
 import { Container } from 'react-bootstrap'
 
-export default function AdminLayout({ children }: PropsWithChildren) {
+export default function UserLayout({ children }: PropsWithChildren) {
   // Show status for xs screen
   const [isShowSidebar, setIsShowSidebar] = useState(false)
 

@@ -2,31 +2,42 @@ import { NextPage } from 'next'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-regular-svg-icons'
 import { faLock } from '@fortawesome/free-solid-svg-icons'
-import {
-  Button,
-  Col, Container, Form, InputGroup, Row,
-} from 'react-bootstrap'
+import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap'
 import Link from 'next/link'
 import { SyntheticEvent, useState } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
 
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 const Login: NextPage = () => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+
   const router = useRouter()
-  const [submitting, setSubmitting] = useState(false)
 
-  const login = (e: SyntheticEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
+  const login = async (e: SyntheticEvent) => {
+    e.stopPropagation() // prevent default form submission
+    e.preventDefault() // prevent default form submission
 
-    setSubmitting(true)
+    const res = await signIn('credentials', {
+      username,
+      password,
+      redirect: false,
+    })
 
-    setTimeout(() => {
-      setSubmitting(false)
-      router.push('/')
-    }, 2000)
+    if (res?.error) {
+      toast.error('Invalid Credentials!')
+      console.log('error', res?.error)
+    } else if (res?.ok) {
+      toast.dismiss()
+      router.replace('/')
+    }
   }
 
   return (
+    // render login form
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
       <Container>
         <Row className="justify-content-center align-items-center px-3">
@@ -35,20 +46,22 @@ const Login: NextPage = () => {
               <Col md={7} className="bg-white border p-5">
                 <div className="">
                   <h1>Login</h1>
-                  <p className="text-black-50">Sign In to your account</p>
+                  <p className="text-black-50">
+                    Sign In to your AWAP Dashboard
+                  </p>
 
                   <form onSubmit={login}>
                     <InputGroup className="mb-3">
                       <InputGroup.Text>
-                        <FontAwesomeIcon
-                          icon={faUser}
-                          fixedWidth
-                        />
+                        <FontAwesomeIcon icon={faUser} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
+                        onChange={(e) => setUsername(e.target.value)}
+                        type="text"
                         name="username"
+                        minLength={3}
+                        maxLength={20}
                         required
-                        disabled={submitting}
                         placeholder="Username"
                         aria-label="Username"
                       />
@@ -56,16 +69,15 @@ const Login: NextPage = () => {
 
                     <InputGroup className="mb-3">
                       <InputGroup.Text>
-                        <FontAwesomeIcon
-                          icon={faLock}
-                          fixedWidth
-                        />
+                        <FontAwesomeIcon icon={faLock} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
+                        onChange={(e) => setPassword(e.target.value)}
                         type="password"
                         name="password"
+                        minLength={8}
+                        maxLength={20}
                         required
-                        disabled={submitting}
                         placeholder="Password"
                         aria-label="Password"
                       />
@@ -73,12 +85,12 @@ const Login: NextPage = () => {
 
                     <Row>
                       <Col xs={6}>
-                        <Button className="px-4" variant="primary" type="submit" disabled={submitting}>Login</Button>
-                      </Col>
-                      <Col xs={6} className="text-end">
-                        <Button className="px-0" variant="link" type="submit">
-                          Forgot
-                          password?
+                        <Button
+                          className="px-4"
+                          variant="primary"
+                          type="submit"
+                        >
+                          Login
                         </Button>
                       </Col>
                     </Row>
@@ -91,12 +103,12 @@ const Login: NextPage = () => {
               >
                 <div className="text-center">
                   <h2>Sign up</h2>
-                  <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                    tempor incididunt ut labore et dolore magna aliqua.
-                  </p>
-                  <Link href="/register">
-                    <button className="btn btn-lg btn-outline-light mt-3" type="button">
+                  <p>Want to compete in AWAP 2023?</p>
+                  <Link href="/auth/register">
+                    <button
+                      className="btn btn-lg btn-outline-light mt-3"
+                      type="button"
+                    >
                       Register Now!
                     </button>
                   </Link>

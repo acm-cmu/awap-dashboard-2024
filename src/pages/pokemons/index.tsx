@@ -1,5 +1,5 @@
 import { GetServerSideProps, NextPage } from 'next'
-import { AdminLayout } from '@layout'
+import { UserLayout } from '@layout'
 import {
   Card, Dropdown, Table, Form,
 } from 'react-bootstrap'
@@ -208,7 +208,7 @@ const Pokemons: NextPage<Props> = (props) => {
   } = props
 
   return (
-    <AdminLayout>
+    <UserLayout>
       <Card>
         <Card.Header>Pokémon</Card.Header>
         <Card.Body>
@@ -288,7 +288,7 @@ const Pokemons: NextPage<Props> = (props) => {
           <Pagination meta={meta} />
         </Card.Body>
       </Card>
-    </AdminLayout>
+    </UserLayout>
   )
 }
 
