@@ -11,10 +11,10 @@ import { hash } from 'bcrypt'
 
 const config: DynamoDBClientConfig = {
   credentials: {
-    accessKeyId: process.env.NEXT_AUTH_AWS_ACCESS_KEY as string,
-    secretAccessKey: process.env.NEXT_AUTH_AWS_SECRET_KEY as string,
+    accessKeyId: process.env.AWS_ACCESS_KEY_LOCAL as string,
+    secretAccessKey: process.env.AWS_SECRET_KEY_LOCAL as string,
   },
-  region: process.env.NEXT_AUTH_AWS_REGION,
+  region: process.env.AWS_REGION_LOCAL,
 }
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
@@ -35,7 +35,7 @@ export default async function handler(
 
   const user = await client.send(
     new GetItemCommand({
-      TableName: process.env.NEXT_AUTH_AWS_TABLE_NAME,
+      TableName: process.env.AWS_USER_TABLE_NAME,
       Key: {
         username: { S: username },
       },
@@ -47,7 +47,7 @@ export default async function handler(
   } else {
     await client.send(
       new PutItemCommand({
-        TableName: process.env.NEXT_AUTH_AWS_TABLE_NAME,
+        TableName: process.env.AWS_USER_TABLE_NAME,
         Item: {
           username: { S: username },
           password: { S: hashedpassword },
