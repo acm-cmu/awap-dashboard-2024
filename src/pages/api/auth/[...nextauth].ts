@@ -27,7 +27,7 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 })
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
