@@ -18,10 +18,7 @@ const Submissions: NextPage = () => {
         <Card>
           <Card.Body>
             <Card.Title>Scrimmages</Card.Title>
-            <Card.Text>
-              This page is Protected for special people. like
-              {JSON.stringify(data?.user, null, 2)}
-            </Card.Text>
+            <Card.Text>This page is Protected.</Card.Text>
           </Card.Body>
         </Card>
       </UserLayout>

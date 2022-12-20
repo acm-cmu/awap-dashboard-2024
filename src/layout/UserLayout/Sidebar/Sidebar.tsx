@@ -32,15 +32,7 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
       id="sidebar"
     >
       <div className="sidebar-brand d-none d-md-flex align-items-center justify-content-center">
-        <p>Replace with Logo</p>
-        <svg
-          className="sidebar-brand-full"
-          width="118"
-          height="46"
-        >
-          <title>AWAP</title>
-          <use xlinkHref="/assets/brand/coreui.svg#full" />
-        </svg>
+        <p>Insert AWAP Logo</p>
       </div>
 
       <div className="sidebar-nav flex-fill">
@@ -54,22 +46,32 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
         type="button"
         aria-label="sidebar toggler"
       >
-        <FontAwesomeIcon className="sidebar-toggler-chevron" icon={faAngleLeft} fontSize={24} />
+        <FontAwesomeIcon
+          className="sidebar-toggler-chevron"
+          icon={faAngleLeft}
+          fontSize={24}
+        />
       </Button>
     </div>
   )
 }
 
-export const SidebarOverlay = (props: { isShowSidebar: boolean; toggleSidebar: () => void }) => {
+export const SidebarOverlay = (props: {
+  isShowSidebar: boolean
+  toggleSidebar: () => void
+}) => {
   const { isShowSidebar, toggleSidebar } = props
 
   return (
     <div
       tabIndex={-1}
       aria-hidden
-      className={classNames('sidebar-overlay position-fixed top-0 bg-dark w-100 h-100 opacity-50', {
-        'd-none': !isShowSidebar,
-      })}
+      className={classNames(
+        'sidebar-overlay position-fixed top-0 bg-dark w-100 h-100 opacity-50',
+        {
+          'd-none': !isShowSidebar,
+        },
+      )}
       onClick={toggleSidebar}
     />
   )

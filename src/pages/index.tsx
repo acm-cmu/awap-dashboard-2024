@@ -8,7 +8,7 @@ const Home: NextPage = () => (
     <Card>
       <Card.Body>
         <Card.Title>Home</Card.Title>
-        <Card.Text>This is the home page.</Card.Text>
+        <Card.Text>add text...</Card.Text>
       </Card.Body>
     </Card>
   </UserLayout>
