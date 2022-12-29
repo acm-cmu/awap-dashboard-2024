@@ -3,7 +3,7 @@ import { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
 import { useEffect } from 'react'
-import { Card, Dropdown, Table, Form } from 'react-bootstrap'
+import { Card, Dropdown, Table, Form, Button } from 'react-bootstrap'
 
 import { InferGetServerSidePropsType } from 'next'
 import { GetServerSideProps } from 'next'
@@ -16,8 +16,12 @@ import {
   DynamoDBClientConfig,
   GetItemCommand,
   QueryCommand,
+  ScanCommand,
 } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+
+import TextField from '@mui/material/TextField'
+import Autocomplete from '@mui/material/Autocomplete'
 
 const config: DynamoDBClientConfig = {
   credentials: {
@@ -67,9 +71,10 @@ const TableBody: React.FC<{ data: any }> = ({ data }) => {
     </tbody>
   )
 }
-
+// add button to request scrimmage after autocomplete
 const Scrimmages: NextPage = ({
   match_data,
+  teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data } = useSession()
 
@@ -83,7 +88,16 @@ const Scrimmages: NextPage = ({
         <Card className="mb-3">
           <Card.Body>
             <Card.Title>Available Scrimmages</Card.Title>
-            <SearchBar />
+            <Autocomplete
+              disablePortal
+              id="teams_dropdown"
+              options={teams}
+              sx={{ width: 500 }}
+              renderInput={(params) => <TextField {...params} label="Teams" />}
+            />
+            <Button variant="primary" type="submit">
+              Request Scrimmage
+            </Button>
           </Card.Body>
           <Card.Body>
             <ul>
@@ -179,10 +193,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const match_data = match_data1.concat(match_data2)
 
-  console.log(result.Count)
+  // scan player table for team names
+  const params3 = {
+    TableName: process.env.AWS_PLAYER_TABLE_NAME,
+    ProjectionExpression: 'TEAM_NAME',
+  }
+
+  const command3 = new ScanCommand(params3)
+  const result3 = await client.send(command3)
+
+  const teams = result3.Items.map((item: any) => item.TEAM_NAME.S)
 
   return {
-    props: { match_data }, // will be passed to the page component as props
+    props: { match_data, teams }, // will be passed to the page component as props
   }
 }
 
