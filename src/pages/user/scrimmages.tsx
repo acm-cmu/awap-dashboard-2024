@@ -2,7 +2,7 @@ import { UserLayout } from '@layout'
 import { NextPage } from 'next'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
-import { useEffect } from 'react'
+import { use, useEffect, useState } from 'react'
 import { Card, Dropdown, Table, Form, Button } from 'react-bootstrap'
 
 import { InferGetServerSidePropsType } from 'next'
@@ -23,6 +23,7 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import TextField from '@mui/material/TextField'
 import Autocomplete from '@mui/material/Autocomplete'
 
+// Dynamo DB Config
 const config: DynamoDBClientConfig = {
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_LOCAL as string,
@@ -39,17 +40,7 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 })
 
-const SearchBar = () => {
-  return (
-    <Form>
-      <Form.Group className="mb-3" controlId="formBasicEmail">
-        <Form.Label>Search</Form.Label>
-        <Form.Control type="text" placeholder="Search" />
-      </Form.Group>
-    </Form>
-  )
-}
-
+// Table Component
 const TableRow: React.FC<{ match: any }> = ({ match }) => {
   return (
     <tr>
@@ -71,44 +62,87 @@ const TableBody: React.FC<{ data: any }> = ({ data }) => {
     </tbody>
   )
 }
-// add button to request scrimmage after autocomplete
+
+// Team Info Component Card and button to request match
+const TeamInfo: React.FC<{ team: any }> = ({ team }) => {
+  // make api request to fastapi
+
+  const request_match2 = () => {
+    console.log('request match')
+  }
+
+  return (
+    <Card className="mb-3">
+      <Card.Body>
+        <Card.Title>{team.teamname}</Card.Title>
+        <Card.Subtitle className="mb-2 text-muted"></Card.Subtitle>
+        <Card.Text>Rating: {team.rating}</Card.Text>
+        <Button variant="primary" onClick={request_match2}>
+          Request Match
+        </Button>
+      </Card.Body>
+    </Card>
+  )
+}
+
+// Scrimmages Page
 const Scrimmages: NextPage = ({
   match_data,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data } = useSession()
+  const [TeamValue, setValue] = useState(null)
+  const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login')
   }, [status])
 
   if (status === 'authenticated') {
+    const teamnames = teams.map((team) => team.teamname)
+
+    const onSearch = () => {
+      // get value from autocomplete
+      for (let i = 0; i < teams.length; i++) {
+        if (teams[i].teamname === TeamValue) {
+          setCurrentTeamSearch(teams[i])
+          return
+        }
+      }
+    }
+
     return (
       <UserLayout>
         <Card className="mb-3">
           <Card.Body>
             <Card.Title>Available Scrimmages</Card.Title>
-            <Autocomplete
-              disablePortal
-              id="teams_dropdown"
-              options={teams}
-              sx={{ width: 500 }}
-              renderInput={(params) => <TextField {...params} label="Teams" />}
-            />
-            <Button variant="primary" type="submit">
-              Request Scrimmage
-            </Button>
-          </Card.Body>
-          <Card.Body>
-            <ul>
-              <li>Todo 1: Search bar component for teams (with dropdown)</li>
-              <li>Todo 2: Add table of available scrimmages</li>
-              <li>Todo 3: Add dropdown to select team </li>
-              <li>Todo 4: Add button to start scrimmage</li>
-            </ul>
-            Include Teams from search bar with request to scrimmage button
+            <div style={{ display: 'flex' }}>
+              <Autocomplete
+                disablePortal
+                value={TeamValue}
+                onChange={(event: any, newTeamValue: string | null) => {
+                  setValue(newTeamValue)
+                }}
+                id="teams_dropdown"
+                options={teamnames}
+                sx={{ width: 800 }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Teams" />
+                )}
+              />
+              <Button
+                variant="primary"
+                style={{ marginLeft: 10 }}
+                onClick={onSearch}
+                size="lg"
+              >
+                Search
+              </Button>
+            </div>
           </Card.Body>
         </Card>
+        {/* Create card that displays only if search button is clicked */}
+        {CurrentTeamSearch && <TeamInfo team={CurrentTeamSearch} />}
         <Card>
           <Card.Body>
             <Card.Title>Scrimmage History</Card.Title>
@@ -196,13 +230,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // scan player table for team names
   const params3 = {
     TableName: process.env.AWS_PLAYER_TABLE_NAME,
-    ProjectionExpression: 'TEAM_NAME',
+    ProjectionExpression: 'TEAM_NAME, RATING',
   }
 
   const command3 = new ScanCommand(params3)
   const result3 = await client.send(command3)
 
-  const teams = result3.Items.map((item: any) => item.TEAM_NAME.S)
+  const teams = result3.Items.map((item: any) => ({
+    teamname: item.TEAM_NAME.S,
+    rating: item.RATING.N,
+  }))
 
   return {
     props: { match_data, teams }, // will be passed to the page component as props
