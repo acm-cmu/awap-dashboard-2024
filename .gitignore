@@ -37,6 +37,7 @@ yarn-error.log*
 
 # linting
 .prettierrc.json
+.prettierignore
 /.vscode
 
 /.idea
