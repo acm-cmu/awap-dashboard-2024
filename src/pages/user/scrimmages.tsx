@@ -1,23 +1,19 @@
 import { UserLayout } from '@layout'
-import { NextPage } from 'next'
+import { NextPage, InferGetServerSidePropsType, GetServerSideProps } from 'next'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
-import { use, useEffect, useState } from 'react'
-import { Card, Dropdown, Table, Form, Button } from 'react-bootstrap'
-
-import { InferGetServerSidePropsType } from 'next'
-import { GetServerSideProps } from 'next'
-
+import { useEffect, useState } from 'react'
+import { Card, Table, Button } from 'react-bootstrap'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { unstable_getServerSession } from 'next-auth/next'
 
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  GetItemCommand,
   QueryCommand,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb'
+
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 
 import TextField from '@mui/material/TextField'
@@ -41,27 +37,23 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
 })
 
 // Table Component
-const TableRow: React.FC<{ match: any }> = ({ match }) => {
-  return (
-    <tr>
-      <td>{match.id}</td>
-      <td>{match.team}</td>
-      <td>{match.result}</td>
-      <td>{match.type}</td>
-      <td>{match.replay}</td>
-    </tr>
-  )
-}
+const TableRow: React.FC<{ match: any }> = ({ match }) => (
+  <tr>
+    <td>{match.id}</td>
+    <td>{match.team}</td>
+    <td>{match.result}</td>
+    <td>{match.type}</td>
+    <td>{match.replay}</td>
+  </tr>
+)
 
-const TableBody: React.FC<{ data: any }> = ({ data }) => {
-  return (
-    <tbody>
-      {data.map((item: any) => (
-        <TableRow match={item} />
-      ))}
-    </tbody>
-  )
-}
+const TableBody: React.FC<{ data: any }> = ({ data }) => (
+  <tbody>
+    {data.map((item: any) => (
+      <TableRow match={item} />
+    ))}
+  </tbody>
+)
 
 // Team Info Component Card and button to request match
 const TeamInfo: React.FC<{ team: any }> = ({ team }) => {
@@ -75,7 +67,7 @@ const TeamInfo: React.FC<{ team: any }> = ({ team }) => {
     <Card className="mb-3">
       <Card.Body>
         <Card.Title>{team.teamname}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted"></Card.Subtitle>
+        <Card.Subtitle className="mb-2 text-muted" />
         <Card.Text>Rating: {team.rating}</Card.Text>
         <Button variant="primary" onClick={request_match2}>
           Request Match
@@ -87,10 +79,10 @@ const TeamInfo: React.FC<{ team: any }> = ({ team }) => {
 
 // Scrimmages Page
 const Scrimmages: NextPage = ({
-  match_data,
+  matchData,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { status, data } = useSession()
+  const { status } = useSession()
   const [TeamValue, setValue] = useState(null)
   const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null)
 
@@ -99,7 +91,7 @@ const Scrimmages: NextPage = ({
   }, [status])
 
   if (status === 'authenticated') {
-    const teamnames = teams.map((team) => team.teamname)
+    const teamnames = teams.map(team => team.teamname)
 
     const onSearch = () => {
       // get value from autocomplete
@@ -126,9 +118,7 @@ const Scrimmages: NextPage = ({
                 id="teams_dropdown"
                 options={teamnames}
                 sx={{ width: 800 }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Teams" />
-                )}
+                renderInput={params => <TextField {...params} label="Teams" />}
               />
               <Button
                 variant="primary"
@@ -156,7 +146,7 @@ const Scrimmages: NextPage = ({
                   <th>Replay</th>
                 </tr>
               </thead>
-              <TableBody data={match_data} />
+              <TableBody data={matchData} />
             </Table>
           </Card.Body>
         </Card>
@@ -167,14 +157,14 @@ const Scrimmages: NextPage = ({
   return <div>loading</div>
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async context => {
   const session = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions,
   )
 
-  if (!session) {
+  if (!session || !session.user) {
     return {
       redirect: {
         destination: '/auth/login',
@@ -195,9 +185,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const command = new QueryCommand(params)
-  const result = await client.send(command)
+  const resultPlayerOne = await client.send(command)
 
-  const match_data1 = result.Items.map((item: any) => ({
+  const matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
     id: item.MATCH_ID.N,
     team: item.TEAM_2.S,
     result: item.OUTCOME.S,
@@ -215,9 +205,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const command2 = new QueryCommand(params2)
-  const result2 = await client.send(command2)
+  const resultPlayerTwo = await client.send(command2)
 
-  const match_data2 = result2.Items.map((item: any) => ({
+  const matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
     id: item.MATCH_ID.N,
     team: item.TEAM_1.S,
     result: item.OUTCOME.S,
@@ -225,7 +215,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     replay: item.REPLAY_URL.S,
   }))
 
-  const match_data = match_data1.concat(match_data2)
+  const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo)
 
   // scan player table for team names
   const params3 = {
@@ -234,15 +224,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const command3 = new ScanCommand(params3)
-  const result3 = await client.send(command3)
+  const result = await client.send(command3)
 
-  const teams = result3.Items.map((item: any) => ({
+  const teams = result.Items.map((item: any) => ({
     teamname: item.TEAM_NAME.S,
     rating: item.RATING.N,
   }))
 
   return {
-    props: { match_data, teams }, // will be passed to the page component as props
+    props: { matchData, teams }, // will be passed to the page component as props
   }
 }
 
