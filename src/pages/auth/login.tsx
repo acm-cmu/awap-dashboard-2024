@@ -1,40 +1,40 @@
-import { NextPage } from 'next'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-regular-svg-icons'
-import { faLock } from '@fortawesome/free-solid-svg-icons'
-import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap'
-import Link from 'next/link'
-import { SyntheticEvent, useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/router'
+import { NextPage } from 'next';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-regular-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
+import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
+import Link from 'next/link';
+import { SyntheticEvent, useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login: NextPage = () => {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  const router = useRouter()
+  const router = useRouter();
 
   const login = async (e: SyntheticEvent) => {
-    e.stopPropagation() // prevent default form submission
-    e.preventDefault() // prevent default form submission
+    e.stopPropagation(); // prevent default form submission
+    e.preventDefault(); // prevent default form submission
 
     const res = await signIn('credentials', {
       username,
       password,
       redirect: false,
-    })
+    });
 
     if (res?.error) {
-      toast.error('Invalid Credentials!')
-      console.log('error', res?.error)
+      toast.error('Invalid Credentials!');
+      console.log('error', res?.error);
     } else if (res?.ok) {
-      toast.dismiss()
-      router.replace('/')
+      toast.dismiss();
+      router.replace('/');
     }
-  }
+  };
 
   return (
     // render login form
@@ -119,7 +119,7 @@ const Login: NextPage = () => {
         </Row>
       </Container>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

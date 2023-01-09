@@ -1,20 +1,20 @@
-import { UserLayout } from '@layout'
-import { NextPage } from 'next'
-import { useSession } from 'next-auth/react'
-import Router from 'next/router'
-import { useEffect } from 'react'
-import { Card } from 'react-bootstrap'
+import { UserLayout } from '@layout';
+import { NextPage } from 'next';
+import { useSession } from 'next-auth/react';
+import Router from 'next/router';
+import { useEffect } from 'react';
+import { Card } from 'react-bootstrap';
 
 const Admin: NextPage = () => {
-  const { status, data } = useSession()
+  const { status, data } = useSession();
 
   useEffect(() => {
-    if (status === 'unauthenticated') Router.replace('/auth/login')
-  }, [status])
+    if (status === 'unauthenticated') Router.replace('/auth/login');
+  }, [status]);
 
   if (status === 'authenticated') {
-    if (data?.user?.role == 'user') {
-      Router.replace('/unauthorized')
+    if (data?.user?.role === 'user') {
+      Router.replace('/unauthorized');
     } else {
       return (
         <UserLayout>
@@ -28,10 +28,10 @@ const Admin: NextPage = () => {
             </Card.Body>
           </Card>
         </UserLayout>
-      )
+      );
     }
   }
-  return <div>loading</div>
-}
+  return <div>loading</div>;
+};
 
-export default Admin
+export default Admin;

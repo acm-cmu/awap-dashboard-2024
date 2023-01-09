@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -10,6 +10,6 @@ const nextConfig = {
   images: {
     domains: ['img.pokemondb.net'],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

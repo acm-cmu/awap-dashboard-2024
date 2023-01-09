@@ -1,19 +1,20 @@
-import { GetServerSideProps, NextPage } from 'next'
-import { UserLayout } from '@layout'
+import { GetServerSideProps, NextPage } from 'next';
+import { UserLayout } from '@layout';
+import { Card, Dropdown, Table, Form } from 'react-bootstrap';
+import axios from 'axios';
+import { Pokemon } from '@models/pokemon';
+import { ResourceList } from '@models/resource-list';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  Card, Dropdown, Table, Form,
-} from 'react-bootstrap'
-import axios from 'axios'
-import { Pokemon } from '@models/pokemon'
-import { ResourceList } from '@models/resource-list'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faEllipsisVertical, faSort, faSortDown, faSortUp,
-} from '@fortawesome/free-solid-svg-icons'
-import React, { PropsWithChildren, useEffect, useState } from 'react'
-import { ImageFallback } from '@components'
-import ReactPaginate from 'react-paginate'
-import { useRouter } from 'next/router'
+  faEllipsisVertical,
+  faSort,
+  faSortDown,
+  faSortUp,
+} from '@fortawesome/free-solid-svg-icons';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { ImageFallback } from '@components';
+import ReactPaginate from 'react-paginate';
+import { useRouter } from 'next/router';
 
 const typeColorMap: Record<string, string> = {
   normal: '#aa9',
@@ -36,11 +37,11 @@ const typeColorMap: Record<string, string> = {
   fairy: '#e9e',
   unknown: '#aa9',
   shadow: '#aa9',
-}
+};
 
 type TypeLabelProps = {
   type: string;
-}
+};
 
 const TypeLabel = ({ type }: TypeLabelProps) => (
   <span
@@ -54,19 +55,19 @@ const TypeLabel = ({ type }: TypeLabelProps) => (
   >
     {type}
   </span>
-)
+);
 
 type THSortProps = {
   name: string;
-} & PropsWithChildren
+} & PropsWithChildren;
 
 const THSort = (props: THSortProps) => {
+  const { name, children } = props;
+  const [icon, setIcon] = useState(faSort);
+  const router = useRouter();
   const {
-    name, children,
-  } = props
-  const [icon, setIcon] = useState(faSort)
-  const router = useRouter()
-  const { query: { sort, order } } = router
+    query: { sort, order },
+  } = router;
 
   const onClick = () => {
     router.push({
@@ -76,71 +77,71 @@ const THSort = (props: THSortProps) => {
         sort: name,
         order: order === 'asc' ? 'desc' : 'asc',
       },
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (sort !== name) {
-      setIcon(faSort)
-      return
+      setIcon(faSort);
+      return;
     }
 
     if (order === 'asc') {
-      setIcon(faSortUp)
-      return
+      setIcon(faSortUp);
+      return;
     }
 
     if (order === 'desc') {
-      setIcon(faSortDown)
+      setIcon(faSortDown);
     }
-  }, [sort, order, name])
+  }, [sort, order, name]);
 
   return (
-    <a className="text-decoration-none" role="button" tabIndex={0} onClick={onClick} onKeyDown={onClick}>
+    <a
+      className="text-decoration-none"
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={onClick}
+    >
       {children}
       <FontAwesomeIcon icon={icon} fixedWidth size="xs" />
     </a>
-  )
-}
+  );
+};
 
 type PaginationProps = {
   meta: ResourceList<Pokemon>['meta'];
-}
+};
 
 const Pagination = (props: PaginationProps) => {
   const {
     meta: {
-      from, to, total, per_page: perPage, last_page: lastPage, current_page: currentPage,
+      from,
+      to,
+      total,
+      per_page: perPage,
+      last_page: lastPage,
+      current_page: currentPage,
     },
-  } = props
+  } = props;
 
-  const [pageIndex, setPageIndex] = useState(currentPage - 1)
-  const router = useRouter()
+  const [pageIndex, setPageIndex] = useState(currentPage - 1);
+  const router = useRouter();
 
   useEffect(() => {
-    setPageIndex(currentPage - 1)
-  }, [currentPage])
+    setPageIndex(currentPage - 1);
+  }, [currentPage]);
 
   return (
     <div className="row align-items-center justify-content-center">
       <div className="col-12 text-center text-sm-start col-sm-auto col-lg mb-3">
-        Showing
-        {' '}
-        <span className="fw-semibold">{from}</span>
-        {' '}
-        to
-        {' '}
-        <span className="fw-semibold">{to}</span>
-        {' '}
-        of
-        {' '}
-        <span className="fw-semibold">{total}</span>
-        {' '}
-        results
+        Showing <span className="fw-semibold">{from}</span> to{' '}
+        <span className="fw-semibold">{to}</span> of{' '}
+        <span className="fw-semibold">{total}</span> results
       </div>
       <div className="col-auto ms-sm-auto mb-3">
-        Rows per page:
-        {' '}
+        Rows per page:{' '}
         <Form.Select
           value={perPage}
           className="d-inline-block w-auto"
@@ -153,7 +154,7 @@ const Pagination = (props: PaginationProps) => {
                 page: 1, // Go back to first page
                 per_page: event.target.value,
               },
-            })
+            });
           }}
         >
           <option value={20}>20</option>
@@ -188,24 +189,22 @@ const Pagination = (props: PaginationProps) => {
                 ...router.query,
                 page: selectedItem.selected + 1,
               },
-            })
+            });
           }}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
 type Props = {
   pokemonResourceList: ResourceList<Pokemon>;
-}
+};
 
 const Pokemons: NextPage<Props> = (props) => {
   const {
-    pokemonResourceList: {
-      data: pokemons, meta,
-    },
-  } = props
+    pokemonResourceList: { data: pokemons, meta },
+  } = props;
 
   return (
     <UserLayout>
@@ -216,18 +215,36 @@ const Pokemons: NextPage<Props> = (props) => {
           <Table responsive bordered hover>
             <thead className="bg-light">
               <tr>
-                <th><THSort name="id">#</THSort></th>
+                <th>
+                  <THSort name="id">#</THSort>
+                </th>
                 <th aria-label="Photo" />
-                <th><THSort name="name">Name</THSort></th>
+                <th>
+                  <THSort name="name">Name</THSort>
+                </th>
                 <th>Type</th>
                 <th className="text-center">Egg group</th>
-                <th className="text-end"><THSort name="hp">Hp</THSort></th>
-                <th className="text-end"><THSort name="attack">Atk</THSort></th>
-                <th className="text-end"><THSort name="defense">Def</THSort></th>
-                <th className="text-end"><THSort name="special_attack">SpA</THSort></th>
-                <th className="text-end"><THSort name="special_defense">SpD</THSort></th>
-                <th className="text-end"><THSort name="speed">Spd</THSort></th>
-                <th className="text-end"><THSort name="total">Total</THSort></th>
+                <th className="text-end">
+                  <THSort name="hp">Hp</THSort>
+                </th>
+                <th className="text-end">
+                  <THSort name="attack">Atk</THSort>
+                </th>
+                <th className="text-end">
+                  <THSort name="defense">Def</THSort>
+                </th>
+                <th className="text-end">
+                  <THSort name="special_attack">SpA</THSort>
+                </th>
+                <th className="text-end">
+                  <THSort name="special_defense">SpD</THSort>
+                </th>
+                <th className="text-end">
+                  <THSort name="speed">Spd</THSort>
+                </th>
+                <th className="text-end">
+                  <THSort name="total">Total</THSort>
+                </th>
                 <th aria-label="Action" />
               </tr>
             </thead>
@@ -236,7 +253,10 @@ const Pokemons: NextPage<Props> = (props) => {
                 <tr key={pokemon.id}>
                   <td>{pokemon.id}</td>
                   <td>
-                    <div className="position-relative mx-auto" style={{ width: '70px', height: '70px' }}>
+                    <div
+                      className="position-relative mx-auto"
+                      style={{ width: '70px', height: '70px' }}
+                    >
                       <ImageFallback
                         fill
                         style={{ objectFit: 'contain' }}
@@ -248,9 +268,13 @@ const Pokemons: NextPage<Props> = (props) => {
                   </td>
                   <td>{pokemon.name}</td>
                   <td>
-                    {pokemon.types.map((type) => <TypeLabel key={type} type={type} />)}
+                    {pokemon.types.map((type) => (
+                      <TypeLabel key={type} type={type} />
+                    ))}
                   </td>
-                  <td className="text-center" style={{ whiteSpace: 'pre' }}>{pokemon.egg_groups.join('\n')}</td>
+                  <td className="text-center" style={{ whiteSpace: 'pre' }}>
+                    {pokemon.egg_groups.join('\n')}
+                  </td>
                   <td className="text-end">{pokemon.hp}</td>
                   <td className="text-end">{pokemon.attack}</td>
                   <td className="text-end">{pokemon.defense}</td>
@@ -289,41 +313,47 @@ const Pokemons: NextPage<Props> = (props) => {
         </Card.Body>
       </Card>
     </UserLayout>
-  )
-}
+  );
+};
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  const pokemonListURL = `${process.env.NEXT_PUBLIC_POKEMON_LIST_API_BASE_URL}pokemons` || ''
-  let page = 1
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context,
+) => {
+  const pokemonListURL =
+    `${process.env.NEXT_PUBLIC_POKEMON_LIST_API_BASE_URL}pokemons` || '';
+  let page = 1;
   if (context.query?.page && typeof context.query.page === 'string') {
-    page = parseInt(context.query.page, 10)
+    page = parseInt(context.query.page, 10);
   }
 
-  let perPage = 20
+  let perPage = 20;
   if (context.query?.per_page && typeof context.query.per_page === 'string') {
-    perPage = parseInt(context.query.per_page.toString(), 10)
+    perPage = parseInt(context.query.per_page.toString(), 10);
   }
 
-  let sort = 'id'
+  let sort = 'id';
   if (context.query?.sort && typeof context.query.sort === 'string') {
-    sort = context.query.sort
+    sort = context.query.sort;
   }
 
-  let order = 'asc'
+  let order = 'asc';
   if (context.query?.order && typeof context.query.order === 'string') {
-    order = context.query.order
+    order = context.query.order;
   }
 
-  const { data: pokemons, headers } = await axios.get<Pokemon[]>(pokemonListURL, {
-    params: {
-      _page: page,
-      _limit: perPage,
-      _sort: sort,
-      _order: order,
+  const { data: pokemons, headers } = await axios.get<Pokemon[]>(
+    pokemonListURL,
+    {
+      params: {
+        _page: page,
+        _limit: perPage,
+        _sort: sort,
+        _order: order,
+      },
     },
-  })
+  );
 
-  const total = parseInt(headers['x-total-count'], 10)
+  const total = parseInt(headers['x-total-count'], 10);
   const pokemonResourceList: ResourceList<Pokemon> = {
     data: pokemons,
     meta: {
@@ -334,13 +364,13 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
       per_page: perPage,
       total,
     },
-  }
+  };
 
   return {
     props: {
       pokemonResourceList,
     }, // will be passed to the page component as props
-  }
-}
+  };
+};
 
-export default Pokemons
+export default Pokemons;

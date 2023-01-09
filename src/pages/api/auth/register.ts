@@ -3,11 +3,11 @@ import {
   DynamoDBClientConfig,
   GetItemCommand,
   PutItemCommand,
-} from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+} from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { hash } from 'bcrypt'
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { hash } from 'bcrypt';
 
 const config: DynamoDBClientConfig = {
   credentials: {
@@ -15,7 +15,7 @@ const config: DynamoDBClientConfig = {
     secretAccessKey: process.env.AWS_SECRET_KEY_LOCAL as string,
   },
   region: process.env.AWS_REGION_LOCAL,
-}
+};
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
@@ -23,15 +23,15 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
-})
+});
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { username, password } = req.body
+  const { username, password } = req.body;
 
-  const hashedpassword = await hash(password, 10)
+  const hashedpassword = await hash(password, 10);
 
   const user = await client.send(
     new GetItemCommand({
@@ -40,10 +40,10 @@ export default async function handler(
         username: { S: username },
       },
     }),
-  )
+  );
 
   if (user.Item) {
-    res.status(400).json({ message: 'user already exists' })
+    res.status(400).json({ message: 'user already exists' });
   } else {
     await client.send(
       new PutItemCommand({
@@ -54,7 +54,7 @@ export default async function handler(
           role: { S: 'user' },
         },
       }),
-    )
-    res.status(200).json({ message: 'success' })
+    );
+    res.status(200).json({ message: 'success' });
   }
 }

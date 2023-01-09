@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 export default function Footer() {
   return (
@@ -6,11 +6,9 @@ export default function Footer() {
       <div>
         <a className="text-decoration-none" href="http://acmatcmu.com/">
           Algorithms with a Purpose
-        </a>
-        {' '}
-        © 2022
-        ACM@CMU.
+        </a>{' '}
+        © 2022 ACM@CMU.
       </div>
     </footer>
-  )
+  );
 }

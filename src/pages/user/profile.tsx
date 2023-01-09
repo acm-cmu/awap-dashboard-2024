@@ -1,61 +1,69 @@
 /* eslint-disable max-len */
-import type { NextPage } from 'next'
-import { UserLayout } from '@layout'
+import type { NextPage } from 'next';
+import { UserLayout } from '@layout';
 import {
-  Form, InputGroup, Row, Col, Container, Card, Button,
-} from 'react-bootstrap'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser, faLock } from '@fortawesome/free-solid-svg-icons'
+  Form,
+  InputGroup,
+  Row,
+  Col,
+  Container,
+  Card,
+  Button,
+} from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 
-import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router';
+import { SyntheticEvent, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 // id is a number
-const TeamMemberField = ({ id } : { id: number }) => {
-  const name = `user${id}`
-  const placeholder = `Team Member ${id}`
-  const ariaLabel = `Team Member ${id}`
+const TeamMemberField = ({ id }: { id: number }) => {
+  const name = `user${id}`;
+  const placeholder = `Team Member ${id}`;
+  const ariaLabel = `Team Member ${id}`;
 
   return (
     <InputGroup className="mb-3">
-      <InputGroup.Text><FontAwesomeIcon icon={faUser} fixedWidth /></InputGroup.Text>
+      <InputGroup.Text>
+        <FontAwesomeIcon icon={faUser} fixedWidth />
+      </InputGroup.Text>
       <Form.Control
         name={name}
         placeholder={placeholder}
         aria-label={ariaLabel}
       />
     </InputGroup>
-  )
-}
+  );
+};
 
 const Profile: NextPage = () => {
-  const router = useRouter()
-  const [submitting, setSubmitting] = useState(false)
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
 
-  const { status } = useSession()
+  const { status } = useSession();
 
   const update = (e: SyntheticEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation();
+    e.preventDefault();
 
-    setSubmitting(true)
+    setSubmitting(true);
 
     setTimeout(() => {
-      setSubmitting(false)
+      setSubmitting(false);
       // update the user database
-      router.reload()
-    }, 2000)
-  }
+      router.reload();
+    }, 2000);
+  };
 
-  const teamMembers = []
+  const teamMembers = [];
   for (let i = 1; i <= 4; i += 1) {
-    teamMembers.push(<TeamMemberField id={i} />)
+    teamMembers.push(<TeamMemberField id={i} />);
   }
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.replace('/auth/login')
-  }, [status])
+    if (status === 'unauthenticated') router.replace('/auth/login');
+  }, [status]);
 
   if (status === 'authenticated') {
     return (
@@ -70,7 +78,9 @@ const Profile: NextPage = () => {
                     <p className="text-black-50">Update your team profile</p>
                     <form onSubmit={update}>
                       <InputGroup className="mb-3">
-                        <InputGroup.Text><FontAwesomeIcon icon={faUser} fixedWidth /></InputGroup.Text>
+                        <InputGroup.Text>
+                          <FontAwesomeIcon icon={faUser} fixedWidth />
+                        </InputGroup.Text>
                         <Form.Control
                           name="teamname"
                           required
@@ -79,7 +89,9 @@ const Profile: NextPage = () => {
                         />
                       </InputGroup>
                       <InputGroup className="mb-3">
-                        <InputGroup.Text><FontAwesomeIcon icon={faLock} fixedWidth /></InputGroup.Text>
+                        <InputGroup.Text>
+                          <FontAwesomeIcon icon={faLock} fixedWidth />
+                        </InputGroup.Text>
                         <Form.Control
                           type="password"
                           name="password"
@@ -89,7 +101,9 @@ const Profile: NextPage = () => {
                         />
                       </InputGroup>
                       <InputGroup className="mb-3">
-                        <InputGroup.Text><FontAwesomeIcon icon={faLock} fixedWidth /></InputGroup.Text>
+                        <InputGroup.Text>
+                          <FontAwesomeIcon icon={faLock} fixedWidth />
+                        </InputGroup.Text>
                         <Form.Control
                           type="password"
                           name="password_repeat"
@@ -99,7 +113,11 @@ const Profile: NextPage = () => {
                         />
                       </InputGroup>
                       {teamMembers}
-                      <Button type="submit" className="d-block w-100" variant="success">
+                      <Button
+                        type="submit"
+                        className="d-block w-100"
+                        variant="success"
+                      >
                         Update Profile
                       </Button>
                     </form>
@@ -110,9 +128,9 @@ const Profile: NextPage = () => {
           </Container>
         </div>
       </UserLayout>
-    )
+    );
   }
-  return <div>loading</div>
-}
+  return <div>loading</div>;
+};
 
-export default Profile
+export default Profile;

@@ -1,26 +1,26 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAngleLeft } from '@fortawesome/free-solid-svg-icons'
-import React, { useEffect, useState } from 'react'
-import classNames from 'classnames'
-import { Button } from 'react-bootstrap'
-import SidebarNav from './SidebarNav'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect, useState } from 'react';
+import classNames from 'classnames';
+import { Button } from 'react-bootstrap';
+import SidebarNav from './SidebarNav';
 
 export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
-  const { isShow, isShowMd } = props
-  const [isNarrow, setIsNarrow] = useState(false)
+  const { isShow, isShowMd } = props;
+  const [isNarrow, setIsNarrow] = useState(false);
 
   const toggleIsNarrow = () => {
-    const newValue = !isNarrow
-    localStorage.setItem('isNarrow', newValue ? 'true' : 'false')
-    setIsNarrow(newValue)
-  }
+    const newValue = !isNarrow;
+    localStorage.setItem('isNarrow', newValue ? 'true' : 'false');
+    setIsNarrow(newValue);
+  };
 
   // On first time load only
   useEffect(() => {
     if (localStorage.getItem('isNarrow')) {
-      setIsNarrow(localStorage.getItem('isNarrow') === 'true')
+      setIsNarrow(localStorage.getItem('isNarrow') === 'true');
     }
-  }, [setIsNarrow])
+  }, [setIsNarrow]);
 
   return (
     <div
@@ -53,14 +53,14 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
         />
       </Button>
     </div>
-  )
+  );
 }
 
 export const SidebarOverlay = (props: {
-  isShowSidebar: boolean
-  toggleSidebar: () => void
+  isShowSidebar: boolean;
+  toggleSidebar: () => void;
 }) => {
-  const { isShowSidebar, toggleSidebar } = props
+  const { isShowSidebar, toggleSidebar } = props;
 
   return (
     <div
@@ -74,5 +74,5 @@ export const SidebarOverlay = (props: {
       )}
       onClick={toggleSidebar}
     />
-  )
-}
+  );
+};

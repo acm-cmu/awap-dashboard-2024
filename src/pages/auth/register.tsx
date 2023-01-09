@@ -1,7 +1,7 @@
-import { NextPage } from 'next'
-import { faUser } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faLock } from '@fortawesome/free-solid-svg-icons'
+import { NextPage } from 'next';
+import { faUser } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import {
   Button,
   Card,
@@ -10,48 +10,48 @@ import {
   Form,
   InputGroup,
   Row,
-} from 'react-bootstrap'
-import { useRouter } from 'next/router'
-import { SyntheticEvent, useState } from 'react'
-import { signIn } from 'next-auth/react'
+} from 'react-bootstrap';
+import { useRouter } from 'next/router';
+import { SyntheticEvent, useState } from 'react';
+import { signIn } from 'next-auth/react';
 
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Register: NextPage = () => {
-  const router = useRouter()
-  const [submitting, setSubmitting] = useState(false)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [passwordRepeat, setPasswordRepeat] = useState('')
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordRepeat, setPasswordRepeat] = useState('');
 
   const login = async (e: SyntheticEvent) => {
-    e.stopPropagation() // prevent default form submission
-    e.preventDefault() // prevent default form submission
+    e.stopPropagation(); // prevent default form submission
+    e.preventDefault(); // prevent default form submission
 
     const res = await signIn('credentials', {
       username,
       password,
       redirect: false,
-    })
+    });
 
     if (res?.error) {
-      console.log('error', res?.error)
+      console.log('error', res?.error);
     } else if (res?.ok) {
-      router.replace('/')
+      router.replace('/');
     }
-  }
+  };
 
   const register = (e: SyntheticEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation();
+    e.preventDefault();
 
-    setSubmitting(true)
+    setSubmitting(true);
 
     if (passwordRepeat !== password) {
-      toast.error('Passwords do not match!')
-      setSubmitting(false)
-      return
+      toast.error('Passwords do not match!');
+      setSubmitting(false);
+      return;
     }
 
     fetch('/api/auth/register', {
@@ -67,15 +67,15 @@ const Register: NextPage = () => {
       .then((res) => res.status)
       .then((status) => {
         if (status === 400) {
-          toast.error('Username already exists!')
+          toast.error('Username already exists!');
         } else if (status === 200) {
-          toast.dismiss()
-          toast.success('Account created successfully!', { autoClose: 2000 })
-          login(e)
+          toast.dismiss();
+          toast.success('Account created successfully!', { autoClose: 2000 });
+          login(e);
         }
       })
-      .finally(() => setSubmitting(false))
-  }
+      .finally(() => setSubmitting(false));
+  };
 
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
@@ -153,7 +153,7 @@ const Register: NextPage = () => {
         </Row>
       </Container>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

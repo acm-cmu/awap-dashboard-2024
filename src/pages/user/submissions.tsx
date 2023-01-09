@@ -1,24 +1,28 @@
 /* eslint-disable react/jsx-key */
-import type { NextPage } from 'next'
-import Image from 'next/image'
-import { UserLayout } from '@layout'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEllipsisVertical, faUsers } from '@fortawesome/free-solid-svg-icons'
-import { Card, Dropdown, ProgressBar } from 'react-bootstrap'
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import type { NextPage } from 'next';
+import Image from 'next/image';
+import { UserLayout } from '@layout';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisVertical, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { Card, Dropdown, ProgressBar } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-import { InferGetServerSidePropsType, GetServerSideProps } from 'next'
+import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 
 import {
   DynamoDB,
   DynamoDBClientConfig,
   QueryCommand,
-} from '@aws-sdk/client-dynamodb'
+  QueryCommandInput,
+} from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
-import { useSession } from 'next-auth/react'
-import Router from 'next/router'
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { useSession } from 'next-auth/react';
+import Router from 'next/router';
+
+import { authOptions } from '@pages/api/auth/[...nextauth]';
+import { unstable_getServerSession } from 'next-auth/next';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -27,7 +31,7 @@ const config: DynamoDBClientConfig = {
     secretAccessKey: process.env.AWS_SECRET_KEY_LOCAL as string,
   },
   region: process.env.AWS_REGION_LOCAL,
-}
+};
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
@@ -35,7 +39,13 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
-})
+});
+
+interface Submission {
+  fileName: string;
+  submissionURL: string;
+  timeStamp: string;
+}
 
 const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
   // let timeStamp = "default";
@@ -98,7 +108,7 @@ const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
       </Dropdown>
     </td>
   </tr>
-)
+);
 
 const TableBody: React.FC<{ data: any }> = ({ data }) => (
   <tbody>
@@ -106,57 +116,56 @@ const TableBody: React.FC<{ data: any }> = ({ data }) => (
       <TableRow submission={item} />
     ))}
   </tbody>
-)
+);
 
 const Submissions: NextPage = ({
   submissionData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { status } = useSession()
+  const { status, data: userData } = useSession();
 
-  const [file, setFile] = useState<any>(null)
-  const [uploadingStatus, setUploadingStatus] = useState<boolean>(false)
+  const [file, setFile] = useState<any>(null);
+  const [uploadingStatus, setUploadingStatus] = useState<boolean>(false);
   // const { status, data } = useSession()
 
-  const uploadFile = async () => {
-    setUploadingStatus(true)
-    const time1 = new Date().toLocaleString()
-    const team = 'testteam2'
-    const time2 = time1.split('/').join('-')
-    const time = time2.split(' ').join('')
-    const fileName = `bot-${team}-${time}.py`
+  const uploadFile = async (user: string) => {
+    setUploadingStatus(true);
+    const time1 = new Date().toLocaleString();
+    const time2 = time1.split('/').join('-');
+    const time = time2.split(' ').join('');
+    const fileName = `bot-${user}-${time}.py`;
     const { data } = await axios.post('/api/user/s3-upload', {
       name: fileName,
       type: file.type,
-    })
+    });
 
-    const fileUrl = data.url
+    const fileUrl = data.url;
     await axios.put(fileUrl, file, {
       headers: {
         'Content-type': file.type,
         'Access-Control-Allow-Origin': '*',
       },
-    })
+    });
 
     await axios.post('/api/user/dynamo-upload', {
       uploadedName: file.name,
-      team,
+      user,
       fileName,
-    })
+    });
 
-    setUploadingStatus(false)
-    setFile(null)
-  }
+    setUploadingStatus(false);
+    setFile(null);
+  };
 
   useEffect(() => {
     if (file) {
-      const uploadedFileDetail = async () => uploadFile()
-      uploadedFileDetail()
+      const uploadedFileDetail = async () => uploadFile(userData.user.name);
+      uploadedFileDetail();
     }
-  }, [file])
+  }, [file]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') Router.replace('/auth/login')
-  }, [status])
+    if (status === 'unauthenticated') Router.replace('/auth/login');
+  }, [status]);
 
   if (status === 'authenticated') {
     return (
@@ -206,45 +215,64 @@ const Submissions: NextPage = ({
           </div>
         </div>
       </UserLayout>
-    )
+    );
   }
-  return <div>loading</div>
-}
+  return <div>loading</div>;
+};
 
-export const getServerSideProps: GetServerSideProps = async context => {
-  // if user is logged in, query match data from dynamodb index
-  // TODO: Add query for user's team
-  const params = {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions,
+  );
+
+  if (!session || !session.user) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    };
+  }
+
+  const params: QueryCommandInput = {
     TableName: process.env.AWS_PLAYER_TABLE_NAME,
     KeyConditionExpression: 'TEAM_NAME = :team_name',
     ExpressionAttributeValues: {
-      ':team_name': { S: 'testteam2' },
+      ':team_name': { S: session.user.name },
     },
-  }
+  };
 
-  const command = new QueryCommand(params)
-  const result = await client.send(command)
-  if (!result.Items[0]) {
+  const command = new QueryCommand(params);
+  const result = await client.send(command);
+  if (
+    !result.Items ||
+    !result.Items[0] ||
+    !result.Items[0].PREVIOUS_SUBMISSION_URLS
+  ) {
     return {
       props: {
         submissionData: [],
       },
-    }
+    };
   }
-  const submissionData: {
-    fileName: string
-    submissionURL: any
-    timeStamp: any
-  }[] = new Array(result.Items[0].PREVIOUS_SUBMISSION_URLS.SS.length)
-  for (let i = 0; i < result.Items[0].PREVIOUS_SUBMISSION_URLS.SS.length; i++) {
-    submissionData[i] = {
-      fileName: result.Items[0].UPLOADED_FILE_NAME.SS[i],
-      submissionURL: result.Items[0].PREVIOUS_SUBMISSION_URLS.SS[i],
-      timeStamp: result.Items[0].PREVIOUS_SUBMISSION_URLS.SS[i]
+
+  const userData = result.Items[0];
+  const submissionData: Submission[] = [];
+  const numSubmissions = userData.PREVIOUS_SUBMISSION_URLS.SS.length;
+
+  for (let i = 0; i < numSubmissions; i++) {
+    const submission: Submission = {
+      fileName: userData.UPLOADED_FILE_NAME.SS[i],
+      submissionURL: userData.PREVIOUS_SUBMISSION_URLS.SS[i],
+      timeStamp: userData.PREVIOUS_SUBMISSION_URLS.SS[i]
         .slice(-21)
         .slice(0, -3),
-    }
+    };
+    submissionData.push(submission);
   }
+
   // let submission_data = result.Items[0].PREVIOUS_SUBMISSION_URLS.SS.map((item: any) => ({
   //   fileName: "hey",
   //   submissionURL: item
@@ -276,6 +304,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
   return {
     props: { submissionData }, // will be passed to the page component as props
-  }
-}
-export default Submissions
+  };
+};
+export default Submissions;

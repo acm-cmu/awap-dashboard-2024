@@ -1,23 +1,32 @@
-import { UserLayout } from '@layout'
-import { NextPage, InferGetServerSidePropsType, GetServerSideProps } from 'next'
-import { useSession } from 'next-auth/react'
-import Router from 'next/router'
-import { useEffect, useState } from 'react'
-import { Card, Table, Button } from 'react-bootstrap'
-import { authOptions } from '@pages/api/auth/[...nextauth]'
-import { unstable_getServerSession } from 'next-auth/next'
+import { UserLayout } from '@layout';
+import {
+  NextPage,
+  InferGetServerSidePropsType,
+  GetServerSideProps,
+} from 'next';
+import { useSession } from 'next-auth/react';
+import Router from 'next/router';
+import { useEffect, useState } from 'react';
+import { Card, Table, Button } from 'react-bootstrap';
+import { authOptions } from '@pages/api/auth/[...nextauth]';
+import { unstable_getServerSession } from 'next-auth/next';
 
 import {
   DynamoDB,
   DynamoDBClientConfig,
   QueryCommand,
+  QueryCommandOutput,
   ScanCommand,
-} from '@aws-sdk/client-dynamodb'
+} from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+import {
+  DynamoDBDocument,
+  QueryCommandInput,
+  ScanCommandInput,
+} from '@aws-sdk/lib-dynamodb';
 
-import TextField from '@mui/material/TextField'
-import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -26,7 +35,7 @@ const config: DynamoDBClientConfig = {
     secretAccessKey: process.env.AWS_SECRET_KEY_LOCAL as string,
   },
   region: process.env.AWS_REGION_LOCAL,
-}
+};
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
@@ -34,10 +43,23 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
-})
+});
+
+interface Match {
+  id: string;
+  team: string;
+  result: string;
+  type: string;
+  replay: string;
+}
+
+interface Team {
+  name: string;
+  rating: number;
+}
 
 // Table Component
-const TableRow: React.FC<{ match: any }> = ({ match }) => (
+const TableRow: React.FC<{ match: Match }> = ({ match }) => (
   <tr>
     <td>{match.id}</td>
     <td>{match.team}</td>
@@ -45,63 +67,63 @@ const TableRow: React.FC<{ match: any }> = ({ match }) => (
     <td>{match.type}</td>
     <td>{match.replay}</td>
   </tr>
-)
+);
 
-const TableBody: React.FC<{ data: any }> = ({ data }) => (
+const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
   <tbody>
-    {data.map((item: any) => (
+    {data.map((item: Match) => (
       <TableRow match={item} />
     ))}
   </tbody>
-)
+);
 
 // Team Info Component Card and button to request match
-const TeamInfo: React.FC<{ team: any }> = ({ team }) => {
+const TeamInfo: React.FC<{ team: Team }> = ({ team }) => {
   // make api request to fastapi
 
-  const request_match2 = () => {
-    console.log('request match')
-  }
+  const requestMatch = () => {
+    console.log('request match');
+  };
 
   return (
     <Card className="mb-3">
       <Card.Body>
-        <Card.Title>{team.teamname}</Card.Title>
+        <Card.Title>{team.name}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted" />
         <Card.Text>Rating: {team.rating}</Card.Text>
-        <Button variant="primary" onClick={request_match2}>
+        <Button variant="primary" onClick={requestMatch}>
           Request Match
         </Button>
       </Card.Body>
     </Card>
-  )
-}
+  );
+};
 
 // Scrimmages Page
 const Scrimmages: NextPage = ({
   matchData,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { status } = useSession()
-  const [TeamValue, setValue] = useState(null)
-  const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null)
+  const { status } = useSession();
+  const [TeamValue, setValue] = useState(null);
+  const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') Router.replace('/auth/login')
-  }, [status])
+    if (status === 'unauthenticated') Router.replace('/auth/login');
+  }, [status]);
 
   if (status === 'authenticated') {
-    const teamnames = teams.map(team => team.teamname)
+    const teamnames = teams.map((team: Team) => team.name);
 
     const onSearch = () => {
       // get value from autocomplete
       for (let i = 0; i < teams.length; i++) {
-        if (teams[i].teamname === TeamValue) {
-          setCurrentTeamSearch(teams[i])
-          return
+        if (teams[i].name === TeamValue) {
+          setCurrentTeamSearch(teams[i]);
+          return;
         }
       }
-    }
+    };
 
     return (
       <UserLayout>
@@ -113,12 +135,14 @@ const Scrimmages: NextPage = ({
                 disablePortal
                 value={TeamValue}
                 onChange={(event: any, newTeamValue: string | null) => {
-                  setValue(newTeamValue)
+                  setValue(newTeamValue);
                 }}
                 id="teams_dropdown"
                 options={teamnames}
                 sx={{ width: 800 }}
-                renderInput={params => <TextField {...params} label="Teams" />}
+                renderInput={(params) => (
+                  <TextField {...params} label="Teams" />
+                )}
               />
               <Button
                 variant="primary"
@@ -151,18 +175,18 @@ const Scrimmages: NextPage = ({
           </Card.Body>
         </Card>
       </UserLayout>
-    )
+    );
   }
 
-  return <div>loading</div>
-}
+  return <div>loading</div>;
+};
 
-export const getServerSideProps: GetServerSideProps = async context => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions,
-  )
+  );
 
   if (!session || !session.user) {
     return {
@@ -170,70 +194,80 @@ export const getServerSideProps: GetServerSideProps = async context => {
         destination: '/auth/login',
         permanent: false,
       },
-    }
+    };
   }
 
   // if user is logged in, query match data from dynamodb index
   // TODO: Add query for user's team
-  const params = {
+  const paramsOne: QueryCommandInput = {
     TableName: process.env.AWS_MATCH_TABLE_NAME,
     IndexName: process.env.AWS_MATCH_TABLE_INDEX1,
     KeyConditionExpression: 'TEAM_1 = :team_name',
     ExpressionAttributeValues: {
       ':team_name': { S: session.user.name },
     },
+  };
+
+  const commandOne = new QueryCommand(paramsOne);
+  const resultPlayerOne: QueryCommandOutput = await client.send(commandOne);
+
+  let matchDataPlayerOne: Match[] = [];
+
+  if (resultPlayerOne.Items) {
+    matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
+      id: item.MATCH_ID.N,
+      team: item.TEAM_2.S,
+      result: item.OUTCOME.S,
+      type: item.TYPE.S,
+      replay: item.REPLAY_URL.S,
+    }));
   }
 
-  const command = new QueryCommand(params)
-  const resultPlayerOne = await client.send(command)
-
-  const matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
-    id: item.MATCH_ID.N,
-    team: item.TEAM_2.S,
-    result: item.OUTCOME.S,
-    type: item.TYPE.S,
-    replay: item.REPLAY_URL.S,
-  }))
-
-  const params2 = {
+  const paramsTwo: QueryCommandInput = {
     TableName: process.env.AWS_MATCH_TABLE_NAME,
     IndexName: process.env.AWS_MATCH_TABLE_INDEX2,
     KeyConditionExpression: 'TEAM_2 = :team_name',
     ExpressionAttributeValues: {
       ':team_name': { S: session.user.name },
     },
+  };
+
+  const commandTwo = new QueryCommand(paramsTwo);
+  const resultPlayerTwo: QueryCommandOutput = await client.send(commandTwo);
+
+  let matchDataPlayerTwo: Match[] = [];
+
+  if (resultPlayerTwo.Items) {
+    matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
+      id: item.MATCH_ID.N,
+      team: item.TEAM_1.S,
+      result: item.OUTCOME.S,
+      type: item.TYPE.S,
+      replay: item.REPLAY_URL.S,
+    }));
   }
-
-  const command2 = new QueryCommand(params2)
-  const resultPlayerTwo = await client.send(command2)
-
-  const matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
-    id: item.MATCH_ID.N,
-    team: item.TEAM_1.S,
-    result: item.OUTCOME.S,
-    type: item.TYPE.S,
-    replay: item.REPLAY_URL.S,
-  }))
-
-  const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo)
+  const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
 
   // scan player table for team names
-  const params3 = {
+  const teamScanParams: ScanCommandInput = {
     TableName: process.env.AWS_PLAYER_TABLE_NAME,
     ProjectionExpression: 'TEAM_NAME, RATING',
+  };
+
+  const commandThree = new ScanCommand(teamScanParams);
+  const result = await client.send(commandThree);
+
+  let teams: Team[] = [];
+  if (result.Items) {
+    teams = result.Items.map((item: any) => ({
+      name: item.TEAM_NAME.S,
+      rating: item.RATING.N,
+    }));
   }
-
-  const command3 = new ScanCommand(params3)
-  const result = await client.send(command3)
-
-  const teams = result.Items.map((item: any) => ({
-    teamname: item.TEAM_NAME.S,
-    rating: item.RATING.N,
-  }))
 
   return {
     props: { matchData, teams }, // will be passed to the page component as props
-  }
-}
+  };
+};
 
-export default Scrimmages
+export default Scrimmages;

@@ -1,8 +1,10 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app --typescript`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a [Next.js](https://nextjs.org/) project bootstrapped with
+[`create-next-app --typescript`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Next.JS Dashboard
 
-This dashboard is built with `Typescript` and implement some layouts, with [React Bootstrap](https://react-bootstrap.github.io/).
+This dashboard is built with `Typescript` and implement some layouts, with
+[React Bootstrap](https://react-bootstrap.github.io/).
 
 ## Getting Started
 
@@ -18,54 +20,73 @@ Then, run the development server:
 pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the
+result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+You can start editing the page by modifying `pages/index.tsx`. The page
+auto-updates as you edit the file.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on
+[http://localhost:3000/api/hello](http://localhost:3000/api/hello). This
+endpoint can be edited in `pages/api/hello.ts`.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are
+treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead
+of React pages.
 
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
+  features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+You can check out
+[the Next.js GitHub repository](https://github.com/vercel/next.js/) - your
+feedback and contributions are welcome!
 
 ## Next.JS Rendering
 
 ### Pre-rendering
 
-By default, Next.js pre-renders every page. This means that Next.js generates HTML for each page in advance, instead of having it all done by client-side JavaScript. Pre-rendering can result in better performance and SEO.
+By default, Next.js pre-renders every page. This means that Next.js generates
+HTML for each page in advance, instead of having it all done by client-side
+JavaScript. Pre-rendering can result in better performance and SEO.
 
 ### SSR: Server-side rendering
 
-Next.js will pre-render this page on **each request** using the data returned by `getServerSideProps`.
+Next.js will pre-render this page on **each request** using the data returned by
+`getServerSideProps`.
 
 https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props
 
 ### SSG: Static-site generation
 
-Next.js will pre-render this page at **build time** using the props returned by `getStaticProps`.
+Next.js will pre-render this page at **build time** using the props returned by
+`getStaticProps`.
 
-* In development (next dev), getStaticProps will be called on every request.
+- In development (next dev), getStaticProps will be called on every request.
 
 https://nextjs.org/docs/basic-features/data-fetching/get-static-props
 
 ### CSR: Client-side rendering
 
-If done at the page level, the data is fetched at runtime, and the content of the page is updated as the data changes. When used at the component level, the data is fetched at the time of the component mount, and the content of the component is updated as the data changes.
+If done at the page level, the data is fetched at runtime, and the content of
+the page is updated as the data changes. When used at the component level, the
+data is fetched at the time of the component mount, and the content of the
+component is updated as the data changes.
 
-It is **highly recommended** to use [SWR](https://swr.vercel.app/) if you are fetching data on the client-side. It handles caching, revalidation, focus tracking, refetching on intervals, and more.
+It is **highly recommended** to use [SWR](https://swr.vercel.app/) if you are
+fetching data on the client-side. It handles caching, revalidation, focus
+tracking, refetching on intervals, and more.
 
 https://nextjs.org/docs/basic-features/data-fetching/client-side
 
 ### ISR: Incremental Static Regeneration
 
-Next.js allows you to create or update static pages **after you’ve built** your site.
+Next.js allows you to create or update static pages **after you’ve built** your
+site.
 
 To use ISR, add the `revalidate` prop to `getStaticProps`.
 

@@ -1,33 +1,33 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBars } from '@fortawesome/free-solid-svg-icons'
-import HeaderProfileNav from '@layout/UserLayout/Header/HeaderProfileNav'
-import { Button, Container } from 'react-bootstrap'
-import { useSession, signIn } from 'next-auth/react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
+import HeaderProfileNav from '@layout/UserLayout/Header/HeaderProfileNav';
+import { Button, Container } from 'react-bootstrap';
+import { useSession, signIn } from 'next-auth/react';
 
 function Greeting() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
   if (status === 'authenticated') {
     return (
       <div>
         Hello <strong>{session.user.name}</strong>
       </div>
-    )
+    );
   }
   if (status === 'loading') {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
-  return <div>AWAP 2023</div>
+  return <div>AWAP 2023</div>;
 }
 
 function Profile() {
-  const { status } = useSession()
+  const { status } = useSession();
 
   if (status === 'authenticated') {
-    return <HeaderProfileNav />
+    return <HeaderProfileNav />;
   }
   if (status === 'loading') {
-    return <h3>Loading...</h3>
+    return <h3>Loading...</h3>;
   }
   return (
     <Button
@@ -38,16 +38,16 @@ function Profile() {
     >
       Sign In
     </Button>
-  )
+  );
 }
 
 type HeaderProps = {
-  toggleSidebar: () => void
-  toggleSidebarMd: () => void
-}
+  toggleSidebar: () => void;
+  toggleSidebarMd: () => void;
+};
 
 export default function Header(props: HeaderProps) {
-  const { toggleSidebar, toggleSidebarMd } = props
+  const { toggleSidebar, toggleSidebarMd } = props;
 
   return (
     <header className="header sticky-top mb-4 p-2 border-bottom">
@@ -74,5 +74,5 @@ export default function Header(props: HeaderProps) {
         </div>
       </Container>
     </header>
-  )
+  );
 }

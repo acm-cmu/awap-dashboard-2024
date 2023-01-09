@@ -1,6 +1,6 @@
-import { UserLayout } from '@layout'
-import { NextPage } from 'next'
-import { Card } from 'react-bootstrap'
+import { UserLayout } from '@layout';
+import { NextPage } from 'next';
+import { Card } from 'react-bootstrap';
 
 const GettingStarted: NextPage = () => (
   <UserLayout>
@@ -29,6 +29,6 @@ const GettingStarted: NextPage = () => (
       </Card.Body>
     </Card>
   </UserLayout>
-)
+);
 
-export default GettingStarted
+export default GettingStarted;

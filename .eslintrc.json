@@ -15,7 +15,7 @@
         "project": "./tsconfig.json"
       },
       "rules": {
-        "@typescript-eslint/semi": [2, "never"],
+        "@typescript-eslint/semi": [2, "always"],
         // Use semicolon as member delimiter for interfaces and type
         "@typescript-eslint/member-delimiter-style": 2
       }

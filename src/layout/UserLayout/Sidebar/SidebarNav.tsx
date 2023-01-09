@@ -1,27 +1,27 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFileLines,
   faStar,
   IconDefinition,
-} from '@fortawesome/free-regular-svg-icons'
+} from '@fortawesome/free-regular-svg-icons';
 import {
   faCalculator,
   faCode,
   faPencil,
   faLock,
-} from '@fortawesome/free-solid-svg-icons'
-import React, { PropsWithChildren } from 'react'
-import { Nav } from 'react-bootstrap'
-import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+} from '@fortawesome/free-solid-svg-icons';
+import React, { PropsWithChildren } from 'react';
+import { Nav } from 'react-bootstrap';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 type SidebarNavItemProps = {
-  href: string
-  icon?: IconDefinition
-} & PropsWithChildren
+  href: string;
+  icon?: IconDefinition;
+} & PropsWithChildren;
 
 const SidebarNavItem = (props: SidebarNavItemProps) => {
-  const { icon, children, href } = props
+  const { icon, children, href } = props;
 
   return (
     <Nav.Item>
@@ -36,11 +36,11 @@ const SidebarNavItem = (props: SidebarNavItemProps) => {
         </Nav.Link>
       </Link>
     </Nav.Item>
-  )
-}
+  );
+};
 
 const ProtectedSidebarUserItems = () => {
-  const { status, data } = useSession()
+  const { status, data } = useSession();
   if (status === 'authenticated') {
     return (
       <>
@@ -51,13 +51,13 @@ const ProtectedSidebarUserItems = () => {
           Scrimmages
         </SidebarNavItem>
       </>
-    )
+    );
   }
-  return null
-}
+  return null;
+};
 
 const ProtectedSidebarAdminItems = () => {
-  const { status, data } = useSession()
+  const { status, data } = useSession();
   if (status === 'authenticated' && data?.user?.role === 'admin') {
     return (
       <>
@@ -65,10 +65,10 @@ const ProtectedSidebarAdminItems = () => {
           Admin
         </SidebarNavItem>
       </>
-    )
+    );
   }
-  return null
-}
+  return null;
+};
 
 export default function SidebarNav() {
   return (
@@ -85,5 +85,5 @@ export default function SidebarNav() {
       <ProtectedSidebarUserItems />
       <ProtectedSidebarAdminItems />
     </ul>
-  )
+  );
 }

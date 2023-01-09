@@ -1,6 +1,6 @@
-import { UserLayout } from '@layout'
-import { NextPage } from 'next'
-import { Card } from 'react-bootstrap'
+import { UserLayout } from '@layout';
+import { NextPage } from 'next';
+import { Card } from 'react-bootstrap';
 
 const Leaderboard: NextPage = () => (
   <UserLayout>
@@ -11,6 +11,6 @@ const Leaderboard: NextPage = () => (
       </Card.Body>
     </Card>
   </UserLayout>
-)
+);
 
-export default Leaderboard
+export default Leaderboard;

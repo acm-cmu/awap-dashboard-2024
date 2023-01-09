@@ -1,7 +1,7 @@
-import type { NextPage } from 'next'
-import { UserLayout } from '@layout'
-import React from 'react'
-import { Card } from 'react-bootstrap'
+import type { NextPage } from 'next';
+import { UserLayout } from '@layout';
+import React from 'react';
+import { Card } from 'react-bootstrap';
 
 const Home: NextPage = () => (
   <UserLayout>
@@ -12,6 +12,6 @@ const Home: NextPage = () => (
       </Card.Body>
     </Card>
   </UserLayout>
-)
+);
 
-export default Home
+export default Home;
