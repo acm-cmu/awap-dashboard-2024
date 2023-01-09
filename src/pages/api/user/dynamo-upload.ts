@@ -33,7 +33,6 @@ export default async function handler(
   }
 
   try {
-    console.log(req.body);
     const { uploadedName, user, fileName } = req.body;
     const s = process.env.S3_URL_TEMPLATE;
     const s3url = s + fileName;
