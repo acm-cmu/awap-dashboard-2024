@@ -15,6 +15,7 @@ import {
   DynamoDBClientConfig,
   QueryCommand,
   QueryCommandInput,
+  ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
@@ -148,10 +149,11 @@ const Submissions: NextPage = ({
 
     await axios.post('/api/user/dynamo-upload', {
       uploadedName: file.name,
-      user,
-      fileName,
+      user: user,
+      fileName: fileName,
+      timeStamp: time1
     });
-
+    window.location.reload();
     setUploadingStatus(false);
     setFile(null);
   };
@@ -160,6 +162,7 @@ const Submissions: NextPage = ({
     if (file) {
       const uploadedFileDetail = async () => uploadFile(userData.user.name);
       uploadedFileDetail();
+      
     }
   }, [file]);
 
@@ -181,7 +184,7 @@ const Submissions: NextPage = ({
                   type="file"
                   name="image"
                   id="selectFile"
-                  onChange={(e: any) => setFile(e.target.files[0])}
+                  onChange={(e: any) => setFile(e.target.files[0])}                  
                 />
               </Card.Body>
             </Card>
@@ -237,19 +240,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const params: QueryCommandInput = {
-    TableName: process.env.AWS_PLAYER_TABLE_NAME,
-    KeyConditionExpression: 'TEAM_NAME = :team_name',
+    TableName: process.env.AWS_SUBMISSIONS_TABLE_NAME,
+    FilterExpression: 'team_name = :team_name',
     ExpressionAttributeValues: {
       ':team_name': { S: session.user.name },
     },
   };
 
-  const command = new QueryCommand(params);
+  const command = new ScanCommand(params);
   const result = await client.send(command);
   if (
     !result.Items ||
-    !result.Items[0] ||
-    !result.Items[0].PREVIOUS_SUBMISSION_URLS
+    !result.Items[0]
   ) {
     return {
       props: {
@@ -258,49 +260,23 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const userData = result.Items[0];
+  const userData = result.Items;
   const submissionData: Submission[] = [];
-  const numSubmissions = userData.PREVIOUS_SUBMISSION_URLS.SS.length;
+  const numSubmissions = userData.length;
 
+  var sorted = userData.sort( function( a, b )
+{
+  if ( a.timeStamp.S == b.timeStamp.S ) return 0;
+  return ( a.timeStamp.S > b.timeStamp.S ) ? 1 : -1;
+}).reverse();
   for (let i = 0; i < numSubmissions; i++) {
     const submission: Submission = {
-      fileName: userData.UPLOADED_FILE_NAME.SS[i],
-      submissionURL: userData.PREVIOUS_SUBMISSION_URLS.SS[i],
-      timeStamp: userData.PREVIOUS_SUBMISSION_URLS.SS[i]
-        .slice(-21)
-        .slice(0, -3),
+      fileName: sorted[i].uploaded_file_name.S,
+      submissionURL: sorted[i].current_submission_url.S,
+      timeStamp: sorted[i].timeStamp.S
     };
     submissionData.push(submission);
   }
-
-  // let submission_data = result.Items[0].PREVIOUS_SUBMISSION_URLS.SS.map((item: any) => ({
-  //   fileName: "hey",
-  //   submissionURL: item
-  // }))
-
-  // let submission_data = [{
-  //   fileName: "defaultName",
-  //   submissionURL: "defaulturl"
-  // }]
-
-  // if (result.Items) {
-  //   const submission_data1 = result.Items[0];
-  //   if(submission_data1){
-  //     let submission_data2 = submission_data1.PREVIOUS_SUBMISSION_URLS.SS;
-  //     if (submission_data2){
-  //       return submission_data2.map((item: any) => ({
-  //       fileName: "hey",
-  //       submissionURL: item
-  //     }))
-  //   }
-  //   }
-  //   else{
-  //     submission_data = []
-  //   }
-  // }
-  // else{
-  //   submission_data = []
-  // }
 
   return {
     props: { submissionData }, // will be passed to the page component as props
