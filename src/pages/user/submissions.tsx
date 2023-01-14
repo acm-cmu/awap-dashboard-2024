@@ -13,12 +13,10 @@ import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  QueryCommand,
-  QueryCommandInput,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 
@@ -49,7 +47,6 @@ interface Submission {
 }
 
 const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
-
   <tr className="align-middle">
     <td className="text-center">
       <div className="avatar avatar-md d-inline-flex position-relative">
@@ -118,10 +115,10 @@ const Submissions: NextPage = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
   const myUploader = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files){
+    if (event.target.files) {
       setFile(event.target.files[0]);
     }
-  }
+  };
   const handleUploadClick = async () => uploadFile(userData.user.name);
 
   const [file, setFile] = useState<any>(null);
@@ -129,7 +126,7 @@ const Submissions: NextPage = ({
   // const { status, data } = useSession()
 
   const uploadFile = async (user: string) => {
-    if(!file) return;
+    if (!file) return;
     setUploadingStatus(true);
     const time1 = new Date().toLocaleString();
     const time2 = time1.split('/').join('-');
@@ -152,12 +149,19 @@ const Submissions: NextPage = ({
       uploadedName: file.name,
       user: user,
       fileName: fileName,
-      timeStamp: time1
+      timeStamp: time1,
     });
     window.location.reload();
     setUploadingStatus(false);
     setFile(null);
   };
+
+  useEffect(() => {
+    if (file) {
+      const uploadedFileDetail = async () => uploadFile(userData.user.name);
+      uploadedFileDetail();
+    }
+  }, [file]);
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
@@ -175,9 +179,9 @@ const Submissions: NextPage = ({
                   type="file"
                   name="image"
                   id="selectFile"
-                  onChange={myUploader}                  
+                  onChange={(e: any) => setFile(e.target.files[0])}
                 />
- 
+
                 <button onClick={handleUploadClick}>Upload</button>
               </Card.Body>
             </Card>
@@ -232,7 +236,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const params: QueryCommandInput = {
+  const params: ScanCommandInput = {
     TableName: process.env.AWS_SUBMISSIONS_TABLE_NAME,
     FilterExpression: 'team_name = :team_name',
     ExpressionAttributeValues: {
@@ -242,10 +246,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const command = new ScanCommand(params);
   const result = await client.send(command);
-  if (
-    !result.Items ||
-    !result.Items[0]
-  ) {
+  if (!result.Items || !result.Items[0]) {
     return {
       props: {
         submissionData: [],
@@ -257,16 +258,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const submissionData: Submission[] = [];
   const numSubmissions = userData.length;
 
-  var sorted = userData.sort( function( a, b )
-{
-  if ( a.timeStamp.S == b.timeStamp.S ) return 0;
-  return ( a.timeStamp.S > b.timeStamp.S ) ? 1 : -1;
-}).reverse();
+  const sorted = userData
+    .sort((a, b) => {
+      if (a.timeStamp.S === b.timeStamp.S) return 0;
+      return a.timeStamp.S > b.timeStamp.S ? 1 : -1;
+    })
+    .reverse();
   for (let i = 0; i < numSubmissions; i++) {
     const submission: Submission = {
       fileName: sorted[i].uploaded_file_name.S,
       submissionURL: sorted[i].current_submission_url.S,
-      timeStamp: sorted[i].timeStamp.S
+      timeStamp: sorted[i].timeStamp.S,
     };
     submissionData.push(submission);
   }
