@@ -5,9 +5,9 @@ import { UserLayout } from '@layout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisVertical, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { Card, Dropdown, ProgressBar } from 'react-bootstrap';
-import React, { useEffect, useState } from 'react';
+import React, { useRef, ChangeEvent, useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { FileUpload } from 'primereact/fileupload';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 
 import {
@@ -49,10 +49,7 @@ interface Submission {
 }
 
 const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
-  // let timeStamp = "default";
-  // if(!submission.submissionURL) {
 
-  // }
   <tr className="align-middle">
     <td className="text-center">
       <div className="avatar avatar-md d-inline-flex position-relative">
@@ -81,9 +78,6 @@ const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
       </div>
       <ProgressBar className="progress-thin" variant="success" now={30} />
     </td>
-    {/* <td className="text-center">
-        <FontAwesomeIcon icon={faFoursquare} size="lg" fixedWidth />
-      </td> */}
     <td>
       <div className="small text-black-50" />
       <div className="fw-semibold">{submission.timeStamp}</div>
@@ -123,12 +117,19 @@ const Submissions: NextPage = ({
   submissionData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
+  const myUploader = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files){
+      setFile(event.target.files[0]);
+    }
+  }
+  const handleUploadClick = async () => uploadFile(userData.user.name);
 
   const [file, setFile] = useState<any>(null);
   const [uploadingStatus, setUploadingStatus] = useState<boolean>(false);
   // const { status, data } = useSession()
 
   const uploadFile = async (user: string) => {
+    if(!file) return;
     setUploadingStatus(true);
     const time1 = new Date().toLocaleString();
     const time2 = time1.split('/').join('-');
@@ -159,14 +160,6 @@ const Submissions: NextPage = ({
   };
 
   useEffect(() => {
-    if (file) {
-      const uploadedFileDetail = async () => uploadFile(userData.user.name);
-      uploadedFileDetail();
-      
-    }
-  }, [file]);
-
-  useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
   }, [status]);
 
@@ -178,14 +171,14 @@ const Submissions: NextPage = ({
             <Card className="mb-4">
               <Card.Header>Upload Submission</Card.Header>
               <Card.Body>
-                {/* <FileUpload name="demo" url="/api/s3-upload"></FileUpload> */}
-                {/* <input type="file" url="/api/s3-upload" /> */}
                 <input
                   type="file"
                   name="image"
                   id="selectFile"
-                  onChange={(e: any) => setFile(e.target.files[0])}                  
+                  onChange={myUploader}                  
                 />
+ 
+                <button onClick={handleUploadClick}>Upload</button>
               </Card.Body>
             </Card>
           </div>
