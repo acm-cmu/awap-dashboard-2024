@@ -2,9 +2,6 @@ import {
   DynamoDB,
   DynamoDBClientConfig,
   GetItemCommand,
-  UpdateItemCommand,
-  PutItemCommand,
-  GetItemCommandInput,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import axios from 'axios';
@@ -47,7 +44,7 @@ export default async function handler(
       }),
     );
 
-    const player_bot_name = playerData.Item?.current_submission_id.S;
+    const playerBotName = playerData.Item?.current_submission_id.S;
 
     const oppData = await client.send(
       new GetItemCommand({
@@ -58,7 +55,7 @@ export default async function handler(
       }),
     );
 
-    const opp_bot_name = oppData.Item?.current_submission_id.S;
+    const oppBotName = oppData.Item?.current_submission_id.S;
 
     // make post request to matchmaker at match endpoint
     // with player_bot_name and opp_bot_name
@@ -72,12 +69,12 @@ export default async function handler(
         {
           username: player,
           s3_bucket_name: process.env.S3_BOT_BUCKET,
-          s3_object_name: player_bot_name,
+          s3_object_name: playerBotName,
         },
         {
           username: opp,
           s3_bucket_name: process.env.S3_BOT_BUCKET,
-          s3_object_name: opp_bot_name,
+          s3_object_name: oppBotName,
         },
       ],
     });

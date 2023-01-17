@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
 
         const user = await client.send(
           new GetItemCommand({
-            TableName: process.env.AWS_USER_TABLE_NAME,
+            TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
             Key: {
               username: { S: username },
             },

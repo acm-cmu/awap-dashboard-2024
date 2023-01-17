@@ -47,10 +47,12 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
 
 interface Match {
   id: string;
-  team: string;
-  result: string;
+  player: string;
+  opponent: string;
+  outcome: string;
   type: string;
   replay: string;
+  status: string;
 }
 
 interface Team {
@@ -62,8 +64,9 @@ interface Team {
 const TableRow: React.FC<{ match: Match }> = ({ match }) => (
   <tr>
     <td>{match.id}</td>
-    <td>{match.team}</td>
-    <td>{match.result}</td>
+    <td>{match.opponent}</td>
+    <td>{match.status}</td>
+    <td>{match.outcome}</td>
     <td>{match.type}</td>
     <td>{match.replay}</td>
   </tr>
@@ -216,10 +219,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (resultPlayerOne.Items) {
     matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
       id: item.MATCH_ID.N,
-      team: item.TEAM_2.S,
-      result: item.OUTCOME.S,
-      type: item.TYPE.S,
-      replay: item.REPLAY_URL.S,
+      player: item.TEAM_1.S,
+      opponent: item.TEAM_2.S,
+      outcome: item.OUTCOME.S,
+      type: item.MATCH_TYPE.S,
+      replay: item.REPLAY_FILENAME.S,
+      status: item.MATCH_STATUS.S,
     }));
   }
 
@@ -240,18 +245,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (resultPlayerTwo.Items) {
     matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
       id: item.MATCH_ID.N,
-      team: item.TEAM_1.S,
-      result: item.OUTCOME.S,
-      type: item.TYPE.S,
-      replay: item.REPLAY_URL.S,
+      player: item.TEAM_1.S,
+      opponent: item.TEAM_2.S,
+      outcome: item.OUTCOME.S,
+      type: item.MATCH_TYPE.S,
+      replay: item.REPLAY_FILENAME.S,
+      status: item.MATCH_STATUS.S,
     }));
   }
   const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
 
   // scan player table for team names
   const teamScanParams: ScanCommandInput = {
-    TableName: process.env.AWS_PLAYER_TABLE_NAME,
-    ProjectionExpression: 'TEAM_NAME, RATING',
+    TableName: process.env.AWS_RATINGS_TABLE_NAME,
+    ProjectionExpression: 'team_name, rating',
   };
 
   const commandThree = new ScanCommand(teamScanParams);
@@ -260,8 +267,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let teams: Team[] = [];
   if (result.Items) {
     teams = result.Items.map((item: any) => ({
-      name: item.TEAM_NAME.S,
-      rating: item.RATING.N,
+      name: item.team_name.S,
+      rating: item.rating.N,
     }));
   }
 

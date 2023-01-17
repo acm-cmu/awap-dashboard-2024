@@ -35,7 +35,7 @@ export default async function handler(
 
   const user = await client.send(
     new GetItemCommand({
-      TableName: process.env.AWS_USER_TABLE_NAME,
+      TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
       Key: {
         username: { S: username },
       },
@@ -47,7 +47,7 @@ export default async function handler(
   } else {
     await client.send(
       new PutItemCommand({
-        TableName: process.env.AWS_USER_TABLE_NAME,
+        TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
         Item: {
           username: { S: username },
           password: { S: hashedpassword },
@@ -55,6 +55,27 @@ export default async function handler(
         },
       }),
     );
+
+    await client.send(
+      new PutItemCommand({
+        TableName: process.env.AWS_PLAYER_TABLE_NAME,
+        Item: {
+          team_name: { S: username },
+          current_submission_id: { S: '' },
+        },
+      }),
+    );
+
+    await client.send(
+      new PutItemCommand({
+        TableName: process.env.AWS_RATINGS_TABLE_NAME,
+        Item: {
+          team_name: { S: username },
+          rating: { N: 0 },
+        },
+      }),
+    );
+
     res.status(200).json({ message: 'success' });
   }
 }
