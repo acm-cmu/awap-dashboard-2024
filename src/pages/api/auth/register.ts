@@ -71,7 +71,7 @@ export default async function handler(
         TableName: process.env.AWS_RATINGS_TABLE_NAME,
         Item: {
           team_name: { S: username },
-          rating: { N: 0 },
+          rating: { N: '0' },
         },
       }),
     );
