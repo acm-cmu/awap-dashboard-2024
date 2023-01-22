@@ -33,14 +33,28 @@ export default async function handler(
   }
 
   try {
-    const { uploadedName, user, fileName } = req.body;
+    const { uploadedName, user, fileName, timeStamp, submissionID } = req.body;
     const s = process.env.S3_URL_TEMPLATE;
     const s3url = s + fileName;
+    // const submission_id = user + timeStamp;
     const teamUser = await client.send(
       new GetItemCommand({
         TableName: process.env.AWS_PLAYER_TABLE_NAME,
         Key: {
-          TEAM_NAME: { S: user },
+          team_name: { S: user },
+        },
+      }),
+    );
+    client.send(
+      new PutItemCommand({
+        TableName: process.env.AWS_SUBMISSIONS_TABLE_NAME,
+        Item: {
+          submission_id: { S: fileName },
+          team_name: { S: user },
+          bot_file_name: { S: fileName },
+          uploaded_file_name: { S: uploadedName },
+          current_submission_url: { S: s3url },
+          timeStamp: { S: timeStamp },
         },
       }),
     );
@@ -49,41 +63,51 @@ export default async function handler(
         new PutItemCommand({
           TableName: process.env.AWS_PLAYER_TABLE_NAME,
           Item: {
-            TEAM_NAME: { S: user },
-            BOT_FILE_NAME: { S: fileName },
-            CURRENT_SUBMISSION_URL: { S: s3url },
-            PREVIOUS_SUBMISSION_URLS: { SS: [s3url] },
-            RATING: { N: '0' },
-            UPLOADED_FILE_NAME: { SS: [uploadedName] },
+            team_name: { S: user },
+            current_submission_file_name: {S: fileName}
           },
         }),
       );
     } else {
-      const prevSubs = teamUser.Item.PREVIOUS_SUBMISSION_URLS.SS;
-      const prevUploaded = teamUser.Item.UPLOADED_FILE_NAME.SS;
-      if (prevSubs && prevUploaded) {
-        prevSubs.push(s3url);
-        prevUploaded.push(uploadedName);
-
-        client.send(
+      client.send(
           new UpdateItemCommand({
             TableName: process.env.AWS_PLAYER_TABLE_NAME,
             Key: {
-              TEAM_NAME: { S: user },
+              team_name: { S: user },
             },
             UpdateExpression:
-              'SET BOT_FILE_NAME = :fileName, CURRENT_SUBMISSION_URL = :s2, PREVIOUS_SUBMISSION_URLS = :prevSubs, RATING = :rating, UPLOADED_FILE_NAME = :uploadedName',
+              'SET current_submission_id = :bot_file_name',
             ExpressionAttributeValues: {
-              ':fileName': { S: fileName },
-              ':s2': { S: s3url },
-              ':rating': { N: '2' },
-              ':prevSubs': { SS: prevSubs },
-              ':uploadedName': { SS: prevUploaded },
+              ':bot_file_name': { S: fileName }
             },
             ReturnValues: 'UPDATED_NEW',
           }),
         );
-      }
+      // const prevSubs = teamUser.Item.PREVIOUS_SUBMISSION_URLS.SS;
+      // const prevUploaded = teamUser.Item.UPLOADED_FILE_NAME.SS;
+      // if (prevSubs && prevUploaded) {
+      //   prevSubs.push(s3url);
+      //   prevUploaded.push(uploadedName);
+
+      //   client.send(
+      //     new UpdateItemCommand({
+      //       TableName: process.env.AWS_PLAYER_TABLE_NAME,
+      //       Key: {
+      //         TEAM_NAME: { S: user },
+      //       },
+      //       UpdateExpression:
+      //         'SET BOT_FILE_NAME = :fileName, CURRENT_SUBMISSION_URL = :s2, PREVIOUS_SUBMISSION_URLS = :prevSubs, RATING = :rating, UPLOADED_FILE_NAME = :uploadedName',
+      //       ExpressionAttributeValues: {
+      //         ':fileName': { S: fileName },
+      //         ':s2': { S: s3url },
+      //         ':rating': { N: '2' },
+      //         ':prevSubs': { SS: prevSubs },
+      //         ':uploadedName': { SS: prevUploaded },
+      //       },
+      //       ReturnValues: 'UPDATED_NEW',
+      //     }),
+      //   );
+      // }
     }
     res.status(200).json({ s3url });
   } catch (err) {
