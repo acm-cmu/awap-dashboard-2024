@@ -33,10 +33,10 @@ export default async function handler(
   }
 
   try {
-    const { uploadedName, user, fileName, timeStamp } = req.body;
+    const { uploadedName, user, fileName, timeStamp, submissionID } = req.body;
     const s = process.env.S3_URL_TEMPLATE;
     const s3url = s + fileName;
-    const submission_id = user + timeStamp;
+    // const submission_id = user + timeStamp;
     const teamUser = await client.send(
       new GetItemCommand({
         TableName: process.env.AWS_PLAYER_TABLE_NAME,
@@ -49,7 +49,7 @@ export default async function handler(
       new PutItemCommand({
         TableName: process.env.AWS_SUBMISSIONS_TABLE_NAME,
         Item: {
-          submission_id: { S: submission_id },
+          submission_id: { S: fileName },
           team_name: { S: user },
           bot_file_name: { S: fileName },
           uploaded_file_name: { S: uploadedName },
@@ -64,7 +64,7 @@ export default async function handler(
           TableName: process.env.AWS_PLAYER_TABLE_NAME,
           Item: {
             team_name: { S: user },
-            current_submission_id: {S: submission_id}
+            current_submission_file_name: {S: fileName}
           },
         }),
       );
@@ -76,9 +76,9 @@ export default async function handler(
               team_name: { S: user },
             },
             UpdateExpression:
-              'SET current_submission_id = :submission_id',
+              'SET current_submission_id = :bot_file_name',
             ExpressionAttributeValues: {
-              ':submission_id': { S: submission_id }
+              ':bot_file_name': { S: fileName }
             },
             ReturnValues: 'UPDATED_NEW',
           }),

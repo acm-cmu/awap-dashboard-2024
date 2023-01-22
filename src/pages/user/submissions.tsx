@@ -9,6 +9,7 @@ import React, { useRef, ChangeEvent, useEffect, useState } from 'react';
 import axios from 'axios';
 import { FileUpload } from 'primereact/fileupload';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   DynamoDB,
@@ -69,15 +70,7 @@ const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
         </a>
       </div>
     </td>
-    <td>
-      <div className="clearfix">
-        <div className="float-start">
-          <div className="fw-semibold">30%</div>
-        </div>
-        <div className="float-end" />
-      </div>
-      <ProgressBar className="progress-thin" variant="success" now={30} />
-    </td>
+    
     <td>
       <div className="small text-black-50" />
       <div className="fw-semibold">{submission.timeStamp}</div>
@@ -134,7 +127,8 @@ const Submissions: NextPage = ({
     const time1 = new Date().toLocaleString();
     const time2 = time1.split('/').join('-');
     const time = time2.split(' ').join('');
-    const fileName = `bot-${user}-${time}.py`;
+    const submissionID = uuidv4();
+    const fileName = `bot-${user}-${time}-${submissionID}.py`;
     const { data } = await axios.post('/api/user/s3-upload', {
       name: fileName,
       type: file.type,
@@ -152,7 +146,8 @@ const Submissions: NextPage = ({
       uploadedName: file.name,
       user: user,
       fileName: fileName,
-      timeStamp: time1
+      timeStamp: time1,
+      submissionID: submissionID,
     });
     window.location.reload();
     setUploadingStatus(false);
@@ -197,7 +192,6 @@ const Submissions: NextPage = ({
                           <FontAwesomeIcon icon={faUsers} fixedWidth />
                         </th>
                         <th>Uploaded File Name</th>
-                        <th>Elo Change</th>
                         {/* <th className="text-center">Successful</th> */}
                         <th>Time Submitted</th>
                         <th aria-label="Action" />
