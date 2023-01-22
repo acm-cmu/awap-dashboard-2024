@@ -32,7 +32,8 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
       id="sidebar"
     >
       <div className="sidebar-brand d-none d-md-flex align-items-center justify-content-center">
-        <p>Insert AWAP Logo</p>
+      <img src="/assets/img/logodraft.png" class= "logo" alt="awap logo"> 
+      </img>
       </div>
 
       <div className="sidebar-nav flex-fill">
