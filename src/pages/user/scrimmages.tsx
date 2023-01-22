@@ -27,6 +27,8 @@ import {
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -81,19 +83,39 @@ const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
 );
 
 // Team Info Component Card and button to request match
-const TeamInfo: React.FC<{ team: Team }> = ({ team }) => {
+const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
+  oppTeam,
+  playerTeam,
+}) => {
   // make api request to fastapi
 
-  const requestMatch = () => {
+  const requestMatch = async () => {
     console.log('request match');
+    // get status from axios post request
+
+    try {
+      const response = await axios.post('/api/user/match-request', {
+        player: playerTeam,
+        opp: oppTeam.name,
+      });
+      console.log(response);
+      if (response.status === 200) {
+        toast.success('Match Request Sent!');
+      } else {
+        toast.error('Error sending match request');
+      }
+    } catch (error) {
+      toast.error('Error sending match request');
+      console.log(error);
+    }
   };
 
   return (
     <Card className="mb-3">
       <Card.Body>
-        <Card.Title>{team.name}</Card.Title>
+        <Card.Title>{oppTeam.name}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted" />
-        <Card.Text>Rating: {team.rating}</Card.Text>
+        <Card.Text>Rating: {oppTeam.rating}</Card.Text>
         <Button variant="primary" onClick={requestMatch}>
           Request Match
         </Button>
@@ -107,7 +129,7 @@ const Scrimmages: NextPage = ({
   matchData,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { status } = useSession();
+  const { data, status } = useSession();
   const [TeamValue, setValue] = useState(null);
   const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null);
 
@@ -117,6 +139,8 @@ const Scrimmages: NextPage = ({
 
   if (status === 'authenticated') {
     const teamnames = teams.map((team: Team) => team.name);
+    const index = teamnames.indexOf(data.user.name);
+    if (index > -1) teamnames.splice(index, 1);
 
     const onSearch = () => {
       // get value from autocomplete
@@ -159,7 +183,9 @@ const Scrimmages: NextPage = ({
           </Card.Body>
         </Card>
         {/* Create card that displays only if search button is clicked */}
-        {CurrentTeamSearch && <TeamInfo team={CurrentTeamSearch} />}
+        {CurrentTeamSearch && (
+          <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={data.user.name} />
+        )}
         <Card>
           <Card.Body>
             <Card.Title>Scrimmage History</Card.Title>
@@ -258,7 +284,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // scan player table for team names
   const teamScanParams: ScanCommandInput = {
     TableName: process.env.AWS_RATINGS_TABLE_NAME,
-    ProjectionExpression: 'team_name, rating',
+    ProjectionExpression: 'team_name, current_rating',
   };
 
   const commandThree = new ScanCommand(teamScanParams);
@@ -268,7 +294,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (result.Items) {
     teams = result.Items.map((item: any) => ({
       name: item.team_name.S,
-      rating: item.rating.N,
+      rating: item.current_rating.N,
     }));
   }
 

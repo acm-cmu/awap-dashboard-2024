@@ -32,8 +32,11 @@ export default async function handler(
   }
 
   try {
-    const { player } = req.query;
-    const { opp } = req.query;
+    const { player } = req.body;
+    const { opp } = req.body;
+
+    console.log(player);
+    console.log(opp);
 
     const playerData = await client.send(
       new GetItemCommand({
@@ -62,29 +65,35 @@ export default async function handler(
     // matchmaker will return match_id
     // update player and opp with match_id
 
-    const { data } = await axios.post('http://localhost:8000/match', {
-      game_engine_name: process.env.GAME_ENGINE_NAME,
-      num_players: 2,
-      user_submissions: [
-        {
-          username: player,
-          s3_bucket_name: process.env.S3_BOT_BUCKET,
-          s3_object_name: playerBotName,
-        },
-        {
-          username: opp,
-          s3_bucket_name: process.env.S3_BOT_BUCKET,
-          s3_object_name: oppBotName,
-        },
-      ],
-    });
+    try {
+      const response = await axios.post('http://localhost:8000/match', {
+        game_engine_name: process.env.GAME_ENGINE_NAME,
+        num_players: 2,
+        user_submissions: [
+          {
+            username: player,
+            s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+            s3_object_name: playerBotName,
+          },
+          {
+            username: opp,
+            s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+            s3_object_name: oppBotName,
+          },
+        ],
+      });
 
-    if (data.error) {
-      res
-        .status(500)
-        .json({ message: 'Error fetching data', error: data.error });
-    } else res.status(200).json({ message: 'Success' });
+      console.log(response);
+      if (response.status !== 200) {
+        return res
+          .status(500)
+          .json({ message: 'Error fetching data', error: response.error });
+      }
+      return res.status(200).json({ message: 'Success', data: response.data });
+    } catch (err) {
+      return res.status(500);
+    }
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching data', error: err });
+    return res.status(500).json({ message: 'Error fetching data', error: err });
   }
 }
