@@ -13,12 +13,12 @@ import {
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import ReactPaginate from 'react-paginate';
 import { useRouter } from 'next/router';
-import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 import {
-  DynamoDBDocument,
-  QueryCommandInput,
-  ScanCommandInput,
-} from '@aws-sdk/lib-dynamodb';
+  DynamoDB,
+  DynamoDBClientConfig,
+  ScanCommand,
+} from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 
 const config: DynamoDBClientConfig = {
   credentials: {
@@ -297,22 +297,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     order = context.query.order;
   }
 
-  const params = {
+  const params: ScanCommandInput = {
     TableName: process.env.AWS_RATINGS_TABLE_NAME,
-    AttributesToGet: ['current_rating', 'team_name'],
+    ProjectionExpression: 'team_name, current_rating',
   };
 
-  const teamdata = await client.scan(params);
+  const command = new ScanCommand(params);
+  const teamdata = await client.send(command);
+
   const itemsunordered = teamdata.Items;
   const items = itemsunordered?.sort(
-    (i1, i2) => parseInt(i2.current_rating) - parseInt(i1.current_rating),
+    (i1, i2) => i2.current_rating.N - i1.current_rating.N,
   );
   let teams: Leaderboard[] = [];
   if (items) {
     teams = items.map((item, idx) => ({
       ranking: idx + 1,
-      tname: item.team_name,
-      rating: item.current_rating,
+      tname: item.team_name.S,
+      rating: item.current_rating.N,
     }));
   }
 

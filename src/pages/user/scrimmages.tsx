@@ -292,8 +292,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const commandThree = new ScanCommand(teamScanParams);
   const result = await client.send(commandThree);
 
-  console.log(result.Items);
-
   let teams: Team[] = [];
   if (result.Items) {
     teams = result.Items.map((item: any) => ({
