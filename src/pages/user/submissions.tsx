@@ -150,14 +150,6 @@ const Submissions: NextPage = ({
     setUploadingStatus(false);
     setFile(null);
   };
-
-  useEffect(() => {
-    if (file) {
-      const uploadedFileDetail = async () => uploadFile(userData.user.name);
-      uploadedFileDetail();
-    }
-  }, [file]);
-
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
   }, [status]);
