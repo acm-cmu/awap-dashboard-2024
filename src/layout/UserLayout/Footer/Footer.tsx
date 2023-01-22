@@ -7,7 +7,7 @@ export default function Footer() {
         <a className="text-decoration-none" href="http://acmatcmu.com/">
           Algorithms with a Purpose
         </a>{' '}
-        © 2022 ACM@CMU.
+        © 2023 ACM@CMU.
       </div>
     </footer>
   );
