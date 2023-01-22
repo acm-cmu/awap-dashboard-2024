@@ -91,6 +91,7 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
 
   const requestMatch = async () => {
     console.log('request match');
+    toast.success('Match Request Sent!');
     // get status from axios post request
 
     try {
@@ -194,6 +195,7 @@ const Scrimmages: NextPage = ({
                 <tr>
                   <th>Match ID</th>
                   <th>Opponent</th>
+                  <th>Status</th>
                   <th>Winner</th>
                   <th>Type</th>
                   <th>Replay</th>
@@ -289,6 +291,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const commandThree = new ScanCommand(teamScanParams);
   const result = await client.send(commandThree);
+
+  console.log(result.Items);
 
   let teams: Team[] = [];
   if (result.Items) {
