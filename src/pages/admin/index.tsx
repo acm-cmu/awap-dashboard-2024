@@ -39,10 +39,6 @@ interface UserSubmission {
   s3_object_name: string;
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> main
 const Admin: NextPage = ({
   userSubmissionData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -58,17 +54,11 @@ const Admin: NextPage = ({
       num_tournament_spots: process.env.NUM_TOURNAMENT_SPOTS,
       user_submissions: userSubmissionData,
     });
-<<<<<<< HEAD
   };
-=======
-
-  }
->>>>>>> main
   if (status === 'authenticated') {
     if (data?.user?.role === 'user') {
       Router.replace('/unauthorized');
-    } 
-    else {
+    } else {
       return (
         <UserLayout>
           <Card>
@@ -85,13 +75,9 @@ const Admin: NextPage = ({
             <Card.Body>
               <Card.Title>Start a Tournament</Card.Title>
               <Card.Text>
-<<<<<<< HEAD
                 <button type="button" onClick={startTournament}>
                   Start a Tournament
                 </button>
-=======
-                <button type="button" onClick={startTournament}>Start a Tournament</button>
->>>>>>> main
               </Card.Text>
             </Card.Body>
           </Card>
@@ -124,14 +110,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const command = new ScanCommand(params);
   const result = await client.send(command);
-<<<<<<< HEAD
   if (!result.Items || !result.Items[0]) {
-=======
-  if (
-    !result.Items ||
-    !result.Items[0]
-  ) {
->>>>>>> main
     return {
       props: {
         userSubmissionData: [],
@@ -144,12 +123,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const numSubmissions = userData.length;
 
   for (let i = 0; i < numSubmissions; i++) {
-<<<<<<< HEAD
     if (userData[i].current_submission_id) {
-=======
-    
-    if (userData[i].current_submission_id){
->>>>>>> main
       const userSubmission: UserSubmission = {
         username: userData[i].team_name.S,
         s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
@@ -157,10 +131,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
       userSubmissionData.push(userSubmission);
     }
-<<<<<<< HEAD
-=======
-    
->>>>>>> main
   }
 
   return {
