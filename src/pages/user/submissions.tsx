@@ -144,10 +144,7 @@ const Submissions: NextPage = ({
       user: user,
       fileName: fileName,
       timeStamp: time1,
-<<<<<<< HEAD
       submissionID: submissionID,
-=======
->>>>>>> f90029beec1ef7417aea2517a5f87ed987c3dc3e
     });
     window.location.reload();
     setUploadingStatus(false);
