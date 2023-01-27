@@ -62,6 +62,7 @@ export default async function handler(
         Item: {
           team_name: { S: username },
           current_submission_id: { S: '' },
+          bracket: { S: 'Beginner' },
         },
       }),
     );
