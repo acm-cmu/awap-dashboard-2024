@@ -29,7 +29,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { username, password } = req.body;
+  const { username, password, bracket } = req.body;
 
   const hashedpassword = await hash(password, 10);
 
@@ -61,6 +61,7 @@ export default async function handler(
         TableName: process.env.AWS_PLAYER_TABLE_NAME,
         Item: {
           team_name: { S: username },
+          bracket: {S: bracket},
           current_submission_id: { S: '' },
         },
       }),

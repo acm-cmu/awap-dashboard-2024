@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const Login: NextPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [bracket, setBracket] = useState('');
 
   const router = useRouter();
 
