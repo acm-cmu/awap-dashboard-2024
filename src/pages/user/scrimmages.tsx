@@ -5,29 +5,21 @@ import {
   GetServerSideProps,
 } from 'next';
 import { useSession } from 'next-auth/react';
-import Router from 'next/router';
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
+import { useState } from 'react';
 import { Card, Table, Button } from 'react-bootstrap';
-import { authOptions } from '@pages/api/auth/[...nextauth]';
-import { unstable_getServerSession } from 'next-auth/next';
 
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  QueryCommand,
-  QueryCommandOutput,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import {
-  DynamoDBDocument,
-  QueryCommandInput,
-  ScanCommandInput,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
 
 // Dynamo DB Config
@@ -75,11 +67,7 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => (
 );
 
 const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
-  <tbody>
-    {data.map((item: Match) => (
-      <TableRow match={item} />
-    ))}
-  </tbody>
+  <tbody>{data && data.map((item: Match) => <TableRow match={item} />)}</tbody>
 );
 
 // Team Info Component Card and button to request match
@@ -87,28 +75,29 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
   oppTeam,
   playerTeam,
 }) => {
-  // make api request to fastapi
-
   const requestMatch = async () => {
-    console.log('request match');
-    toast.success('Match Request Sent!');
-    // get status from axios post request
-
-    try {
-      const response = await axios.post('/api/user/match-request', {
+    console.log('request sent');
+    axios
+      .post('/api/user/match-request', {
         player: playerTeam,
         opp: oppTeam.name,
+      })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          console.log('request sent');
+          toast.success('Match Request Sent!');
+        }
+        // Handle response
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response!.status === 500) {
+          toast.error('Either you or your opponent have not uploaded a bot');
+        } else {
+          toast.error('Error sending match request');
+          // Handle else
+        }
+        console.log(reason.message);
       });
-      console.log(response);
-      if (response.status === 200) {
-        toast.success('Match Request Sent!');
-      } else {
-        toast.error('Error sending match request');
-      }
-    } catch (error) {
-      toast.error('Error sending match request');
-      console.log(error);
-    }
   };
 
   return (
@@ -125,172 +114,138 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
   );
 };
 
-// Scrimmages Page
-const Scrimmages: NextPage = ({
-  matchData,
-  teams,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { data, status } = useSession();
+const ScrimmageRequestDropdown: React.FC<{
+  teams: Team[];
+  username: string;
+  setCurrentTeamSearch: React.Dispatch<React.SetStateAction<Team | null>>;
+}> = ({ teams, username, setCurrentTeamSearch }) => {
   const [TeamValue, setValue] = useState(null);
-  const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') Router.replace('/auth/login');
-  }, [status]);
+  const teamnames = teams.map((team: Team) => team.name);
+  const index = teamnames.indexOf(username);
+  if (index > -1) teamnames.splice(index, 1);
 
-  if (status === 'authenticated') {
-    const teamnames = teams.map((team: Team) => team.name);
-    const index = teamnames.indexOf(data.user.name);
-    if (index > -1) teamnames.splice(index, 1);
-
-    const onSearch = () => {
-      // get value from autocomplete
-      for (let i = 0; i < teams.length; i++) {
-        if (teams[i].name === TeamValue) {
-          setCurrentTeamSearch(teams[i]);
-          return;
-        }
+  const onSearch = () => {
+    // get value from autocomplete
+    for (let i = 0; i < teams.length; i++) {
+      if (teams[i].name === TeamValue) {
+        setCurrentTeamSearch(teams[i]);
+        return;
       }
-    };
+    }
+  };
 
-    return (
-      <UserLayout>
-        <Card className="mb-3">
-          <Card.Body>
-            <Card.Title>Available Scrimmages</Card.Title>
-            <div style={{ display: 'flex' }}>
-              <Autocomplete
-                disablePortal
-                value={TeamValue}
-                onChange={(event: any, newTeamValue: string | null) => {
-                  setValue(newTeamValue);
-                }}
-                id="teams_dropdown"
-                options={teamnames}
-                sx={{ width: 800 }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Teams" />
-                )}
-              />
-              <Button
-                variant="primary"
-                style={{ marginLeft: 10 }}
-                onClick={onSearch}
-                size="lg"
-              >
-                Search
-              </Button>
-            </div>
-          </Card.Body>
-        </Card>
-        {/* Create card that displays only if search button is clicked */}
-        {CurrentTeamSearch && (
-          <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={data.user.name} />
-        )}
-        <Card>
-          <Card.Body>
-            <Card.Title>Scrimmage History</Card.Title>
-            <Table responsive bordered hover>
-              <thead>
-                <tr>
-                  <th>Match ID</th>
-                  <th>Opponent</th>
-                  <th>Status</th>
-                  <th>Winner</th>
-                  <th>Type</th>
-                  <th>Replay</th>
-                </tr>
-              </thead>
-              <TableBody data={matchData} />
-            </Table>
-          </Card.Body>
-        </Card>
-      </UserLayout>
-    );
-  }
-
-  return <div>loading</div>;
+  return (
+    <div style={{ display: 'flex' }}>
+      <Autocomplete
+        disablePortal
+        value={TeamValue}
+        onChange={(event: any, newTeamValue: string | null) => {
+          setValue(newTeamValue);
+        }}
+        id="teams_dropdown"
+        options={teamnames}
+        sx={{ width: 800 }}
+        renderInput={(params) => <TextField {...params} label="Teams" />}
+      />
+      <Button
+        variant="primary"
+        style={{ marginLeft: 10 }}
+        onClick={onSearch}
+        size="lg"
+      >
+        Search
+      </Button>
+    </div>
+  );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions,
+const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
+  <Table striped bordered hover className="text-center">
+    <thead>
+      <tr>
+        <th>Match ID</th>
+        <th>Opponent</th>
+        <th>Status</th>
+        <th>Outcome</th>
+        <th>Type</th>
+        <th>Replay</th>
+      </tr>
+    </thead>
+    <TableBody data={data} />
+  </Table>
+);
+
+// Scrimmages Page
+const Scrimmages: NextPage = ({
+  teams,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const session = useSession({ required: true });
+  const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null);
+
+  const fetcher = async (url: string) => axios.get(url).then((res) => res.data);
+
+  const {
+    data: MatchData,
+    error,
+    mutate,
+  } = useSWR('/api/user/match-history', fetcher);
+
+  if (error) <p>Loading failed...</p>;
+  if (
+    session.status === 'loading' ||
+    !session.data ||
+    !session.data.user?.name
+  ) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <UserLayout>
+      <Card className="mb-3">
+        <Card.Body>
+          <Card.Title>Available Scrimmages</Card.Title>
+          <ScrimmageRequestDropdown
+            teams={teams}
+            username={session.data.user?.name}
+            setCurrentTeamSearch={setCurrentTeamSearch}
+          />
+        </Card.Body>
+      </Card>
+      {CurrentTeamSearch && (
+        <TeamInfo
+          oppTeam={CurrentTeamSearch}
+          playerTeam={session.data.user.name}
+        />
+      )}
+      <Card>
+        <Card.Body>
+          <Card.Title>Scrimmage History</Card.Title>
+          <Button
+            variant="primary"
+            className="mb-3"
+            onClick={async () => {
+              mutate();
+            }}
+          >
+            Refresh
+          </Button>
+          <ScrimmagesTable data={MatchData} />
+        </Card.Body>
+      </Card>
+    </UserLayout>
   );
+};
 
-  if (!session || !session.user) {
-    return {
-      redirect: {
-        destination: '/auth/login',
-        permanent: false,
-      },
-    };
-  }
-
-  // if user is logged in, query match data from dynamodb index
-  // TODO: Add query for user's team
-  const paramsOne: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX1,
-    KeyConditionExpression: 'TEAM_1 = :team_name',
-    ExpressionAttributeValues: {
-      ':team_name': { S: session.user.name },
-    },
-  };
-
-  const commandOne = new QueryCommand(paramsOne);
-  const resultPlayerOne: QueryCommandOutput = await client.send(commandOne);
-
-  let matchDataPlayerOne: Match[] = [];
-
-  if (resultPlayerOne.Items) {
-    matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_1.S,
-      opponent: item.TEAM_2.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_FILENAME.S,
-      status: item.MATCH_STATUS.S,
-    }));
-  }
-
-  const paramsTwo: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX2,
-    KeyConditionExpression: 'TEAM_2 = :team_name',
-    ExpressionAttributeValues: {
-      ':team_name': { S: session.user.name },
-    },
-  };
-
-  const commandTwo = new QueryCommand(paramsTwo);
-  const resultPlayerTwo: QueryCommandOutput = await client.send(commandTwo);
-
-  let matchDataPlayerTwo: Match[] = [];
-
-  if (resultPlayerTwo.Items) {
-    matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_1.S,
-      opponent: item.TEAM_2.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_FILENAME.S,
-      status: item.MATCH_STATUS.S,
-    }));
-  }
-  const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
-
+export const getServerSideProps: GetServerSideProps = async () => {
   // scan player table for team names
   const teamScanParams: ScanCommandInput = {
     TableName: process.env.AWS_RATINGS_TABLE_NAME,
     ProjectionExpression: 'team_name, current_rating',
   };
 
-  const commandThree = new ScanCommand(teamScanParams);
-  const result = await client.send(commandThree);
+  const command = new ScanCommand(teamScanParams);
+  const result = await client.send(command);
 
   let teams: Team[] = [];
   if (result.Items) {
@@ -301,7 +256,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   return {
-    props: { matchData, teams }, // will be passed to the page component as props
+    props: { teams }, // will be passed to the page component as props
   };
 };
 
