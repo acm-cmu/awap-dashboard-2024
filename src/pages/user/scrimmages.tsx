@@ -5,26 +5,17 @@ import {
   GetServerSideProps,
 } from 'next';
 import { useSession } from 'next-auth/react';
-import useSWR, { preload } from 'swr';
-import Router from 'next/router';
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
+import { useState } from 'react';
 import { Card, Table, Button } from 'react-bootstrap';
-import { authOptions } from '@pages/api/auth/[...nextauth]';
-import { unstable_getServerSession } from 'next-auth/next';
 
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  QueryCommand,
-  QueryCommandOutput,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import {
-  DynamoDBDocument,
-  QueryCommandInput,
-  ScanCommandInput,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -76,11 +67,7 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => (
 );
 
 const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
-  <tbody>
-    {data.map((item: Match) => (
-      <TableRow match={item} />
-    ))}
-  </tbody>
+  <tbody>{data && data.map((item: Match) => <TableRow match={item} />)}</tbody>
 );
 
 // Team Info Component Card and button to request match
@@ -174,7 +161,7 @@ const ScrimmageRequestDropdown: React.FC<{
 };
 
 const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
-  <Table striped bordered hover>
+  <Table striped bordered hover className="text-center">
     <thead>
       <tr>
         <th>Match ID</th>
@@ -191,30 +178,27 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
 
 // Scrimmages Page
 const Scrimmages: NextPage = ({
-  matchData,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { data, status } = useSession({ required: true });
+  const session = useSession({ required: true });
   const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null);
-  const [MatchData, setMatchData] = useState(matchData);
 
-  const fetcher = async (url) => axios.get(url).then((res) => res.data);
+  const fetcher = async (url: string) => axios.get(url).then((res) => res.data);
 
-  const { data: newMatchData, error } = useSWR(
-    '/api/user/match-history',
-    fetcher,
-  );
-
-  useEffect(() => {
-    if (newMatchData) {
-      console.log('new match data');
-      setMatchData(newMatchData);
-    }
-  }, [newMatchData]);
+  const {
+    data: MatchData,
+    error,
+    mutate,
+  } = useSWR('/api/user/match-history', fetcher);
 
   if (error) <p>Loading failed...</p>;
-  if (status === 'loading' || !data || !data.user?.name)
+  if (
+    session.status === 'loading' ||
+    !session.data ||
+    !session.data.user?.name
+  ) {
     return <div>Loading...</div>;
+  }
 
   return (
     <UserLayout>
@@ -223,17 +207,29 @@ const Scrimmages: NextPage = ({
           <Card.Title>Available Scrimmages</Card.Title>
           <ScrimmageRequestDropdown
             teams={teams}
-            username={data.user?.name}
+            username={session.data.user?.name}
             setCurrentTeamSearch={setCurrentTeamSearch}
           />
         </Card.Body>
       </Card>
       {CurrentTeamSearch && (
-        <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={data.user.name} />
+        <TeamInfo
+          oppTeam={CurrentTeamSearch}
+          playerTeam={session.data.user.name}
+        />
       )}
       <Card>
         <Card.Body>
           <Card.Title>Scrimmage History</Card.Title>
+          <Button
+            variant="primary"
+            className="mb-3"
+            onClick={async () => {
+              mutate();
+            }}
+          >
+            Refresh
+          </Button>
           <ScrimmagesTable data={MatchData} />
         </Card.Body>
       </Card>
@@ -241,83 +237,15 @@ const Scrimmages: NextPage = ({
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions,
-  );
-
-  if (!session || !session.user) {
-    return {
-      redirect: {
-        destination: '/auth/login',
-        permanent: false,
-      },
-    };
-  }
-
-  const paramsOne: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX1,
-    KeyConditionExpression: 'TEAM_1 = :team_name',
-    ExpressionAttributeValues: {
-      ':team_name': { S: session.user.name },
-    },
-  };
-
-  const commandOne = new QueryCommand(paramsOne);
-  const resultPlayerOne: QueryCommandOutput = await client.send(commandOne);
-
-  let matchDataPlayerOne: Match[] = [];
-
-  if (resultPlayerOne.Items) {
-    matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_1.S,
-      opponent: item.TEAM_2.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_FILENAME.S,
-      status: item.MATCH_STATUS.S,
-    }));
-  }
-
-  const paramsTwo: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX2,
-    KeyConditionExpression: 'TEAM_2 = :team_name',
-    ExpressionAttributeValues: {
-      ':team_name': { S: session.user.name },
-    },
-  };
-
-  const commandTwo = new QueryCommand(paramsTwo);
-  const resultPlayerTwo: QueryCommandOutput = await client.send(commandTwo);
-
-  let matchDataPlayerTwo: Match[] = [];
-
-  if (resultPlayerTwo.Items) {
-    matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_1.S,
-      opponent: item.TEAM_2.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_FILENAME.S,
-      status: item.MATCH_STATUS.S,
-    }));
-  }
-  const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
-
+export const getServerSideProps: GetServerSideProps = async () => {
   // scan player table for team names
   const teamScanParams: ScanCommandInput = {
     TableName: process.env.AWS_RATINGS_TABLE_NAME,
     ProjectionExpression: 'team_name, current_rating',
   };
 
-  const commandThree = new ScanCommand(teamScanParams);
-  const result = await client.send(commandThree);
+  const command = new ScanCommand(teamScanParams);
+  const result = await client.send(command);
 
   let teams: Team[] = [];
   if (result.Items) {
@@ -328,7 +256,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   return {
-    props: { matchData, teams }, // will be passed to the page component as props
+    props: { teams }, // will be passed to the page component as props
   };
 };
 

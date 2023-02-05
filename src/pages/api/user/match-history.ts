@@ -102,5 +102,6 @@ export default async function handler(
     }));
   }
   const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
+  matchData.reverse();
   return res.status(200).json(matchData);
 }
