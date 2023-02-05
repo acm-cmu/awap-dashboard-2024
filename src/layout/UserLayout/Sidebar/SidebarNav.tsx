@@ -72,7 +72,9 @@ const ProtectedSidebarAdminItems = () => {
 
 export default function SidebarNav() {
   return (
+
     <ul className="list-unstyled">
+      
       <SidebarNavItem icon={faStar} href="/">
         Home
       </SidebarNavItem>
@@ -82,6 +84,7 @@ export default function SidebarNav() {
       <SidebarNavItem icon={faCalculator} href="/leaderboard">
         Leaderboard
       </SidebarNavItem>
+      
       <ProtectedSidebarUserItems />
       <ProtectedSidebarAdminItems />
     </ul>
