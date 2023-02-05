@@ -35,8 +35,8 @@ export default async function handler(
     const { player } = req.body;
     const { opp } = req.body;
 
-    console.log(`Player: ${player}`);
-    console.log(`Opponent: ${opp}`);
+    // console.log(`Player: ${player}`);
+    // console.log(`Opponent: ${opp}`);
 
     const playerData = await client.send(
       new GetItemCommand({
@@ -83,7 +83,7 @@ export default async function handler(
       ],
     };
 
-    console.log(requestData);
+    // console.log(requestData);
 
     // make post request to matchmaker at match endpoint
     // with player_bot_name and opp_bot_name
@@ -107,7 +107,8 @@ export default async function handler(
       ],
     });
 
-    console.log(`Status: ${response.status}`);
+    // console.log(`Status: ${response.status}`);
+
     if (response.status !== 200) {
       return res
         .status(500)

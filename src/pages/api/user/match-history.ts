@@ -47,8 +47,8 @@ export default async function handler(
   }
 
   const teamname = session.user.name;
-  console.log('Match History request from');
-  console.log(teamname);
+  // console.log('Match History request from');
+  // console.log(teamname);
 
   const paramsOne: QueryCommandInput = {
     TableName: process.env.AWS_MATCH_TABLE_NAME,
