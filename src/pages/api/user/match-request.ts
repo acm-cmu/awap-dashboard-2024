@@ -28,15 +28,15 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (req.method !== 'POST') {
-    res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).send({ message: 'Method not allowed' });
   }
 
   try {
     const { player } = req.body;
     const { opp } = req.body;
 
-    console.log(player);
-    console.log(opp);
+    console.log(`Player: ${player}`);
+    console.log(`Opponent: ${opp}`);
 
     const playerData = await client.send(
       new GetItemCommand({
@@ -60,40 +60,61 @@ export default async function handler(
 
     const oppBotName = oppData.Item?.current_submission_id.S;
 
+    if (!playerBotName || !oppBotName) {
+      return res
+        .status(500)
+        .send({ message: 'Error fetching data', error: 'No bot found' });
+    }
+
+    const requestData = {
+      game_engine_name: process.env.GAME_ENGINE_NAME,
+      num_players: 2,
+      user_submissions: [
+        {
+          username: player,
+          s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+          s3_object_name: playerBotName,
+        },
+        {
+          username: opp,
+          s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+          s3_object_name: oppBotName,
+        },
+      ],
+    };
+
+    console.log(requestData);
+
     // make post request to matchmaker at match endpoint
     // with player_bot_name and opp_bot_name
     // matchmaker will return match_id
     // update player and opp with match_id
 
-    try {
-      const response = await axios.post('http://localhost:8000/match', {
-        game_engine_name: process.env.GAME_ENGINE_NAME,
-        num_players: 2,
-        user_submissions: [
-          {
-            username: player,
-            s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
-            s3_object_name: playerBotName,
-          },
-          {
-            username: opp,
-            s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
-            s3_object_name: oppBotName,
-          },
-        ],
-      });
+    const response = await axios.post('http://52.23.23.233:8000/match/', {
+      game_engine_name: process.env.GAME_ENGINE_NAME,
+      num_players: 2,
+      user_submissions: [
+        {
+          username: player,
+          s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+          s3_object_name: playerBotName,
+        },
+        {
+          username: opp,
+          s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+          s3_object_name: oppBotName,
+        },
+      ],
+    });
 
-      console.log(response);
-      if (response.status !== 200) {
-        return res
-          .status(500)
-          .json({ message: 'Error fetching data', error: response.error });
-      }
-      return res.status(200).json({ message: 'Success', data: response.data });
-    } catch (err) {
-      return res.status(500);
+    console.log(`Status: ${response.status}`);
+    if (response.status !== 200) {
+      return res
+        .status(500)
+        .send({ message: 'Error fetching data', error: response.error });
     }
+    return res.status(200).send({ message: 'Success', data: response.data });
   } catch (err) {
-    return res.status(500).json({ message: 'Error fetching data', error: err });
+    return res.status(500);
   }
 }

@@ -5,6 +5,7 @@ import {
   GetServerSideProps,
 } from 'next';
 import { useSession } from 'next-auth/react';
+import useSWR, { preload } from 'swr';
 import Router from 'next/router';
 import { useEffect, useState } from 'react';
 import { Card, Table, Button } from 'react-bootstrap';
@@ -27,7 +28,7 @@ import {
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
 
 // Dynamo DB Config
@@ -87,28 +88,29 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
   oppTeam,
   playerTeam,
 }) => {
-  // make api request to fastapi
-
   const requestMatch = async () => {
-    console.log('request match');
-    toast.success('Match Request Sent!');
-    // get status from axios post request
-
-    try {
-      const response = await axios.post('/api/user/match-request', {
+    console.log('request sent');
+    axios
+      .post('/api/user/match-request', {
         player: playerTeam,
         opp: oppTeam.name,
+      })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          console.log('request sent');
+          toast.success('Match Request Sent!');
+        }
+        // Handle response
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response!.status === 500) {
+          toast.error('Either you or your opponent have not uploaded a bot');
+        } else {
+          toast.error('Error sending match request');
+          // Handle else
+        }
+        console.log(reason.message);
       });
-      console.log(response);
-      if (response.status === 200) {
-        toast.success('Match Request Sent!');
-      } else {
-        toast.error('Error sending match request');
-      }
-    } catch (error) {
-      toast.error('Error sending match request');
-      console.log(error);
-    }
   };
 
   return (
@@ -125,91 +127,118 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
   );
 };
 
+const ScrimmageRequestDropdown: React.FC<{
+  teams: Team[];
+  username: string;
+  setCurrentTeamSearch: React.Dispatch<React.SetStateAction<Team | null>>;
+}> = ({ teams, username, setCurrentTeamSearch }) => {
+  const [TeamValue, setValue] = useState(null);
+
+  const teamnames = teams.map((team: Team) => team.name);
+  const index = teamnames.indexOf(username);
+  if (index > -1) teamnames.splice(index, 1);
+
+  const onSearch = () => {
+    // get value from autocomplete
+    for (let i = 0; i < teams.length; i++) {
+      if (teams[i].name === TeamValue) {
+        setCurrentTeamSearch(teams[i]);
+        return;
+      }
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex' }}>
+      <Autocomplete
+        disablePortal
+        value={TeamValue}
+        onChange={(event: any, newTeamValue: string | null) => {
+          setValue(newTeamValue);
+        }}
+        id="teams_dropdown"
+        options={teamnames}
+        sx={{ width: 800 }}
+        renderInput={(params) => <TextField {...params} label="Teams" />}
+      />
+      <Button
+        variant="primary"
+        style={{ marginLeft: 10 }}
+        onClick={onSearch}
+        size="lg"
+      >
+        Search
+      </Button>
+    </div>
+  );
+};
+
+const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
+  <Table striped bordered hover>
+    <thead>
+      <tr>
+        <th>Match ID</th>
+        <th>Opponent</th>
+        <th>Status</th>
+        <th>Outcome</th>
+        <th>Type</th>
+        <th>Replay</th>
+      </tr>
+    </thead>
+    <TableBody data={data} />
+  </Table>
+);
+
 // Scrimmages Page
 const Scrimmages: NextPage = ({
   matchData,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const { data, status } = useSession();
-  const [TeamValue, setValue] = useState(null);
+  const { data, status } = useSession({ required: true });
   const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null);
+  const [MatchData, setMatchData] = useState(matchData);
+
+  const fetcher = async (url) => axios.get(url).then((res) => res.data);
+
+  const { data: newMatchData, error } = useSWR(
+    '/api/user/match-history',
+    fetcher,
+  );
 
   useEffect(() => {
-    if (status === 'unauthenticated') Router.replace('/auth/login');
-  }, [status]);
+    if (newMatchData) {
+      console.log('new match data');
+      setMatchData(newMatchData);
+    }
+  }, [newMatchData]);
 
-  if (status === 'authenticated') {
-    const teamnames = teams.map((team: Team) => team.name);
-    const index = teamnames.indexOf(data.user.name);
-    if (index > -1) teamnames.splice(index, 1);
+  if (error) <p>Loading failed...</p>;
+  if (status === 'loading' || !data || !data.user?.name)
+    return <div>Loading...</div>;
 
-    const onSearch = () => {
-      // get value from autocomplete
-      for (let i = 0; i < teams.length; i++) {
-        if (teams[i].name === TeamValue) {
-          setCurrentTeamSearch(teams[i]);
-          return;
-        }
-      }
-    };
-
-    return (
-      <UserLayout>
-        <Card className="mb-3">
-          <Card.Body>
-            <Card.Title>Available Scrimmages</Card.Title>
-            <div style={{ display: 'flex' }}>
-              <Autocomplete
-                disablePortal
-                value={TeamValue}
-                onChange={(event: any, newTeamValue: string | null) => {
-                  setValue(newTeamValue);
-                }}
-                id="teams_dropdown"
-                options={teamnames}
-                sx={{ width: 800 }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Teams" />
-                )}
-              />
-              <Button
-                variant="primary"
-                style={{ marginLeft: 10 }}
-                onClick={onSearch}
-                size="lg"
-              >
-                Search
-              </Button>
-            </div>
-          </Card.Body>
-        </Card>
-        {/* Create card that displays only if search button is clicked */}
-        {CurrentTeamSearch && (
-          <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={data.user.name} />
-        )}
-        <Card>
-          <Card.Body>
-            <Card.Title>Scrimmage History</Card.Title>
-            <Table responsive bordered hover>
-              <thead>
-                <tr>
-                  <th>Match ID</th>
-                  <th>Opponent</th>
-                  <th>Status</th>
-                  <th>Winner</th>
-                  <th>Type</th>
-                  <th>Replay</th>
-                </tr>
-              </thead>
-              <TableBody data={matchData} />
-            </Table>
-          </Card.Body>
-        </Card>
-      </UserLayout>
-    );
-  }
-
-  return <div>loading</div>;
+  return (
+    <UserLayout>
+      <Card className="mb-3">
+        <Card.Body>
+          <Card.Title>Available Scrimmages</Card.Title>
+          <ScrimmageRequestDropdown
+            teams={teams}
+            username={data.user?.name}
+            setCurrentTeamSearch={setCurrentTeamSearch}
+          />
+        </Card.Body>
+      </Card>
+      {CurrentTeamSearch && (
+        <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={data.user.name} />
+      )}
+      <Card>
+        <Card.Body>
+          <Card.Title>Scrimmage History</Card.Title>
+          <ScrimmagesTable data={MatchData} />
+        </Card.Body>
+      </Card>
+    </UserLayout>
+  );
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -228,8 +257,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  // if user is logged in, query match data from dynamodb index
-  // TODO: Add query for user's team
   const paramsOne: QueryCommandInput = {
     TableName: process.env.AWS_MATCH_TABLE_NAME,
     IndexName: process.env.AWS_MATCH_TABLE_INDEX1,
