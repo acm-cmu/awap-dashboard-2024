@@ -5,10 +5,7 @@ import { Leaderboard } from '@models/leaderboard';
 import { ResourceList } from '@models/resource-list';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEllipsisVertical,
-  faSort,
-  faSortDown,
-  faSortUp,
+  faEllipsisVertical, faSort, faSortDown, faSortUp,
 } from '@fortawesome/free-solid-svg-icons';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import ReactPaginate from 'react-paginate';
@@ -53,7 +50,7 @@ const RankLabel = ({ rank }: RankLabelProps) => (
     style={{
       backgroundColor: rankColorMap[rank],
       fontSize: '.96rem',
-      width: '70px',
+      width: '100px',
     }}
   >
     {rank}
@@ -68,9 +65,7 @@ const THSort = (props: THSortProps) => {
   const { name, children } = props;
   const [icon, setIcon] = useState(faSort);
   const router = useRouter();
-  const {
-    query: { sort, order },
-  } = router;
+  const { query: { sort, order } } = router;
 
   const onClick = () => {
     router.push({
@@ -139,13 +134,13 @@ const Pagination = (props: PaginationProps) => {
   return (
     <div className="row align-items-center justify-content-center">
       <div className="col-12 text-center text-sm-start col-sm-auto col-lg mb-3">
-        Showing
+        Showing{' '}
         <span className="fw-semibold">{from}</span>
-        to
-        <span className="fw-semibold">{to}</span>
-        of
+        {' '}to{' '}
+        <span className="fw-semibold">{Math.min(to, total)}</span>
+        {' '}of{' '}
         <span className="fw-semibold">{total}</span>
-        results
+        {' '}results
       </div>
       <div className="col-auto ms-sm-auto mb-3">
         Rows per page:{' '}
@@ -299,24 +294,38 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   const params: ScanCommandInput = {
     TableName: process.env.AWS_RATINGS_TABLE_NAME,
-    ProjectionExpression: 'team_name, current_rating',
+    ProjectionExpression: 'team_name, current_rating, updated_timestamp',
   };
 
   const command = new ScanCommand(params);
   const teamdata = await client.send(command);
-
-  const itemsunordered = teamdata.Items;
-  const items = itemsunordered?.sort(
-    (i1, i2) => i2.current_rating.N - i1.current_rating.N,
-  );
+  console.log("teamdata: ", teamdata.Items);
+  const unfiltered = teamdata.Items?.sort((i1, i2) => {
+    if (i1.team_name.S == i2.team_name.S) {
+      if (i2.updated_timestamp.S < i1.updated_timestamp.S) {
+        return -1;
+      }
+      return 1;
+    }
+    if (i1.team_name.S < i2.team_name.S) {
+      return -1;
+    }
+    return 1;
+  });
+  console.log("unfiltered: ", unfiltered);
+  const unordered = unfiltered?.filter((val, idx, arr) => {
+    return (idx == 0) || (val.team_name != unfiltered[idx-1].team_name);
+  });
+  console.log("unordered: ", unordered);
+  const items = unordered?.sort((i1, i2) => {
+    return i2.current_rating.N - i1.current_rating.N
+  });
   let teams: Leaderboard[] = [];
-  if (items) {
-    teams = items.map((item, idx) => ({
-      ranking: idx + 1,
-      tname: item.team_name.S,
-      rating: item.current_rating.N,
-    }));
-  }
+  teams = items?.map((item, idx) => ({
+    ranking: idx + 1,
+    tname: item.team_name.S,
+    rating: item.current_rating.N,
+  }));
 
   function sortmap(t: Leaderboard, att: string) {
     if (att === 'tname') return t.tname;
