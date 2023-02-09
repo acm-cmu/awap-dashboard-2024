@@ -71,7 +71,7 @@ export default async function handler(
       opponent: item.TEAM_2.S,
       outcome: item.OUTCOME.S,
       type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_FILENAME.S,
+      replay: item.REPLAY_URL.S,
       status: item.MATCH_STATUS.S,
     }));
   }
@@ -97,7 +97,7 @@ export default async function handler(
       opponent: item.TEAM_2.S,
       outcome: item.OUTCOME.S,
       type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_FILENAME.S,
+      replay: item.REPLAY_URL.S,
       status: item.MATCH_STATUS.S,
     }));
   }
