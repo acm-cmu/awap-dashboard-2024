@@ -87,14 +87,14 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
           console.log('request sent');
           toast.success('Match Request Sent!');
         }
-        // Handle response
       })
       .catch((reason: AxiosError) => {
         if (reason.response!.status === 500) {
+          toast.error(reason.response?.data.error);
+        } else if (reason.response?.status === 400) {
           toast.error('Either you or your opponent have not uploaded a bot');
         } else {
-          toast.error('Error sending match request');
-          // Handle else
+          toast.error('Something went wrong');
         }
         console.log(reason.message);
       });
