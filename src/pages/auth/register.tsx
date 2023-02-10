@@ -14,17 +14,17 @@ import {
 import { useRouter } from 'next/router';
 import { SyntheticEvent, useState } from 'react';
 import { signIn } from 'next-auth/react';
-import Select from 'react-select';
 
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 const Register: NextPage = () => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [bracket, setBracket] = useState('');
+  const [bracket, setBracket] = useState('beginner');
   const [passwordRepeat, setPasswordRepeat] = useState('');
 
   const login = async (e: SyntheticEvent) => {
@@ -55,19 +55,14 @@ const Register: NextPage = () => {
       setSubmitting(false);
       return;
     }
-    var event = document.getElementById('bracket') as HTMLSelectElement;
-    var bracket = event.options[event.selectedIndex].value;
-    fetch('/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+
+    // rewrite this to use axios
+    axios
+      .post('/api/auth/register', {
         username,
         password,
         bracket,
-      }),
-    })
+      })
       .then((res) => res.status)
       .then((status) => {
         if (status === 400) {
@@ -80,6 +75,7 @@ const Register: NextPage = () => {
       })
       .finally(() => setSubmitting(false));
   };
+
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
       <Container>
@@ -140,12 +136,16 @@ const Register: NextPage = () => {
                       aria-label="Repeat password"
                     />
                   </InputGroup>
-                  <select className="form-select" aria-label="Default select example" id="bracket">
+
+                  <Form.Select
+                    aria-label="Default select example"
+                    onChange={(e) => setBracket(e.target.value)}
+                  >
                     <option value="beginner">Beginner</option>
                     <option value="advanced">Advanced</option>
-                  </select>
+                  </Form.Select>
 
-                  <br></br>
+                  <br />
                   <Button
                     type="submit"
                     className="d-block w-100"

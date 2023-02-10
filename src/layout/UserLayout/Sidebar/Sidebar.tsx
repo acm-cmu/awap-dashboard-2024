@@ -3,6 +3,7 @@ import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { Button } from 'react-bootstrap';
+import Image from 'next/image';
 import SidebarNav from './SidebarNav';
 
 export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
@@ -32,8 +33,13 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
       id="sidebar"
     >
       <div className="sidebar-brand d-none d-md-flex align-items-center justify-content-center">
-      <img src="/assets/img/logodraft.png" class="logo" alt="awap logo"> 
-      </img>
+        <Image
+          src="/assets/img/logodraft.png"
+          className="logo"
+          width={isNarrow ? 50 : 100}
+          height={isNarrow ? 50 : 100}
+          alt="awap logo"
+        />
       </div>
 
       <div className="sidebar-nav flex-fill">

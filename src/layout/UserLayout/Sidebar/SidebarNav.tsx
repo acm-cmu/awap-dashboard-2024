@@ -41,7 +41,9 @@ const SidebarNavItem = (props: SidebarNavItemProps) => {
 
 const ProtectedSidebarUserItems = () => {
   const { status, data } = useSession();
+
   if (status === 'authenticated') {
+    if (!data?.user || data.user.role !== 'user') return null;
     return (
       <>
         <SidebarNavItem icon={faCode} href="/user/submissions">
@@ -58,13 +60,12 @@ const ProtectedSidebarUserItems = () => {
 
 const ProtectedSidebarAdminItems = () => {
   const { status, data } = useSession();
-  if (status === 'authenticated' && data?.user?.role === 'admin') {
+  if (status === 'authenticated') {
+    if (!data?.user || data.user.role !== 'admin') return null;
     return (
-      <>
-        <SidebarNavItem icon={faLock} href="/admin">
-          Admin
-        </SidebarNavItem>
-      </>
+      <SidebarNavItem icon={faLock} href="/admin">
+        Admin
+      </SidebarNavItem>
     );
   }
   return null;
@@ -72,9 +73,7 @@ const ProtectedSidebarAdminItems = () => {
 
 export default function SidebarNav() {
   return (
-
     <ul className="list-unstyled">
-      
       <SidebarNavItem icon={faStar} href="/">
         Home
       </SidebarNavItem>
@@ -84,7 +83,7 @@ export default function SidebarNav() {
       <SidebarNavItem icon={faCalculator} href="/leaderboard">
         Leaderboard
       </SidebarNavItem>
-      
+
       <ProtectedSidebarUserItems />
       <ProtectedSidebarAdminItems />
     </ul>

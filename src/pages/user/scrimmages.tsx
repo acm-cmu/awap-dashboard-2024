@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable react/jsx-one-expression-per-line */
 import { UserLayout } from '@layout';
 import {
   NextPage,
@@ -67,6 +69,7 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => (
 );
 
 const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
+  // eslint-disable-next-line react/jsx-key
   <tbody>{data && data.map((item: Match) => <TableRow match={item} />)}</tbody>
 );
 
@@ -90,7 +93,9 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
       })
       .catch((reason: AxiosError) => {
         if (reason.response!.status === 500) {
-          toast.error(reason.response?.data.error);
+          toast.error('Internal Error, please try again later');
+        } else if (reason.response?.status === 412) {
+          toast.error('You have already requested a match with this team');
         } else if (reason.response?.status === 400) {
           toast.error('Either you or your opponent have not uploaded a bot');
         } else {
@@ -119,7 +124,7 @@ const ScrimmageRequestDropdown: React.FC<{
   username: string;
   setCurrentTeamSearch: React.Dispatch<React.SetStateAction<Team | null>>;
 }> = ({ teams, username, setCurrentTeamSearch }) => {
-  const [TeamValue, setValue] = useState(null);
+  const [TeamValue, setValue] = useState<string | null>(null);
 
   const teamnames = teams.map((team: Team) => team.name);
   const index = teamnames.indexOf(username);
@@ -127,7 +132,7 @@ const ScrimmageRequestDropdown: React.FC<{
 
   const onSearch = () => {
     // get value from autocomplete
-    for (let i = 0; i < teams.length; i++) {
+    for (let i = 0; i < teams.length; i += 1) {
       if (teams[i].name === TeamValue) {
         setCurrentTeamSearch(teams[i]);
         return;
@@ -181,7 +186,7 @@ const Scrimmages: NextPage = ({
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const session = useSession({ required: true });
-  const [CurrentTeamSearch, setCurrentTeamSearch] = useState(null);
+  const [CurrentTeamSearch, setCurrentTeamSearch] = useState<Team | null>(null);
 
   const fetcher = async (url: string) => axios.get(url).then((res) => res.data);
 

@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import '@styles/globals.scss';
 import type { AppProps } from 'next/app';
 // Next.js allows you to import CSS directly in .js files.

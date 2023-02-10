@@ -11,7 +11,7 @@ import {
   Button,
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import {
   DynamoDB,
@@ -24,16 +24,15 @@ import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
 import { useRouter } from 'next/router';
-import { SyntheticEvent, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { TextDecoderStream } from 'node:stream/web';
 
 // id is a number
 const TeamMemberField = ({ id }: { id: number }) => {
   const name = `user${id}`;
   const placeholder = `Team Member ${id}`;
   const ariaLabel = `Team Member ${id}`;
-  
+
   return (
     <InputGroup className="mb-3">
       <InputGroup.Text>
@@ -67,34 +66,21 @@ const Profile: NextPage = ({
   team,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
   const { data: session, status } = useSession();
-  // const { status } = useSession();
-  const update = (e: SyntheticEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
 
-    setSubmitting(true);
-
-    setTimeout(() => {
-      setSubmitting(false);
-      // update the user database
-      router.reload();
-    }, 2000);
-  };
-  const handleChangeBracket = async () => changeBracket(session.user.name);
-
-  const changeBracket = async (user: string) => {
+  const changeBracket = async (user: string | null | undefined) => {
+    if (!user) return;
     const bracket = document.getElementById('bracket') as HTMLInputElement;
     const bracketValue = bracket.value;
-    
 
     await axios.post('/api/user/bracket-change', {
-      user: user,
+      user,
       bracket: bracketValue,
     });
     window.location.reload();
   };
+
+  const handleChangeBracket = async () => changeBracket(session?.user.name);
 
   const teamMembers = [];
   for (let i = 1; i <= 4; i += 1) {
@@ -115,20 +101,33 @@ const Profile: NextPage = ({
                 <Card className="mb-4 rounded-0">
                   <Card.Body className="p-4">
                     <h1 className="text-center">Team Profile</h1>
-                    <div>Team Name: <strong>{session.user.name}</strong></div>
-                    <div>Bracket: <strong>{team.bracket.charAt(0).toUpperCase() + team.bracket.slice(1)}</strong></div>
-                    <br>
-                    </br>
-                    <div><strong>Change Bracket:</strong></div>
-                    
-                    <select className="form-select" aria-label="Default select example" id="bracket">
+                    <div>
+                      Team Name: <strong>{session.user.name}</strong>
+                    </div>
+                    <div>
+                      Bracket:{' '}
+                      <strong>
+                        {team.bracket.charAt(0).toUpperCase() +
+                          team.bracket.slice(1)}
+                      </strong>
+                    </div>
+                    <br />
+                    <div>
+                      <strong>Change Bracket:</strong>
+                    </div>
+
+                    <select
+                      className="form-select"
+                      aria-label="Default select example"
+                      id="bracket"
+                    >
                       <option value="beginner">Beginner</option>
                       <option value="advanced">Advanced</option>
                     </select>
-                    <br>
-                    </br>
-                    <Button onClick={handleChangeBracket} variant="dark">Change Button</Button>
-
+                    <br />
+                    <Button onClick={handleChangeBracket} variant="dark">
+                      Change Bracket
+                    </Button>
                   </Card.Body>
                 </Card>
               </Col>
@@ -166,12 +165,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const command = new ScanCommand(params);
   const result = await client.send(command);
-  
 
   const userData = result.Items;
-  const team = {
-    bracket: result.Items[0].bracket.S
+  if (!userData) {
+    return {
+      props: { team: { bracket: null } }, // will be passed to the page component as props
+    };
   }
+
+  const team = {
+    bracket: userData[0].bracket.S,
+  };
 
   return {
     props: { team }, // will be passed to the page component as props

@@ -66,6 +66,11 @@ export default async function handler(
         .send({ message: 'Error fetching data', error: 'No bot found' });
     }
 
+    // make post request to matchmaker at match endpoint
+    // with player_bot_name and opp_bot_name
+    // matchmaker will return match_id
+    // update player and opp with match_id
+
     const requestData = {
       game_engine_name: process.env.GAME_ENGINE_NAME,
       num_players: 2,
@@ -83,15 +88,10 @@ export default async function handler(
       ],
     };
 
-    // console.log(requestData);
-
-    // make post request to matchmaker at match endpoint
-    // with player_bot_name and opp_bot_name
-    // matchmaker will return match_id
-    // update player and opp with match_id
+    console.log(requestData);
 
     const response = await axios.post(
-      'http://52.23.23.233:8000/match/',
+      `http://${process.env.MATCHMAKING_SERVER_IP}/match/`,
       requestData,
     );
 

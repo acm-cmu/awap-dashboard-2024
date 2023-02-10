@@ -10,7 +10,7 @@ function Greeting() {
   if (status === 'authenticated') {
     return (
       <div>
-        Hello <strong>{session.user.name}</strong>
+        Hello <strong>{session.user?.name}</strong>
       </div>
     );
   }

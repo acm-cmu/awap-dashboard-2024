@@ -32,7 +32,7 @@ interface Match {
   opponent: string;
   outcome: string;
   type: string;
-  replay: string;
+  replay: string | null;
   status: string;
 }
 
@@ -42,11 +42,12 @@ export default async function handler(
 ) {
   const session = await unstable_getServerSession(req, res, authOptions);
 
-  if (!session || !session.user) {
+  if (!session || !session.user || !session.user.name) {
     return res.status(401).json({ message: 'You must be logged in.' });
   }
 
   const teamname = session.user.name;
+
   // console.log('Match History request from');
   // console.log(teamname);
 
@@ -71,7 +72,7 @@ export default async function handler(
       opponent: item.TEAM_2.S,
       outcome: item.OUTCOME.S,
       type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_URL.S,
+      replay: item.REPLAY_URL ? item.REPLAY_URL.S : null,
       status: item.MATCH_STATUS.S,
     }));
   }
@@ -97,7 +98,7 @@ export default async function handler(
       opponent: item.TEAM_2.S,
       outcome: item.OUTCOME.S,
       type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_URL.S,
+      replay: item.REPLAY_URL ? item.REPLAY_URL.S : null,
       status: item.MATCH_STATUS.S,
     }));
   }

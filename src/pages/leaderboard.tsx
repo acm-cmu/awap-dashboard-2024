@@ -5,7 +5,10 @@ import { Leaderboard } from '@models/leaderboard';
 import { ResourceList } from '@models/resource-list';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEllipsisVertical, faSort, faSortDown, faSortUp,
+  faEllipsisVertical,
+  faSort,
+  faSortDown,
+  faSortUp,
 } from '@fortawesome/free-solid-svg-icons';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import ReactPaginate from 'react-paginate';
@@ -65,7 +68,9 @@ const THSort = (props: THSortProps) => {
   const { name, children } = props;
   const [icon, setIcon] = useState(faSort);
   const router = useRouter();
-  const { query: { sort, order } } = router;
+  const {
+    query: { sort, order },
+  } = router;
 
   const onClick = () => {
     router.push({
@@ -134,13 +139,9 @@ const Pagination = (props: PaginationProps) => {
   return (
     <div className="row align-items-center justify-content-center">
       <div className="col-12 text-center text-sm-start col-sm-auto col-lg mb-3">
-        Showing{' '}
-        <span className="fw-semibold">{from}</span>
-        {' '}to{' '}
-        <span className="fw-semibold">{Math.min(to, total)}</span>
-        {' '}of{' '}
-        <span className="fw-semibold">{total}</span>
-        {' '}results
+        Showing <span className="fw-semibold">{from}</span> to{' '}
+        <span className="fw-semibold">{Math.min(to, total)}</span> of{' '}
+        <span className="fw-semibold">{total}</span> results
       </div>
       <div className="col-auto ms-sm-auto mb-3">
         Rows per page:{' '}
@@ -299,32 +300,57 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   const command = new ScanCommand(params);
   const teamdata = await client.send(command);
-  console.log("teamdata: ", teamdata.Items);
-  const unfiltered = teamdata.Items?.sort((i1, i2) => {
-    if (i1.team_name.S == i2.team_name.S) {
-      if (i2.updated_timestamp.S < i1.updated_timestamp.S) {
+  // console.log('teamdata: ', teamdata.Items);
+
+  if (teamdata.Items === undefined) {
+    return {
+      props: {
+        teamResourceList: {
+          data: [],
+          meta: {
+            current_page: 1,
+            per_page: 10,
+            total: 0,
+            from: 1,
+            to: 1,
+            last_page: 1,
+          },
+        },
+      },
+    };
+  }
+
+  const unfiltered = teamdata.Items.sort((i1, i2) => {
+    if (i1.team_name.S === i2.team_name.S) {
+      if (
+        (i2.updated_timestamp.S as string) < (i1.updated_timestamp.S as string)
+      ) {
         return -1;
       }
       return 1;
     }
-    if (i1.team_name.S < i2.team_name.S) {
+    if ((i1.team_name.S as string) < (i2.team_name.S as string)) {
       return -1;
     }
     return 1;
   });
-  console.log("unfiltered: ", unfiltered);
-  const unordered = unfiltered?.filter((val, idx, arr) => {
-    return (idx == 0) || (val.team_name != unfiltered[idx-1].team_name);
+  console.log('unfiltered: ', unfiltered);
+  const unordered = unfiltered.filter(
+    (val, idx) => idx === 0 || val.team_name !== unfiltered[idx - 1].team_name,
+  );
+  console.log('unordered: ', unordered);
+  const items = unordered.sort((i1, i2) => {
+    if (i1.current_rating.N === undefined || i2.current_rating.N === undefined)
+      return 0;
+    const i2Rating = parseInt(i2.current_rating.N, 10);
+    const i1Rating = parseInt(i1.current_rating.N, 10);
+    return i2Rating - i1Rating;
   });
-  console.log("unordered: ", unordered);
-  const items = unordered?.sort((i1, i2) => {
-    return i2.current_rating.N - i1.current_rating.N
-  });
-  let teams: Leaderboard[] = [];
-  teams = items?.map((item, idx) => ({
+
+  const teams: Leaderboard[] = items.map((item, idx) => ({
     ranking: idx + 1,
-    tname: item.team_name.S,
-    rating: item.current_rating.N,
+    tname: item.team_name.S as string,
+    rating: parseInt(item.current_rating.N as string, 10),
   }));
 
   function sortmap(t: Leaderboard, att: string) {

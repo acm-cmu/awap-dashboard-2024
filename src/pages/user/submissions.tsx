@@ -4,10 +4,9 @@ import Image from 'next/image';
 import { UserLayout } from '@layout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisVertical, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { Card, Dropdown, ProgressBar } from 'react-bootstrap';
-import React, { useRef, ChangeEvent, useEffect, useState } from 'react';
+import { Button, Card, Dropdown } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FileUpload } from 'primereact/fileupload';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -67,7 +66,7 @@ const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
         </a>
       </div>
     </td>
-    
+
     <td>
       <div className="small text-black-50" />
       <div className="fw-semibold">{submission.timeStamp}</div>
@@ -107,20 +106,12 @@ const Submissions: NextPage = ({
   submissionData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
-  const myUploader = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setFile(event.target.files[0]);
-    }
-  };
-  const handleUploadClick = async () => uploadFile(userData.user.name);
 
   const [file, setFile] = useState<any>(null);
-  const [uploadingStatus, setUploadingStatus] = useState<boolean>(false);
   // const { status, data } = useSession()
 
   const uploadFile = async (user: string) => {
     if (!file) return;
-    setUploadingStatus(true);
     const time1 = new Date().toLocaleString();
     const time2 = time1.split('/').join('-');
     const time = time2.split(' ').join('');
@@ -141,15 +132,18 @@ const Submissions: NextPage = ({
 
     await axios.post('/api/user/dynamo-upload', {
       uploadedName: file.name,
-      user: user,
-      fileName: fileName,
+      user,
+      fileName,
       timeStamp: time1,
-      submissionID: submissionID,
+      submissionID,
     });
     window.location.reload();
-    setUploadingStatus(false);
     setFile(null);
   };
+
+  const handleUploadClick = async () =>
+    uploadFile(userData?.user.name as string);
+
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
   }, [status]);
@@ -169,7 +163,7 @@ const Submissions: NextPage = ({
                   onChange={(e: any) => setFile(e.target.files[0])}
                 />
 
-                <button onClick={handleUploadClick}>Upload</button>
+                <Button onClick={handleUploadClick}>Upload</Button>
               </Card.Body>
             </Card>
           </div>
@@ -247,14 +241,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const sorted = userData
     .sort((a, b) => {
       if (a.timeStamp.S === b.timeStamp.S) return 0;
+      if (a.timeStamp.S === undefined) return 1;
+      if (b.timeStamp.S === undefined) return -1;
       return a.timeStamp.S > b.timeStamp.S ? 1 : -1;
     })
     .reverse();
-  for (let i = 0; i < numSubmissions; i++) {
+  for (let i = 0; i < numSubmissions; i += 1) {
     const submission: Submission = {
-      fileName: sorted[i].uploaded_file_name.S,
-      submissionURL: sorted[i].current_submission_url.S,
-      timeStamp: sorted[i].timeStamp.S,
+      fileName: sorted[i].uploaded_file_name.S as string,
+      submissionURL: sorted[i].current_submission_url.S as string,
+      timeStamp: sorted[i].timeStamp.S as string,
     };
     submissionData.push(submission);
   }

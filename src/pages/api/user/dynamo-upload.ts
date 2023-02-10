@@ -33,7 +33,7 @@ export default async function handler(
   }
 
   try {
-    const { uploadedName, user, fileName, timeStamp, submissionID } = req.body;
+    const { uploadedName, user, fileName, timeStamp } = req.body;
     const s = process.env.S3_URL_TEMPLATE;
     const s3url = s + fileName;
     // const submission_id = user + timeStamp;
@@ -64,25 +64,24 @@ export default async function handler(
           TableName: process.env.AWS_PLAYER_TABLE_NAME,
           Item: {
             team_name: { S: user },
-            current_submission_file_name: {S: fileName}
+            current_submission_file_name: { S: fileName },
           },
         }),
       );
     } else {
       client.send(
-          new UpdateItemCommand({
-            TableName: process.env.AWS_PLAYER_TABLE_NAME,
-            Key: {
-              team_name: { S: user },
-            },
-            UpdateExpression:
-              'SET current_submission_id = :bot_file_name',
-            ExpressionAttributeValues: {
-              ':bot_file_name': { S: fileName }
-            },
-            ReturnValues: 'UPDATED_NEW',
-          }),
-        );
+        new UpdateItemCommand({
+          TableName: process.env.AWS_PLAYER_TABLE_NAME,
+          Key: {
+            team_name: { S: user },
+          },
+          UpdateExpression: 'SET current_submission_id = :bot_file_name',
+          ExpressionAttributeValues: {
+            ':bot_file_name': { S: fileName },
+          },
+          ReturnValues: 'UPDATED_NEW',
+        }),
+      );
       // const prevSubs = teamUser.Item.PREVIOUS_SUBMISSION_URLS.SS;
       // const prevUploaded = teamUser.Item.UPLOADED_FILE_NAME.SS;
       // if (prevSubs && prevUploaded) {

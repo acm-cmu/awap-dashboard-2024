@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import {
   DynamoDB,
   DynamoDBClientConfig,
@@ -8,7 +9,6 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-import type { NextApiRequest } from 'next';
 import { compare } from 'bcrypt';
 
 const config: DynamoDBClientConfig = {
@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
         username: { label: 'Username', type: 'text', placeholder: 'awapteam' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         const { username, password } = credentials as {
           username: string;
           password: string;
@@ -67,7 +67,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error('invalid credentials');
         }
 
-        return { name: username, role: user.Item.role.S };
+        return { id: username, name: username, role: user.Item.role.S };
       },
     }),
   ],
@@ -80,8 +80,8 @@ export const authOptions: NextAuthOptions = {
       // return final_token
       return params.token;
     },
-    async session({ session, token, user }) {
-      session.user.role = token.role;
+    async session({ session, token }) {
+      session.user.role = token.role as string;
       return session;
     },
   },

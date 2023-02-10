@@ -61,9 +61,8 @@ export default async function handler(
         TableName: process.env.AWS_PLAYER_TABLE_NAME,
         Item: {
           team_name: { S: username },
-          bracket: {S: bracket},
+          bracket: { S: bracket },
           current_submission_id: { S: '' },
-          bracket: { S: 'Beginner' },
         },
       }),
     );

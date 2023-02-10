@@ -6,7 +6,6 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faPowerOff } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/router';
 import { PropsWithChildren } from 'react';
 
 type NavItemProps = {
@@ -25,7 +24,6 @@ const ProfileDropdownItem = (props: NavItemProps) => {
 };
 
 export default function HeaderProfileNav() {
-  const router = useRouter();
   const logout = async () => {
     await signOut();
   };
