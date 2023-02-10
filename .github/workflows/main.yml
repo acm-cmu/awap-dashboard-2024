@@ -14,4 +14,10 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
-            echo Hello
+            cd awap-dashboard
+            PID_FASTAPI=$(lsof -i:80 -t)
+            kill -9 $PID_FASTAPI
+            git pull
+            npm install
+            npm run build
+            npm run start -- --port 80
