@@ -24,6 +24,10 @@ const ProfileDropdownItem = (props: NavItemProps) => {
 };
 
 export default function HeaderProfileNav() {
+  const logout = async () => {
+    await signOut({ callbackUrl: '/api/auth/logout' });
+  };
+
   return (
     <Nav>
       <Dropdown as={NavItem}>
@@ -52,7 +56,7 @@ export default function HeaderProfileNav() {
             </Dropdown.Item>
           </Link>
           <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item onClick={() => signOut()}>
+            <Dropdown.Item onClick={() => logout()}>
               <ProfileDropdownItem icon={faPowerOff}>
                 Sign Out
               </ProfileDropdownItem>
