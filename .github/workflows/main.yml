@@ -15,8 +15,8 @@ jobs:
         port: 22
         script: |
             cd awap-dashboard
-            PID_FASTAPI=$(lsof -i:80 -t)
-            kill -9 $PID_FASTAPI
+            PID_DASHBOARD=$(lsof -i:80 -t)
+            kill -9 $PID_DASHBOARD
             git pull
             npm install
             npm run build
