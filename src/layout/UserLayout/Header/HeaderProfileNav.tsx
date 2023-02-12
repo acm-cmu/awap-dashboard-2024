@@ -25,7 +25,7 @@ const ProfileDropdownItem = (props: NavItemProps) => {
 
 export default function HeaderProfileNav() {
   const logout = async () => {
-    await signOut();
+    await signOut({ callbackUrl: '/api/auth/logout' });
   };
 
   return (
