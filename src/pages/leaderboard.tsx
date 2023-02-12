@@ -226,7 +226,6 @@ const Teams: NextPage<Props> = (props) => {
                 <th className="text-end">
                   <THSort name="rating">Rating</THSort>
                 </th>
-                <th aria-label="Action" />
               </tr>
             </thead>
             <tbody>
