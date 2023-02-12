@@ -77,6 +77,14 @@ export default async function handler(
     }));
   }
 
+  for (let i = 0; i < matchDataPlayerOne.length; i += 1) {
+    if (matchDataPlayerOne[i].outcome === 'team1') {
+      matchDataPlayerOne[i].outcome = 'WIN';
+    } else if (matchDataPlayerOne[i].outcome === 'team2') {
+      matchDataPlayerOne[i].outcome = 'LOSS';
+    }
+  }
+
   const paramsTwo: QueryCommandInput = {
     TableName: process.env.AWS_MATCH_TABLE_NAME,
     IndexName: process.env.AWS_MATCH_TABLE_INDEX2,
@@ -94,15 +102,27 @@ export default async function handler(
   if (resultPlayerTwo.Items) {
     matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
       id: item.MATCH_ID.N,
-      player: item.TEAM_1.S,
-      opponent: item.TEAM_2.S,
+      player: item.TEAM_2.S,
+      opponent: item.TEAM_1.S,
       outcome: item.OUTCOME.S,
       type: item.MATCH_TYPE.S,
       replay: item.REPLAY_URL ? item.REPLAY_URL.S : null,
       status: item.MATCH_STATUS.S,
     }));
   }
+
+  for (let i = 0; i < matchDataPlayerTwo.length; i += 1) {
+    if (matchDataPlayerTwo[i].outcome === 'team1') {
+      matchDataPlayerTwo[i].outcome = 'LOSS';
+    } else if (matchDataPlayerTwo[i].outcome === 'team2') {
+      matchDataPlayerTwo[i].outcome = 'WIN';
+    }
+  }
+
   const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
-  matchData.reverse();
-  return res.status(200).json(matchData);
+  // sort matchData by id
+  const sortedMatchData = matchData.sort(
+    (a, b) => parseInt(b.id, 10) - parseInt(a.id, 10),
+  );
+  return res.status(200).json(sortedMatchData);
 }

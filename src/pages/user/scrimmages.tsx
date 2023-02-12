@@ -64,7 +64,13 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => (
     <td>{match.status}</td>
     <td>{match.outcome}</td>
     <td>{match.type}</td>
-    <td>{match.replay}</td>
+    <td>
+      {match.status === 'finished' ? (
+        <a href={match.replay}>Download</a>
+      ) : (
+        'N/A'
+      )}
+    </td>
   </tr>
 );
 
