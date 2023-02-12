@@ -127,10 +127,10 @@ const Admin: NextPage = () => {
           <br />
           <Card>
             <Card.Body>
-              <Card.Title>Ranked Scrimmagse</Card.Title>
+              <Card.Title>Ranked Scrimmages</Card.Title>
               <Card.Text>
                 <Button onClick={startRankedScrimmages}>
-                  Start ranked Scrimmages
+                  Start Ranked Scrimmages
                 </Button>
               </Card.Text>
             </Card.Body>
