@@ -35,9 +35,6 @@ export default async function handler(
     const { player } = req.body;
     const { opp } = req.body;
 
-    // console.log(`Player: ${player}`);
-    // console.log(`Opponent: ${opp}`);
-
     const playerData = await client.send(
       new GetItemCommand({
         TableName: process.env.AWS_PLAYER_TABLE_NAME,
@@ -88,7 +85,7 @@ export default async function handler(
       ],
     };
 
-    console.log(requestData);
+    //console.log(requestData);
 
     const response = await axios.post(
       `http://${process.env.MATCHMAKING_SERVER_IP}/match/`,
