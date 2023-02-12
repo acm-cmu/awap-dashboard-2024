@@ -1,11 +1,10 @@
 import { GetServerSideProps, NextPage } from 'next';
 import { UserLayout } from '@layout';
-import { Card, Dropdown, Table, Form } from 'react-bootstrap';
+import { Card, Table, Form } from 'react-bootstrap';
 import { Leaderboard } from '@models/leaderboard';
 import { ResourceList } from '@models/resource-list';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faEllipsisVertical,
   faSort,
   faSortDown,
   faSortUp,
@@ -237,28 +236,6 @@ const Teams: NextPage<Props> = (props) => {
                   {/* <td>{team.ranking}</td> */}
                   <td>{team.tname}</td>
                   <td className="text-end">{team.rating}</td>
-                  <td>
-                    <Dropdown align="end">
-                      <Dropdown.Toggle
-                        as="button"
-                        bsPrefix="btn"
-                        className="btn-link rounded-0 text-black-50 shadow-none p-0"
-                        id={`action-${team.tname}`}
-                      >
-                        <FontAwesomeIcon fixedWidth icon={faEllipsisVertical} />
-                      </Dropdown.Toggle>
-
-                      <Dropdown.Menu>
-                        <Dropdown.Item href="#/action-1">Info</Dropdown.Item>
-                        <Dropdown.Item
-                          className="text-danger"
-                          href="#/action-2"
-                        >
-                          Request Match
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </td>
                 </tr>
               ))}
             </tbody>
