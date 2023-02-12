@@ -20,4 +20,4 @@ jobs:
             git pull
             npm install
             npm run build
-            npm run start -- --port 80
+            sudo npm run start -- -p 80
