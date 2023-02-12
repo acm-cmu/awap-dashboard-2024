@@ -63,7 +63,7 @@ export default async function handler(
       s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
       s3_object_name: item.current_submission_id.S,
     }));
-    //console.log(playerDataBeginner);
+    // console.log(playerDataBeginner);
 
     requestData = {
       game_engine_name: process.env.GAME_ENGINE_NAME,
@@ -97,7 +97,7 @@ export default async function handler(
       s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
       s3_object_name: item.current_submission_id.S,
     }));
-    //console.log(playerDataAdvanced);
+    // console.log(playerDataAdvanced);
 
     requestData = {
       game_engine_name: process.env.GAME_ENGINE_NAME,
