@@ -15,9 +15,9 @@ jobs:
         port: 22
         script: |
             cd awap-dashboard
-            PID_DASHBOARD=$(lsof -i:3000 -t)
+            PID_DASHBOARD=$(sudo lsof -i:3000 -t)
             sudo kill -9 $PID_DASHBOARD
             git pull
-            npm install
-            npm run build
-            (npm run start -- -p 3000 &)
+            sudo npm install
+            sudo npm run build
+            (sudo npm run start -- -p 3000 &)
