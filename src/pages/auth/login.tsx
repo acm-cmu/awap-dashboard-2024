@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
-import Link from 'next/link';
 import { SyntheticEvent, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
@@ -41,11 +40,11 @@ const Login: NextPage = () => {
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
       <Container>
         <Row className="justify-content-center align-items-center px-3">
-          <Col lg={8}>
+          <Col lg={10}>
             <Row>
               <Col md={7} className="bg-white border p-5">
                 <div className="">
-                  <h1>Login</h1>
+                  <h1>AWAP 2023 Login</h1>
                   <p className="text-black-50">
                     Sign In to your AWAP Dashboard
                   </p>
@@ -95,23 +94,6 @@ const Login: NextPage = () => {
                       </Col>
                     </Row>
                   </form>
-                </div>
-              </Col>
-              <Col
-                md={5}
-                className="bg-primary text-white d-flex align-items-center justify-content-center p-5"
-              >
-                <div className="text-center">
-                  <h2>Sign up</h2>
-                  <p>Want to compete in AWAP 2023?</p>
-                  <Link href="/auth/register">
-                    <button
-                      className="btn btn-lg btn-outline-light mt-3"
-                      type="button"
-                    >
-                      Register Now!
-                    </button>
-                  </Link>
                 </div>
               </Col>
             </Row>
