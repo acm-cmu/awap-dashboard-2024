@@ -37,11 +37,11 @@ const Login: NextPage = () => {
 
   return (
     // render login form
-    <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
+    <div className="bg-light min-vh-100 d-flex flex-column justify-content-center align-items-center dark:bg-transparent">
       <Container>
         <Row className="justify-content-center align-items-center px-3">
           <Col lg={10}>
-            <Row>
+            <Row className="justify-content-center align-items-center">
               <Col md={7} className="bg-white border p-5">
                 <div className="">
                   <h1>AWAP 2023 Login</h1>
