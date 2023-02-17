@@ -10,6 +10,7 @@ import {
   Card,
   Button,
 } from 'react-bootstrap';
+import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
@@ -101,8 +102,19 @@ const Profile: NextPage = ({
                 <Card className="mb-4 rounded-0">
                   <Card.Body className="p-4">
                     <h1 className="text-center">Team Profile</h1>
+                    <div className="text-center">
+                      <Image
+                        width={300}
+                        height={300}
+                        src={`/assets/avatars/avatar_${session.user.image}.jpg`}
+                        alt="Team Logo"
+                      />
+                    </div>
                     <div>
                       Team Name: <strong>{session.user.name}</strong>
+                    </div>
+                    <div>
+                      Team Lead Email: <strong>{session.user.email}</strong>
                     </div>
                     <div>
                       Bracket:{' '}

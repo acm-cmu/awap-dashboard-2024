@@ -21,10 +21,11 @@ function Greeting() {
 }
 
 function Profile() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
 
   if (status === 'authenticated') {
-    return <HeaderProfileNav />;
+    if (!session.user.image) return <HeaderProfileNav img="0" />;
+    return <HeaderProfileNav img={session.user.image} />;
   }
   if (status === 'loading') {
     return <h3>Loading...</h3>;

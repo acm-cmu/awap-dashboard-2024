@@ -67,7 +67,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error('invalid credentials');
         }
 
-        return { id: username, name: username, role: user.Item.role.S };
+        return {
+          id: username,
+          name: username,
+          role: user.Item.role.S,
+          email: user.Item.email !== undefined ? user.Item.email.S : '',
+          image: user.Item.image !== undefined ? user.Item.image.N : '0',
+        };
       },
     }),
   ],

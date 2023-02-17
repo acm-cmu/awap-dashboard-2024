@@ -23,7 +23,7 @@ const ProfileDropdownItem = (props: NavItemProps) => {
   );
 };
 
-export default function HeaderProfileNav() {
+export default function HeaderProfileNav({ img }: { img: string }) {
   const logout = async () => {
     await signOut({ callbackUrl: '/api/auth/logout' });
   };
@@ -41,8 +41,8 @@ export default function HeaderProfileNav() {
             <Image
               fill
               className="rounded-circle"
-              src="/assets/img/avatars/default.png"
-              alt="user@email.com"
+              src={`/assets/avatars/avatar_${img}.jpg`}
+              alt="profile pic"
             />
           </div>
         </Dropdown.Toggle>
