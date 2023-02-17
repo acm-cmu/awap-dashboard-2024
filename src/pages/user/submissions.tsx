@@ -46,15 +46,18 @@ interface Submission {
   timeStamp: string;
 }
 
-const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
+const TableRow: React.FC<{ submission: any; image: string }> = ({
+  submission,
+  image,
+}) => (
   <tr className="align-middle">
     <td className="text-center">
       <div className="avatar avatar-md d-inline-flex position-relative">
         <Image
           fill
           className="rounded-circle"
-          src="/assets/img/avatars/1.jpg"
-          alt="user@email.com"
+          src={`/assets/avatars/avatar_${image}.jpg`}
+          alt="profile pic"
         />
         <span className="avatar-status position-absolute d-block bottom-0 end-0 bg-success rounded-circle border border-white" />
       </div>
@@ -94,10 +97,10 @@ const TableRow: React.FC<{ submission: any }> = ({ submission }) => (
   </tr>
 );
 
-const TableBody: React.FC<{ data: any }> = ({ data }) => (
+const TableBody: React.FC<{ data: any; image: string }> = ({ data, image }) => (
   <tbody>
     {data.map((item: any) => (
-      <TableRow submission={item} />
+      <TableRow submission={item} image={image} />
     ))}
   </tbody>
 );
@@ -149,6 +152,10 @@ const Submissions: NextPage = ({
   }, [status]);
 
   if (status === 'authenticated') {
+    let image = '';
+    if (!userData.user.image) image = '0';
+    else image = userData.user.image;
+
     return (
       <UserLayout>
         <div className="row">
@@ -187,7 +194,7 @@ const Submissions: NextPage = ({
                         <th aria-label="Action" />
                       </tr>
                     </thead>
-                    <TableBody data={submissionData} />
+                    <TableBody data={submissionData} image={image} />
                   </table>
                 </div>
               </Card.Body>

@@ -25,6 +25,10 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 });
 
+function getRandomIntInclusive(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -52,6 +56,7 @@ export default async function handler(
           username: { S: username },
           password: { S: hashedpassword },
           role: { S: 'user' },
+          image: { N: getRandomIntInclusive(1, 27).toString() },
           email: { S: email },
         },
       }),
