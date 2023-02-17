@@ -18,10 +18,10 @@ const GettingStarted: NextPage = () => (
       <Card.Body>
         <Card.Title>Installation</Card.Title>
         <Card.Text>
-          You'll need Python and Node.js, and will use the{" "}
+          You'll need exactly Python 3.9, and will use the{" "}
           <a href="https://dashboard.awap.acmatcmu.com/">Dashboard</a>,{" "}
           <a href="https://view.awap.acmatcmu.com">Viewer</a>, and{" "}
-          <a href="https://github.com/ACM-CMU/awap-engine-2023">Engine</a> to
+          <a href="https://awap.acmatcmu.com/engine">Engine</a> to
           compete and iterate on your algorithms. Reference the{" "}
           <a href="https://docs.google.com/document/d/1piTDL6cHUQIYDfd75VNeHqWmxzcqkFHyf-bdmmrDsmc/edit?usp=sharing">
             {" "}
