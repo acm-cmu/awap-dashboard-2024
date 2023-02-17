@@ -18,7 +18,7 @@ const GettingStarted: NextPage = () => (
       <Card.Body>
         <Card.Title>Installation</Card.Title>
         <Card.Text>
-          You'll need exactly Python 3.9, and will use the{' '}
+          You will need exactly Python 3.9, and will use the{' '}
           <a href="https://dashboard.awap.acmatcmu.com/">Dashboard</a>,{' '}
           <a href="https://view.awap.acmatcmu.com">Viewer</a>, and{' '}
           <a href="https://awap.acmatcmu.com/engine">Engine</a> to
