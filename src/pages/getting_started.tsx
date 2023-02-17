@@ -18,7 +18,8 @@ const GettingStarted: NextPage = () => (
       <Card.Body>
         <Card.Title>Installation</Card.Title>
         <Card.Text>
-          You'll need Python and Node.js, and will use the <a href="https://dashboard.awap.acmatcmu.com/">Dashboard</a>,{" "}
+          You'll need Python and Node.js, and will use the{" "}
+          <a href="https://dashboard.awap.acmatcmu.com/">Dashboard</a>,{" "}
           <a href="https://view.awap.acmatcmu.com">Viewer</a>, and{" "}
           <a href="https://github.com/ACM-CMU/awap-engine-2023">Engine</a> to
           compete and iterate on your algorithms. Reference the{" "}
@@ -55,8 +56,8 @@ const GettingStarted: NextPage = () => (
       <Card.Body>
         <Card.Title>Leaderboard</Card.Title>
         <Card.Text>
-          Navigate to the leaderboard to see your rating compared to competing
-          teams participating in AWAP.{" "}
+          Navigate to the Leaderboard page to see your rating against other teams
+          participating in AWAP 2023!
         </Card.Text>
       </Card.Body>
     </Card>
