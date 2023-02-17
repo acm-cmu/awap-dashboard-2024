@@ -20,7 +20,8 @@ jobs:
         script: |
             cd awap-dashboard
             pm2 stop server
+            pm2 delete server
             git pull
             sudo npm install
             sudo npm run build
-            pm2 start server
+            pm2 start npm --name server -- run start
