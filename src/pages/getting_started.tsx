@@ -4,16 +4,20 @@ import { Card } from 'react-bootstrap';
 
 const GettingStarted: NextPage = () => (
   <UserLayout>
-    <Card.Title>Getting Started</Card.Title>
-    <Card.Text>
-      Our full game rules can be found{' '}
-      <a href="https://docs.google.com/document/d/1piTDL6cHUQIYDfd75VNeHqWmxzcqkFHyf-bdmmrDsmc/edit?usp=sharing">
-        here
-      </a>
-      ! Keep reading to install the Martian environment, upload your algorithm
-      submissions, request scrimmages with other players, and check out your
-      match results. Happy hacking!
-    </Card.Text>
+    <Card className="mb-3">
+      <Card.Body>
+        <Card.Title>Getting Started</Card.Title>
+        <Card.Text>
+          Our full game rules can be found{' '}
+          <a href="https://docs.google.com/document/d/1piTDL6cHUQIYDfd75VNeHqWmxzcqkFHyf-bdmmrDsmc/edit?usp=sharing">
+            here
+          </a>
+          ! Keep reading to install the Martian environment, upload your
+          algorithm submissions, request scrimmages with other players, and
+          check out your match results. Happy hacking!
+        </Card.Text>
+      </Card.Body>
+    </Card>
     <Card className="mb-3">
       <Card.Body>
         <Card.Title>Installation</Card.Title>
@@ -21,8 +25,8 @@ const GettingStarted: NextPage = () => (
           You will need exactly Python 3.9, and will use the{' '}
           <a href="https://dashboard.awap.acmatcmu.com/">Dashboard</a>,{' '}
           <a href="https://view.awap.acmatcmu.com">Viewer</a>, and{' '}
-          <a href="https://awap.acmatcmu.com/engine">Engine</a> to
-          compete and iterate on your algorithms. Reference the{' '}
+          <a href="https://awap.acmatcmu.com/engine">Engine</a> to compete and
+          iterate on your algorithms. Reference the{' '}
           <a href="https://docs.google.com/document/d/1piTDL6cHUQIYDfd75VNeHqWmxzcqkFHyf-bdmmrDsmc/edit?usp=sharing">
             {' '}
             Mars Makeover Rules{' '}
@@ -56,8 +60,8 @@ const GettingStarted: NextPage = () => (
       <Card.Body>
         <Card.Title>Leaderboard</Card.Title>
         <Card.Text>
-          Navigate to the Leaderboard page to see your rating against other teams
-          participating in AWAP 2023!
+          Navigate to the Leaderboard page to see your rating against other
+          teams participating in AWAP 2023!
         </Card.Text>
       </Card.Body>
     </Card>
