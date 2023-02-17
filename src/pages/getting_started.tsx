@@ -6,20 +6,27 @@ const GettingStarted: NextPage = () => (
   <UserLayout>
     <Card.Title>Getting Started</Card.Title>
     <Card.Text>
-      Follow the instructions below to install the Martian environment, upload
-      your algorithm submissions, request scrimmages with other players, and
-      check out your match results - happy hacking!
+      Our full game rules can be found{" "}
+      <a href="https://docs.google.com/document/d/1piTDL6cHUQIYDfd75VNeHqWmxzcqkFHyf-bdmmrDsmc/edit?usp=sharing">
+        here
+      </a>
+      ! Keep reading to install the Martian environment, upload your algorithm
+      submissions, request scrimmages with other players, and check out your
+      match results. Happy hacking!
     </Card.Text>
     <Card className="mb-3">
       <Card.Body>
         <Card.Title>Installation</Card.Title>
         <Card.Text>
-          Visit our AWAP 2023{" "}
-          <a href="https://github.com/ACM-CMU/awap-viewer-2023">Viewer</a> and{" "}
-          <a href="https://github.com/ACM-CMU/awap-engine-2023">Engine</a>{" "}
-          GitHub repos to install the Martian environment. You'll need Python
-          and Node.js, and will use this Dashboard, Viewer, and Engine to
-          compete and iterate on your algorithms.
+          You'll need Python and Node.js, and will use the <a href="https://dashboard.awap.acmatcmu.com/">Dashboard</a>,{" "}
+          <a href="https://view.awap.acmatcmu.com">Viewer</a>, and{" "}
+          <a href="https://github.com/ACM-CMU/awap-engine-2023">Engine</a> to
+          compete and iterate on your algorithms. Reference the{" "}
+          <a href="https://docs.google.com/document/d/1piTDL6cHUQIYDfd75VNeHqWmxzcqkFHyf-bdmmrDsmc/edit?usp=sharing">
+            {" "}
+            Mars Makeover Rules{" "}
+          </a>
+          for documentation!
         </Card.Text>
       </Card.Body>
     </Card>
