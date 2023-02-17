@@ -29,7 +29,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { username, password, bracket } = req.body;
+  const { username, password, bracket, email } = req.body;
 
   const hashedpassword = await hash(password, 10);
 
@@ -52,6 +52,7 @@ export default async function handler(
           username: { S: username },
           password: { S: hashedpassword },
           role: { S: 'user' },
+          email: { S: email },
         },
       }),
     );
