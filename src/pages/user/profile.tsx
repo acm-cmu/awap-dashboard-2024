@@ -19,7 +19,7 @@ import {
   DynamoDBClientConfig,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
@@ -27,6 +27,7 @@ import { unstable_getServerSession } from 'next-auth/next';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { toast } from 'react-toastify';
 
 // id is a number
 const TeamMemberField = ({ id }: { id: number }) => {
@@ -74,11 +75,24 @@ const Profile: NextPage = ({
     const bracket = document.getElementById('bracket') as HTMLInputElement;
     const bracketValue = bracket.value;
 
-    await axios.post('/api/user/bracket-change', {
-      user,
-      bracket: bracketValue,
-    });
-    window.location.reload();
+    await axios
+      .post('/api/user/bracket-change', {
+        user,
+        bracket: bracketValue,
+      })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          toast.success('Bracket changed successfully');
+          window.location.reload();
+        }
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response?.status === 400) {
+          toast.error('Bracket changing is not permitted.');
+        } else {
+          toast.error('Something went wrong');
+        }
+      });
   };
 
   const handleChangeBracket = async () => changeBracket(session?.user.name);
