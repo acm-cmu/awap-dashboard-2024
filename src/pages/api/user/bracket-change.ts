@@ -32,6 +32,7 @@ export default async function handler(
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
+  // comment out to allow for bracket change
   return res.status(400).json({ message: 'Not allowed to change bracket' });
 
   try {
