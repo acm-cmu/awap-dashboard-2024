@@ -49,9 +49,26 @@ export default function UserLayout({ children }: PropsWithChildren) {
   return (
     <>
       <Head>
-        <title>AWAP 2023 - Dashboard</title>
-        <meta name="description" content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!" />
-        <link rel="icon" href="/favicon.ico" />
+        
+        {/*} HTML Meta Tags */}
+        <title>AWAP 2023 - Viewer</title>
+        <meta name="description" content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!"></meta>
+
+        {/* Facebook Meta Tags */}
+        <meta property="og:url" content="https://awap.acmatcmu.com/"></meta>
+        <meta property="og:type" content="website"></meta>
+        <meta property="og:title" content="AWAP 2023 - Viewer"></meta>
+        <meta property="og:description" content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!"></meta>
+        <meta property="og:image" content="https://i.imgur.com/FOGQVVh.png"></meta>
+
+        <meta name="twitter:card" content="summary_large_image"></meta>
+        <meta property="twitter:domain" content="awap.acmatcmu.com"></meta>
+        <meta property="twitter:url" content="https://awap.acmatcmu.com/"></meta>
+        <meta name="twitter:title" content="AWAP 2023 - Viewer"></meta>
+        <meta name="twitter:description" content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!"></meta>
+        <meta name="twitter:image" content="https://i.imgur.com/FOGQVVh.png"></meta>
+
+        {/*  Meta Tags Generated via https://www.opengraph.xyz */}        
       </Head>
 
       <div ref={ref} className="position-absolute w-100" />
