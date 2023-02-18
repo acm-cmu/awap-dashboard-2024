@@ -56,23 +56,33 @@ interface Team {
   rating: number;
 }
 
-// Table Component
-const TableRow: React.FC<{ match: Match }> = ({ match }) => (
-  <tr>
-    <td>{match.id}</td>
-    <td>{match.opponent}</td>
-    <td>{match.status}</td>
-    <td>{match.outcome}</td>
-    <td>{match.type}</td>
-    <td>
-      {match.status === 'finished' ? (
-        <a href={match.replay}>Download</a>
-      ) : (
-        'N/A'
-      )}
-    </td>
-  </tr>
-);
+const TableRow: React.FC<{ match: Match }> = ({ match }) => {
+  let backgroundColor;
+  if (match.outcome === 'WIN') {
+    backgroundColor = 'rgb(209, 236, 201)'; // light red
+  } else if (match.outcome === 'LOSS') {
+    backgroundColor = 'rgb(245, 205, 213)'; // light green
+  } else if (match.status === 'pending') {
+    backgroundColor = 'rgb(255, 255, 0)'; // yellow
+  }
+
+  return (
+    <tr style={{ backgroundColor }}>
+      <td>{match.id}</td>
+      <td>{match.opponent}</td>
+      <td>{match.status}</td>
+      <td>{match.outcome}</td>
+      <td>{match.type}</td>
+      <td>
+        {match.status === 'finished' ? (
+          <a href={match.replay}>Download</a>
+        ) : (
+          'N/A'
+        )}
+      </td>
+    </tr>
+  );
+};
 
 const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
   // eslint-disable-next-line react/jsx-key
