@@ -69,6 +69,7 @@ export default async function handler(
       game_engine_name: process.env.GAME_ENGINE_NAME,
       num_tournament_spots: process.env.NUM_TOURNAMENT_SPOTS,
       user_submissions: playerDataBeginner,
+      bracket: 'beginner',
     };
   } else if (bracket === 'advanced') {
     const paramsAdvanced: ScanCommandInput = {
@@ -103,6 +104,7 @@ export default async function handler(
       game_engine_name: process.env.GAME_ENGINE_NAME,
       num_tournament_spots: process.env.NUM_TOURNAMENT_SPOTS,
       user_submissions: playerDataAdvanced,
+      bracket: 'advanced',
     };
   } else if (bracket === 'test') {
     const paramsTest: ScanCommandInput = {
@@ -136,6 +138,7 @@ export default async function handler(
       game_engine_name: process.env.GAME_ENGINE_NAME,
       num_tournament_spots: process.env.NUM_TOURNAMENT_SPOTS,
       user_submissions: playerDataTest,
+      bracket: 'test',
     };
   }
   // console.log(requestData);
