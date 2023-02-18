@@ -66,6 +66,13 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => {
     backgroundColor = 'rgb(255, 255, 0)'; // yellow
   }
 
+  let replayMsg = '';
+  if (match.status === 'finished') {
+    replayMsg = 'Download';
+  } else if (match.status === 'failed') {
+    replayMsg = 'Download Error Log';
+  }
+
   return (
     <tr style={{ backgroundColor }}>
       <td>{match.id}</td>
@@ -74,10 +81,10 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => {
       <td>{match.outcome}</td>
       <td>{match.type}</td>
       <td>
-        {match.status === 'finished' ? (
-          <a href={match.replay}>Download</a>
+        {match.status === 'finished' || match.status === 'failed' ? (
+          <a href={match.replay}>{replayMsg}</a>
         ) : (
-          <a href={match.replay}>Download Error Log</a>
+          replayMsg
         )}
       </td>
     </tr>

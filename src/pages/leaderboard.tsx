@@ -16,6 +16,7 @@ import {
   DynamoDB,
   DynamoDBClientConfig,
   ScanCommand,
+  ScanCommandOutput,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 
@@ -294,6 +295,44 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
         },
       },
     };
+  }
+
+  const params2: ScanCommandInput = {
+    TableName: process.env.AWS_PLAYER_TABLE_NAME,
+    FilterExpression: 'current_submission_id = :null',
+    ExpressionAttributeValues: {
+      ':null': { S: '' },
+    },
+  };
+
+  const scanCommand = new ScanCommand(params2);
+  const playerTableData: ScanCommandOutput = await client.send(scanCommand);
+
+  if (!playerTableData.Items) {
+    return {
+      props: {
+        teamResourceList: {
+          data: [],
+          meta: {
+            current_page: 1,
+            per_page: 10,
+            total: 0,
+            from: 1,
+            to: 1,
+            last_page: 1,
+          },
+        },
+      },
+    };
+  }
+
+  for (let i = 0; i < playerTableData.Items.length; i += 1) {
+    const player = playerTableData.Items[i].team_name.S;
+    for (let j = 0; j < teamdata.Items.length; j += 1) {
+      if (teamdata.Items[j].team_name.S === player) {
+        teamdata.Items[j].current_rating.N = '-9999';
+      }
+    }
   }
 
   const unfiltered = teamdata.Items.sort((i1, i2) => {
