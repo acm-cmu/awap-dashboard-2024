@@ -104,6 +104,39 @@ export default async function handler(
       num_tournament_spots: process.env.NUM_TOURNAMENT_SPOTS,
       user_submissions: playerDataAdvanced,
     };
+  } else if (bracket === 'test') {
+    const paramsTest: ScanCommandInput = {
+      TableName: process.env.AWS_PLAYER_TABLE_NAME,
+      FilterExpression: 'bracket = :test and current_submission_id <> :null',
+      ExpressionAttributeValues: {
+        ':test': { S: 'test' },
+        ':null': { S: '' },
+      },
+    };
+
+    const scanCommandTest = new ScanCommand(paramsTest);
+    const scanResultTest: ScanCommandOutput = await client.send(
+      scanCommandTest,
+    );
+
+    if (!scanResultTest.Items?.length) {
+      return res
+        .status(400)
+        .send({ message: 'Error fetching data', error: 'No players found' });
+    }
+
+    const playerDataTest = scanResultTest.Items.map((item: any) => ({
+      username: item.team_name.S,
+      s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+      s3_object_name: item.current_submission_id.S,
+    }));
+    // console.log(playerDataTest);
+
+    requestData = {
+      game_engine_name: process.env.GAME_ENGINE_NAME,
+      num_tournament_spots: process.env.NUM_TOURNAMENT_SPOTS,
+      user_submissions: playerDataTest,
+    };
   }
   // console.log(requestData);
   try {
