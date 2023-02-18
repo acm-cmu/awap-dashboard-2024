@@ -50,7 +50,7 @@ export default function UserLayout({ children }: PropsWithChildren) {
     <>
       <Head>
         {/* } HTML Meta Tags */}
-        <title>AWAP 2023 - Viewer</title>
+        <title>AWAP 2023 - Dashboard</title>
         <meta
           name="description"
           content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!"
@@ -59,7 +59,7 @@ export default function UserLayout({ children }: PropsWithChildren) {
         {/* Facebook Meta Tags */}
         <meta property="og:url" content="https://awap.acmatcmu.com/" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="AWAP 2023 - Viewer" />
+        <meta property="og:title" content="AWAP 2023 - Dashboard" />
         <meta
           property="og:description"
           content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!"
@@ -69,7 +69,7 @@ export default function UserLayout({ children }: PropsWithChildren) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="twitter:domain" content="awap.acmatcmu.com" />
         <meta property="twitter:url" content="https://awap.acmatcmu.com/" />
-        <meta name="twitter:title" content="AWAP 2023 - Viewer" />
+        <meta name="twitter:title" content="AWAP 2023 - Dashboard" />
         <meta
           name="twitter:description"
           content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!"
