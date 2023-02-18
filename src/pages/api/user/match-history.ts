@@ -124,5 +124,11 @@ export default async function handler(
   const sortedMatchData = matchData.sort(
     (a, b) => parseInt(b.id, 10) - parseInt(a.id, 10),
   );
-  return res.status(200).json(sortedMatchData);
+
+  // filter out matches that are tournaments
+  const filteredMatchData = sortedMatchData.filter(
+    (match) => match.type !== 'tournament',
+  );
+
+  return res.status(200).json(filteredMatchData);
 }

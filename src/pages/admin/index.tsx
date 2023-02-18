@@ -66,6 +66,32 @@ const Admin: NextPage = () => {
       });
   };
 
+  const startTestTournament = async () => {
+    console.log('request sent');
+    axios
+      .post('/api/admin/start-tournament', {
+        bracket: 'test',
+      })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          console.log('request sent');
+          toast.success('Test Tournament Started!');
+        }
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response!.status === 500) {
+          toast.error('Internal Error, please try again later');
+        } else if (reason.response?.status === 412) {
+          toast.error('You have already requested a match with this team');
+        } else if (reason.response?.status === 400) {
+          toast.error('Either you or your opponent have not uploaded a bot');
+        } else {
+          toast.error('Something went wrong');
+        }
+        console.log(reason.message);
+      });
+  };
+
   const startRankedScrimmages = async () => {
     console.log('request sent');
     axios
@@ -100,6 +126,17 @@ const Admin: NextPage = () => {
             <Card.Body>
               <Card.Title>Admin</Card.Title>
               <Card.Text>Run ranked scrimmages and tournaments here.</Card.Text>
+            </Card.Body>
+          </Card>
+          <br />
+          <Card>
+            <Card.Body>
+              <Card.Title>Test Tournament</Card.Title>
+              <Card.Text>
+                <Button onClick={startTestTournament}>
+                  Start a Test Tournament (Rafflebots)
+                </Button>
+              </Card.Text>
             </Card.Body>
           </Card>
           <br />
