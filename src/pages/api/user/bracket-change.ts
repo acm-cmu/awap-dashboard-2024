@@ -29,8 +29,10 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (req.method !== 'POST') {
-    res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ message: 'Method not allowed' });
   }
+
+  return res.status(400).json({ message: 'Not allowed to change bracket' });
 
   try {
     const { user, bracket } = req.body;
@@ -94,9 +96,9 @@ export default async function handler(
       //   );
       // }
     }
-    res.status(200).json({ bracket });
+    return res.status(200).json({ bracket });
   } catch (err) {
     console.log(err);
-    res.status(400).json({ message: err });
+    return res.status(400).json({ message: err });
   }
 }
