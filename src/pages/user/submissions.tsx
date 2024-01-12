@@ -224,10 +224,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const params: ScanCommandInput = {
-    TableName: process.env.AWS_SUBMISSIONS_TABLE_NAME,
-    FilterExpression: 'team_name = :team_name',
+    TableName: process.env.AWS_TABLE_NAME,
+    FilterExpression: 'pk = :team_name AND record_type = :bot',
     ExpressionAttributeValues: {
-      ':team_name': { S: session.user.name },
+      ':team_name': { S: ("team:" + session.user.name) },
+      ':bot': { S: "bot" }
     },
   };
 
@@ -247,16 +248,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const sorted = userData
     .sort((a, b) => {
-      if (a.timeStamp.S === b.timeStamp.S) return 0;
       if (a.timeStamp.S === undefined) return 1;
       if (b.timeStamp.S === undefined) return -1;
+      if (a.timeStamp.S === b.timeStamp.S) return 0;
       return a.timeStamp.S > b.timeStamp.S ? 1 : -1;
     })
     .reverse();
   for (let i = 0; i < numSubmissions; i += 1) {
     const submission: Submission = {
-      fileName: sorted[i].uploaded_file_name.S as string,
-      submissionURL: sorted[i].current_submission_url.S as string,
+      fileName: sorted[i].upload_name.S as string,
+      submissionURL: process.env.S3_URL_TEMPLATE + sorted[i].s3_key.S as string,
       timeStamp: sorted[i].timeStamp.S as string,
     };
     submissionData.push(submission);

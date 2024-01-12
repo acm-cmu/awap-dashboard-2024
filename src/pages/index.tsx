@@ -9,7 +9,7 @@ const Home: NextPage = () => (
       <Card.Body>
         <Card.Title>Home</Card.Title>
         <Card.Text>
-          Welcome to AWAP 2023! :D Thanks for registering and creating an
+          Welcome to AWAP 2024! :D Thanks for registering and creating an
           account. Navigate to the getting started page to begin!
         </Card.Text>
       </Card.Body>

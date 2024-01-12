@@ -49,7 +49,7 @@ export default function UserLayout({ children }: PropsWithChildren) {
   return (
     <>
       <Head>
-        <title>AWAP 2023 - Dashboard</title>
+        <title>AWAP 2024 - Dashboard</title>
         <meta name="description" content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

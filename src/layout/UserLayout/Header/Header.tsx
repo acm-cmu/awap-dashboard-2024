@@ -17,7 +17,7 @@ function Greeting() {
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
-  return <div>AWAP 2023</div>;
+  return <div>AWAP 2024</div>;
 }
 
 function Profile() {
