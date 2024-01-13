@@ -257,7 +257,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   for (let i = 0; i < numSubmissions; i += 1) {
     const submission: Submission = {
       fileName: sorted[i].upload_name.S as string,
-      submissionURL: process.env.S3_URL_TEMPLATE + sorted[i].s3_key.S as string,
+      submissionURL: "https://awap23-bots.s3.amazonaws.com/" + sorted[i].s3_key.S as string,
       timeStamp: sorted[i].timeStamp.S as string,
     };
     submissionData.push(submission);

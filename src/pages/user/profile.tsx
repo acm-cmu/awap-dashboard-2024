@@ -20,6 +20,8 @@ import {
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
@@ -71,17 +73,57 @@ const Profile: NextPage = ({
 
   const changeBracket = async (user: string | null | undefined) => {
     if (!user) return;
-    const bracket = document.getElementById('bracket') as HTMLInputElement;
-    const bracketValue = bracket.value;
-
+    const teamName = document.getElementById('teamname') as HTMLInputElement;
+    const newBracket = document.getElementById('newbracket') as HTMLInputElement;
+    const newBracketValue = newBracket.value;
+    console.log(newBracketValue)
     await axios.post('/api/user/bracket-change', {
       user,
-      bracket: bracketValue,
+      bracket: newBracketValue,
+      teamName: teamName.value,
+    })
+    // .then((res) => res.status)
+    .then((res) => {
+      if (res.status === 400) {
+        toast.error('Bracket change not successful!');
+      } else if (res.status === 200) {
+        toast.dismiss();
+        toast.success('Bracket changed successfully!', { autoClose: 2000 });
+      }
     });
+    window.location.reload();
+    window.location.reload();
+  };
+  const createTeam = async (user: string | null | undefined) => {
+    if (!user) return;
+    const teamName = document.getElementById('teamname') as HTMLInputElement;
+    // console.log(teamName);
+    const teamNameValue = teamName.value;
+    console.log(teamNameValue)
+    await axios
+      .post('/api/user/create-team', {
+        user,
+        teamName: teamNameValue,
+      })
+      .then((res) => res.status)
+      .then((status) => {
+        if (status === 400) {
+          toast.error('Team name already in use!');
+        } else if (status === 200) {
+          toast.dismiss();
+          toast.success('Team created successfully!', { autoClose: 2000 });
+        }
+      });
+    // await axios.post('/api/user/create-team', {
+    //   user,
+    //   bracket: teamNameValue,
+    // });
     window.location.reload();
   };
 
   const handleChangeBracket = async () => changeBracket(session?.user.name);
+
+  const handleCreateTeam = async () => createTeam(session?.user.name);
 
   const teamMembers = [];
   for (let i = 1; i <= 4; i += 1) {
@@ -101,6 +143,41 @@ const Profile: NextPage = ({
               <Col md={6}>
                 <Card className="mb-4 rounded-0">
                   <Card.Body className="p-4">
+                    <h1 className="text-center">Team Actions</h1>
+                    
+                    {/* <br /> */}
+                    <div>
+                      <strong>Create Team</strong>
+                    </div>
+
+                    <form onSubmit={handleCreateTeam}>
+                    <label>
+                      Team Name: 
+                      <input type="text" name="name" id="teamname" />
+                    </label>
+                    <input type="submit" value="Submit" />
+                  </form>
+                    {/* <br />
+                    <div>
+                      <strong>Add Team Members</strong>
+                    </div>
+
+                    <form onSubmit={handleAddTeamMember}>
+                    <label>
+                      User Name: 
+                      <input type="text" name="name" id="teamname" />
+                    </label>
+                    <input type="submit" value="Submit" />
+                  </form> */}
+                  <br />
+                  </Card.Body>
+                </Card>
+              </Col>
+            {/* </Row>
+            <Row className="justify-content-center"> */}
+              <Col md={6}>
+                <Card className="mb-4 rounded-0">
+                  <Card.Body className="p-4">
                     <h1 className="text-center">Team Profile</h1>
                     <div className="text-center">
                       <Image
@@ -111,10 +188,16 @@ const Profile: NextPage = ({
                       />
                     </div>
                     <div>
-                      Team Name: <strong>{session.user.name}</strong>
+                      User Name: <strong>{session.user.name}</strong>
                     </div>
                     <div>
                       Team Lead Email: <strong>{session.user.email}</strong>
+                    </div>
+                    <div>
+                      Team Name:
+                      <strong>
+                        {team.name}
+                      </strong>
                     </div>
                     <div>
                       Bracket:{' '}
@@ -131,7 +214,7 @@ const Profile: NextPage = ({
                     <select
                       className="form-select"
                       aria-label="Default select example"
-                      id="bracket"
+                      id="newbracket"
                     >
                       <option value="beginner">Beginner</option>
                       <option value="advanced">Advanced</option>
@@ -168,10 +251,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   const params: ScanCommandInput = {
-    TableName: process.env.AWS_PLAYER_TABLE_NAME,
-    FilterExpression: 'team_name = :team_name',
+    TableName: process.env.AWS_TABLE_NAME,
+    FilterExpression: 'pk = :user_name',
     ExpressionAttributeValues: {
-      ':team_name': { S: session.user.name },
+      ':user_name': { S: "user:"+ session.user.name },
     },
   };
 
@@ -184,9 +267,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       props: { team: { bracket: null } }, // will be passed to the page component as props
     };
   }
-
+  const result2 = await client.send(new ScanCommand({
+    TableName: process.env.AWS_TABLE_NAME,
+    FilterExpression: 'pk = :team_name AND record_type= :bracket',
+    ExpressionAttributeValues: {
+      ':team_name': { S: "team:"+ userData[0].team.S },
+      ':bracket': { S: "bracket"},
+    },
+  }))
+  const teamData = result2.Items;
+  var bracketN = "Beginner"
+  if(teamData[0] && teamData[0].bracket){
+    bracketN = teamData[0].bracket.S
+  }
   const team = {
-    bracket: userData[0].bracket.S,
+    name: userData[0].team.S,
+    bracket: bracketN,
   };
 
   return {

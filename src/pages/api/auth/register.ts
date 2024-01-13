@@ -51,12 +51,10 @@ export default async function handler(
   } else {
     await client.send(
       new PutItemCommand({
-        TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
+        TableName: process.env.AWS_TABLE_NAME,
         Item: {
-          username: { S: username },
-          password: { S: hashedpassword },
-          role: { S: 'user' },
-          image: { N: getRandomIntInclusive(1, 27).toString() },
+          pk: { S: 'user:'+username },
+          sk: { S: 'user:'+username },
         },
       }),
     );
