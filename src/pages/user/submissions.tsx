@@ -13,10 +13,12 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   DynamoDB,
   DynamoDBClientConfig,
+  GetItemCommand,
+  GetItemCommandInput,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, QueryCommand, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 
@@ -44,6 +46,7 @@ interface Submission {
   fileName: string;
   submissionURL: string;
   timeStamp: string;
+  isActive: boolean;
 }
 
 const TableRow: React.FC<{ submission: any; image: string }> = ({
@@ -75,24 +78,8 @@ const TableRow: React.FC<{ submission: any; image: string }> = ({
       <div className="fw-semibold">{submission.timeStamp}</div>
     </td>
     <td>
-      <Dropdown align="end">
-        <Dropdown.Toggle
-          as="button"
-          bsPrefix="btn"
-          className="btn-link rounded-0 text-black-50 shadow-none p-0"
-          id="action-user1"
-        >
-          <FontAwesomeIcon fixedWidth icon={faEllipsisVertical} />
-        </Dropdown.Toggle>
-
-        <Dropdown.Menu>
-          <Dropdown.Item href="#/action-1">Info</Dropdown.Item>
-          <Dropdown.Item href="#/action-2">Edit</Dropdown.Item>
-          <Dropdown.Item className="text-danger" href="#/action-3">
-            Delete
-          </Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
+      <div className="small text-black-50" />
+      <div className="fw-semibold">{submission.isActive ? "Active" : "Inactive"}</div>
     </td>
   </tr>
 );
@@ -100,7 +87,7 @@ const TableRow: React.FC<{ submission: any; image: string }> = ({
 const TableBody: React.FC<{ data: any; image: string }> = ({ data, image }) => (
   <tbody>
     {data.map((item: any) => (
-      <TableRow submission={item} image={image} />
+      <TableRow submission={item} image={image}/>
     ))}
   </tbody>
 );
@@ -191,7 +178,7 @@ const Submissions: NextPage = ({
                         <th>Uploaded File Name</th>
                         {/* <th className="text-center">Successful</th> */}
                         <th>Time Submitted</th>
-                        <th aria-label="Action" />
+                        <th>Active Version</th>
                       </tr>
                     </thead>
                     <TableBody data={submissionData} image={image} />
@@ -223,48 +210,80 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const params: ScanCommandInput = {
+  const queryParams: QueryCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'pk = :team_name AND record_type = :bot',
+    KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
+    ExpressionAttributeNames: {
+      '#pk': 'pk',
+      '#sk': 'sk',
+    },
     ExpressionAttributeValues: {
-      ':team_name': { S: ("team:" + session.user.name) },
-      ':bot': { S: "bot" }
+      ':pk': "team:" + session.user.name,
+      ':sk': "team:" + session.user.name + "#bot"
     },
   };
 
-  const command = new ScanCommand(params);
-  const result = await client.send(command);
-  if (!result.Items || !result.Items[0]) {
+
+  const command = new QueryCommand(queryParams);
+  const queryResult = await client.send(command);
+  if (!queryResult.Items || !queryResult.Items[0]) {
+    return {
+      props: { submissionData: [] },
+    };
+  }
+
+  const userData = queryResult.Items;
+
+  /* run a GetItem command to search with primary key team:teamname and sort key team:teamname */
+
+  const getItemParams: GetItemCommandInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: {S : "team:" + session.user.name},
+      sk: {S : "team:" + session.user.name}
+    },
+    ProjectionExpression: "active_version"
+  };
+
+  const getItemCommand = new GetItemCommand(getItemParams);
+  const getItemResult = await client.send(getItemCommand);
+  if (!getItemResult || !getItemResult.Item) {
     return {
       props: {
         submissionData: [],
       },
     };
   }
+  const activeVersion = getItemResult.Item.active_version.S ? getItemResult.Item.active_version.S : "";
 
-  const userData = result.Items;
+  console.log("active version: " + activeVersion)
+
+
   const submissionData: Submission[] = [];
   const numSubmissions = userData.length;
 
   const sorted = userData
     .sort((a, b) => {
-      if (a.timeStamp.S === undefined) return 1;
-      if (b.timeStamp.S === undefined) return -1;
-      if (a.timeStamp.S === b.timeStamp.S) return 0;
-      return a.timeStamp.S > b.timeStamp.S ? 1 : -1;
+      if (a.timeStamp === undefined) return 1;
+      if (b.timeStamp === undefined) return -1;
+      if (a.timeStamp === b.timeStamp) return 0;
+      return a.timeStamp > b.timeStamp ? 1 : -1;
     })
     .reverse();
+
   for (let i = 0; i < numSubmissions; i += 1) {
     const submission: Submission = {
-      fileName: sorted[i].upload_name.S as string,
-      submissionURL: process.env.S3_URL_TEMPLATE + sorted[i].s3_key.S as string,
-      timeStamp: sorted[i].timeStamp.S as string,
+      fileName: sorted[i].upload_name as string,
+      submissionURL: process.env.S3_URL_TEMPLATE + sorted[i].s3_key as string,
+      timeStamp: sorted[i].timeStamp as string,
+      isActive: (sorted[i].s3_key === activeVersion) as boolean,
     };
     submissionData.push(submission);
   }
 
+
   return {
-    props: { submissionData }, // will be passed to the page component as props
+    props: { submissionData },
   };
 };
 export default Submissions;

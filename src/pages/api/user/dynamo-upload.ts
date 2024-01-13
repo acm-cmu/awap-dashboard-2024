@@ -61,7 +61,7 @@ export default async function handler(
         },
       }),
     );
-    // console.log(teamUser.Item)
+
     if (!teamUser.Item) {
       client.send(
         new PutItemCommand({
@@ -80,6 +80,7 @@ export default async function handler(
         new UpdateItemCommand({
           TableName: process.env.AWS_TABLE_NAME,
           Key: {
+            pk: { S: primarykey },
             sk: { S: primarykey },
           },
           UpdateExpression: 'SET active_version = :bot_file_name',
