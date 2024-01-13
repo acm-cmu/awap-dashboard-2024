@@ -31,37 +31,42 @@ export default async function handler(
   if (req.method !== 'POST') {
     res.status(405).json({ message: 'Method not allowed' });
   }
-
+  console.log("entered bracket change handler")
   try {
-    const { user, bracket } = req.body;
+    const { user, bracket, teamName } = req.body;
+    console.log("new bracket" + bracket)
     // const submission_id = user + timeStamp;
-    const teamUser = await client.send(
-      new GetItemCommand({
-        TableName: process.env.AWS_PLAYER_TABLE_NAME,
-        Key: {
-          team_name: { S: user },
-        },
-      }),
-    );
+    // const team = await client.send(
+    //   new GetItemCommand({
+    //     TableName: process.env.AWS_TABLE_NAME,
+    //     Key: {
+    //       pk: { S: "team:"+ teamName},
+    //       sk: { S: "team:"+ teamName},
+    //     },
+    //   }),
+    // );
 
-    if (!teamUser.Item) {
-      client.send(
-        new PutItemCommand({
-          TableName: process.env.AWS_PLAYER_TABLE_NAME,
-          Item: {
-            team_name: { S: user },
-            bracket: { S: bracket },
-          },
-        }),
-      );
-    } else {
+    // if (!team.Item) {
+    //   client.send(
+    //     new PutItemCommand({
+    //       TableName: process.env.AWS_TABLE_NAME,
+    //       Item: {
+    //         pk: { S: "team:"+ teamName},
+    //         sk: { S: "team:"+ teamName},
+    //         record_type: { S: "team"},
+    //         bracket: { S: bracket },
+    //       },
+    //     }),
+    //   );
+    // } else {
       client.send(
         new UpdateItemCommand({
-          TableName: process.env.AWS_PLAYER_TABLE_NAME,
+          TableName: process.env.AWS_TABLE_NAME,
           Key: {
-            team_name: { S: user },
+            pk: { S: "team:"+ teamName},
+            sk: { S: "team:"+ teamName},
           },
-          UpdateExpression: 'SET bracket = :bracket',
+          UpdateExpression: 'SET active_version = :bracket',
           ExpressionAttributeValues: {
             ':bracket': { S: bracket },
           },
@@ -93,7 +98,7 @@ export default async function handler(
       //     }),
       //   );
       // }
-    }
+    // }
     res.status(200).json({ bracket });
   } catch (err) {
     console.log(err);
