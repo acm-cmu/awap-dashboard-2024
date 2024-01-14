@@ -103,7 +103,7 @@ const Login: NextPage = () => {
               >
                 <div className="text-center">
                   <h2>Sign up</h2>
-                  <p>Want to compete in AWAP 2023?</p>
+                  <p>Want to compete in AWAP 2024?</p>
                   <Link href="/auth/register">
                     <button
                       className="btn btn-lg btn-outline-light mt-3"

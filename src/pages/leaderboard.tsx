@@ -310,11 +310,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     }
     return 1;
   });
-  console.log('unfiltered: ', unfiltered);
   const unordered = unfiltered.filter(
     (val, idx) => idx === 0 || val.team_name !== unfiltered[idx - 1].team_name,
   );
-  console.log('unordered: ', unordered);
   const items = unordered.sort((i1, i2) => {
     if (i1.current_rating.N === undefined || i2.current_rating.N === undefined)
       return 0;
