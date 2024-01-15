@@ -251,18 +251,28 @@ const Scrimmages: NextPage = ({
 export const getServerSideProps: GetServerSideProps = async () => {
   // scan player table for team names
   const teamScanParams: ScanCommandInput = {
-    TableName: process.env.AWS_RATINGS_TABLE_NAME,
-    ProjectionExpression: 'team_name, current_rating',
+    TableName: process.env.AWS_TABLE_NAME,
+    FilterExpression: 'begins_with(pk, :pk) AND begins_with(sk, :sk)',
+    ExpressionAttributeValues: {
+      ':pk': { S: 'team:' },
+      ':sk': { S: 'team:' },
+    },
+    ProjectionExpression: '#teamName, #rating',
+    ExpressionAttributeNames: {
+      '#teamName': 'name',
+      '#rating': 'num',
+    },
   };
 
   const command = new ScanCommand(teamScanParams);
   const result = await client.send(command);
+  const defaultRating = process.env.DEFAULT_RATING || 0;
 
   let teams: Team[] = [];
   if (result.Items) {
-    teams = result.Items.map((item: any) => ({
-      name: item.team_name.S,
-      rating: item.current_rating.N,
+    teams = result.Items.filter((item: any) => item.name).map((item: any) => ({
+      name: item.name.S,
+      rating: item.num ? item.num.N: defaultRating as number,
     }));
   }
 
