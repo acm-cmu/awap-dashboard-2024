@@ -52,11 +52,12 @@ export default async function handler(
   // console.log(teamname);
 
   const paramsOne: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX1,
-    KeyConditionExpression: 'TEAM_1 = :team_name',
+    TableName: process.env.AWS_TABLE_NAME,
+    IndexName: process.env.AWS_REVERSE_INDEX,
+    KeyConditionExpression: 'sk = :team_name and begins_with(pk, :pk)',
     ExpressionAttributeValues: {
-      ':team_name': { S: teamname },
+      ':team_name': { S: "team:" + teamname },
+      ':pk': { S: "match:" }
     },
   };
 
@@ -67,61 +68,26 @@ export default async function handler(
 
   if (resultPlayerOne.Items) {
     matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_1.S,
-      opponent: item.TEAM_2.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_URL ? item.REPLAY_URL.S : null,
-      status: item.MATCH_STATUS.S,
+      id: item.match_id.N,
+      player: item.team.S,
+      opponent: item.opponent.S,
+      outcome: item.placement ? item.placement.N.toString(): "PENDING",
+      type: item.category.S,
+      replay: item.s3_key ? process.env.S3_URL_TEMPLATE + item.s3_key.S : null,
+      status: item.item_status.S,
     }));
   }
 
   for (let i = 0; i < matchDataPlayerOne.length; i += 1) {
-    if (matchDataPlayerOne[i].outcome === 'team1') {
+    if (matchDataPlayerOne[i].outcome === '0') {
       matchDataPlayerOne[i].outcome = 'WIN';
-    } else if (matchDataPlayerOne[i].outcome === 'team2') {
+    } else if (matchDataPlayerOne[i].outcome === '1') {
       matchDataPlayerOne[i].outcome = 'LOSS';
     }
   }
 
-  const paramsTwo: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX2,
-    KeyConditionExpression: 'TEAM_2 = :team_name',
-    ExpressionAttributeValues: {
-      ':team_name': { S: teamname },
-    },
-  };
-
-  const commandTwo = new QueryCommand(paramsTwo);
-  const resultPlayerTwo: QueryCommandOutput = await client.send(commandTwo);
-
-  let matchDataPlayerTwo: Match[] = [];
-
-  if (resultPlayerTwo.Items) {
-    matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_2.S,
-      opponent: item.TEAM_1.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_URL ? item.REPLAY_URL.S : null,
-      status: item.MATCH_STATUS.S,
-    }));
-  }
-
-  for (let i = 0; i < matchDataPlayerTwo.length; i += 1) {
-    if (matchDataPlayerTwo[i].outcome === 'team1') {
-      matchDataPlayerTwo[i].outcome = 'LOSS';
-    } else if (matchDataPlayerTwo[i].outcome === 'team2') {
-      matchDataPlayerTwo[i].outcome = 'WIN';
-    }
-  }
-
-  const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
   // sort matchData by id
-  const sortedMatchData = matchData.sort(
+  const sortedMatchData = matchDataPlayerOne.sort(
     (a, b) => parseInt(b.id, 10) - parseInt(a.id, 10),
   );
   return res.status(200).json(sortedMatchData);
