@@ -79,9 +79,9 @@ export default async function handler(
   }
 
   for (let i = 0; i < matchDataPlayerOne.length; i += 1) {
-    if (matchDataPlayerOne[i].outcome === '0') {
+    if (matchDataPlayerOne[i].outcome === '1') {
       matchDataPlayerOne[i].outcome = 'WIN';
-    } else if (matchDataPlayerOne[i].outcome === '1') {
+    } else if (matchDataPlayerOne[i].outcome === '2') {
       matchDataPlayerOne[i].outcome = 'LOSS';
     }
   }
