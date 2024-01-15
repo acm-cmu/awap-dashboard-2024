@@ -46,12 +46,17 @@ export const authOptions: NextAuthOptions = {
 
         const user = await client.send(
           new GetItemCommand({
-            TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
+            TableName: process.env.AWS_TABLE_NAME,
             Key: {
-              username: { S: username },
+              pk: { S: "user:"+username },
+              sk: { S: "user:"+username },
             },
           }),
         );
+        console.log(user)
+        console.log(user.Item)
+        console.log(user.Item.password.S)
+        console.log(password)
 
         // if user is not found, throw error
         if (!user.Item) {

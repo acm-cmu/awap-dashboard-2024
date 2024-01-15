@@ -28,8 +28,9 @@ const Login: NextPage = () => {
     });
 
     if (res?.error) {
-      toast.error('Invalid Credentials!');
       console.log('error', res?.error);
+      toast.error('Invalid Credentials!');
+      
     } else if (res?.ok) {
       toast.dismiss();
       router.replace('/');

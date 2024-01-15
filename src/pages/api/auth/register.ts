@@ -39,9 +39,10 @@ export default async function handler(
 
   const user = await client.send(
     new GetItemCommand({
-      TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
+      TableName: process.env.AWS_TABLE_NAME,
       Key: {
-        username: { S: username },
+        pk: { S: "user:"+username },
+        sk: { S: "user:"+username },
       },
     }),
   );
@@ -55,30 +56,31 @@ export default async function handler(
         Item: {
           pk: { S: 'user:'+username },
           sk: { S: 'user:'+username },
+          password: {S: hashedpassword},
         },
       }),
     );
 
-    await client.send(
-      new PutItemCommand({
-        TableName: process.env.AWS_PLAYER_TABLE_NAME,
-        Item: {
-          team_name: { S: username },
-          bracket: { S: bracket },
-          current_submission_id: { S: '' },
-        },
-      }),
-    );
+    // await client.send(
+    //   new PutItemCommand({
+    //     TableName: process.env.AWS_PLAYER_TABLE_NAME,
+    //     Item: {
+    //       team_name: { S: username },
+    //       bracket: { S: bracket },
+    //       current_submission_id: { S: '' },
+    //     },
+    //   }),
+    // );
 
-    await client.send(
-      new PutItemCommand({
-        TableName: process.env.AWS_RATINGS_TABLE_NAME,
-        Item: {
-          team_name: { S: username },
-          current_rating: { N: '0' },
-        },
-      }),
-    );
+    // await client.send(
+    //   new PutItemCommand({
+    //     TableName: process.env.AWS_RATINGS_TABLE_NAME,
+    //     Item: {
+    //       team_name: { S: username },
+    //       current_rating: { N: '0' },
+    //     },
+    //   }),
+    // );
 
     res.status(200).json({ message: 'success' });
   }
