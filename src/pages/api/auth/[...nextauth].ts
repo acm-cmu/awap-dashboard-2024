@@ -53,11 +53,7 @@ export const authOptions: NextAuthOptions = {
             },
           }),
         );
-        console.log(user)
-        console.log(user.Item)
-        console.log(user.Item.password.S)
-        console.log(password)
-
+        
         // if user is not found, throw error
         if (!user.Item) {
           throw new Error('invalid credentials');
@@ -65,17 +61,17 @@ export const authOptions: NextAuthOptions = {
 
         const hashedpassword: string =
           user.Item.password.S !== undefined ? user.Item.password.S : '';
-
-        const match = await compare(password, hashedpassword);
-
+        
+        // const match = await compare(password, hashedpassword);
+        console.log(match)
         if (!match) {
           throw new Error('invalid credentials');
         }
-
+        // console.log("returning")
         return {
           id: username,
           name: username,
-          role: user.Item.role.S,
+          // role: user.Item.role.S,
           email: user.Item.email !== undefined ? user.Item.email.S : '',
           image: user.Item.image !== undefined ? user.Item.image.N : '0',
         };

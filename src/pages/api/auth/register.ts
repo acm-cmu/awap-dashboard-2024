@@ -54,16 +54,10 @@ export default async function handler(
       new PutItemCommand({
         TableName: process.env.AWS_TABLE_NAME,
         Item: {
-<<<<<<< HEAD
           pk: { S: 'user:'+username },
           sk: { S: 'user:'+username },
+          record_type: {S: "user"},
           password: {S: hashedpassword},
-=======
-          username: { S: username },
-          password: { S: hashedpassword },
-          role: { S: 'user' },
-          email: { S: email },
->>>>>>> 7b93407c3f4384d2ad93a6aac25e078aaa31a8bb
         },
       }),
     );

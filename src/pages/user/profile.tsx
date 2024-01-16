@@ -267,26 +267,41 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       props: { team: { bracket: null } }, // will be passed to the page component as props
     };
   }
-  const result2 = await client.send(new ScanCommand({
-    TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'pk = :team_name AND record_type= :bracket',
-    ExpressionAttributeValues: {
-      ':team_name': { S: "team:"+ userData[0].team.S },
-      ':bracket': { S: "bracket"},
-    },
-  }))
-  const teamData = result2.Items;
-  var bracketN = "Beginner"
-  if(teamData[0] && teamData[0].bracket){
-    bracketN = teamData[0].bracket.S
+  if (userData[0].team){
+    const result2 = await client.send(new ScanCommand({
+      TableName: process.env.AWS_TABLE_NAME,
+      FilterExpression: 'pk = :team_name AND record_type= :bracket',
+      ExpressionAttributeValues: {
+        ':team_name': { S: "team:"+ userData[0].team.S},
+        ':bracket': { S: "bracket"},
+      },
+    }))
+    const teamData = result2.Items;
+    var bracketN = "Beginner"
+    if(teamData[0] && teamData[0].bracket){
+      bracketN = teamData[0].bracket.S
+    }
+    const team = {
+      name: userData[0].team.S,
+      bracket: bracketN,
+    };
+    return {
+      props: { team }, // will be passed to the page component as props
+    };
   }
-  const team = {
-    name: userData[0].team.S,
-    bracket: bracketN,
-  };
+  else{
+    const team = {
+      name: "No team",
+        bracket: "Beginner",
+    };
+    return {
+      props: { 
+        team
+       }, // will be passed to the page component as props
+    };
+  }
+  
 
-  return {
-    props: { team }, // will be passed to the page component as props
-  };
+  
 };
 export default Profile;
