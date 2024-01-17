@@ -4,11 +4,21 @@ import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 import { useEffect } from 'react';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Button, Card } from 'react-bootstrap';
+import { Button, Card, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import useSWR from 'swr';
+import { Match } from '@pages/api/admin/admin-match-history';
+import MatchTable from '@components/MatchTable';
 
 const Admin: NextPage = () => {
   const { status, data } = useSession();
+
+  const fetcher = async (url: string) => axios.get(url).then((res) => res.data);
+
+  const { data: MatchData, mutate } = useSWR(
+    '/api/admin/admin-match-history',
+    fetcher
+  );
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
@@ -133,6 +143,22 @@ const Admin: NextPage = () => {
                   Start Ranked Scrimmages
                 </Button>
               </Card.Text>
+            </Card.Body>
+          </Card>
+          <br />
+          <Card>
+            <Card.Body>
+              <Card.Title>Global Match History</Card.Title>
+              <Button
+                variant='primary'
+                className='mb-3'
+                onClick={async () => {
+                  mutate();
+                }}
+              >
+                Refresh
+              </Button>
+              <MatchTable data={MatchData} />
             </Card.Body>
           </Card>
         </UserLayout>
