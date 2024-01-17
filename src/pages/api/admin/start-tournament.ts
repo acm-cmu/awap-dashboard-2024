@@ -38,9 +38,9 @@ export default async function handler(
 
   if (bracket === 'beginner') {
     const paramsBeginner: ScanCommandInput = {
-      TableName: process.env.AWS_PLAYER_TABLE_NAME,
+      TableName: process.env.AWS_TABLE_NAME,
       FilterExpression:
-        'bracket = :beginner and current_submission_id <> :null',
+        'bracket = :beginner and attribute_exists(active_version) and active_version <> :null',
       ExpressionAttributeValues: {
         ':beginner': { S: 'beginner' },
         ':null': { S: '' },
@@ -58,10 +58,10 @@ export default async function handler(
         .send({ message: 'Error fetching data', error: 'No players found' });
     }
 
-    const playerDataBeginner = scanResultBeginner.Items.map((item: any) => ({
-      username: item.team_name.S,
+    const playerDataBeginner = scanResultBeginner.Items.filter((item: any) => item.name).map((item: any) => ({
+      username: item.name.S,
       s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
-      s3_object_name: item.current_submission_id.S,
+      s3_object_name: item.active_version.S,
     }));
     // console.log(playerDataBeginner);
 
@@ -72,9 +72,9 @@ export default async function handler(
     };
   } else if (bracket === 'advanced') {
     const paramsAdvanced: ScanCommandInput = {
-      TableName: process.env.AWS_PLAYER_TABLE_NAME,
+      TableName: process.env.AWS_TABLE_NAME,
       FilterExpression:
-        'bracket = :advanced and current_submission_id <> :null',
+      'bracket = :advanced and attribute_exists(active_version) and active_version <> :null',
       ExpressionAttributeValues: {
         ':advanced': { S: 'advanced' },
         ':null': { S: '' },
@@ -92,10 +92,10 @@ export default async function handler(
         .send({ message: 'Error fetching data', error: 'No players found' });
     }
 
-    const playerDataAdvanced = scanResultAdvanced.Items.map((item: any) => ({
-      username: item.team_name.S,
+    const playerDataAdvanced = scanResultAdvanced.Items.filter((item: any) => item.name).map((item: any) => ({
+      username: item.name.S,
       s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
-      s3_object_name: item.current_submission_id.S,
+      s3_object_name: item.active_version.S,
     }));
     // console.log(playerDataAdvanced);
 
