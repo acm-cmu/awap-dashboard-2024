@@ -227,7 +227,7 @@ const Submissions: NextPage = ({
           <div className="col-md-12">
             <Card className="mb-3">
               <Card.Body>
-                <Card.Title>Available Scrimmages</Card.Title>
+                <Card.Title>Activate Bot</Card.Title>
                 <BotsDropdown
                   bots={submissionData}
                   username={userData?.user.name!}
