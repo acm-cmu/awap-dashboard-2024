@@ -15,12 +15,15 @@ import {
   DynamoDBClientConfig,
   GetItemCommand,
   GetItemCommandInput,
+  UpdateItemCommand,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
 import { DynamoDBDocument, QueryCommand, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
@@ -44,6 +47,7 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
 
 interface Submission {
   fileName: string;
+  s3Key: string;
   submissionURL: string;
   timeStamp: string;
   isActive: boolean;
@@ -91,6 +95,62 @@ const TableBody: React.FC<{ data: any; image: string }> = ({ data, image }) => (
     ))}
   </tbody>
 );
+
+const BotsDropdown: React.FC<{
+  bots: Submission[];
+  username: string;
+}> = ({ bots, username}) => {
+  const [ActiveBot, setValue] = useState<string | null>(null);
+
+  const onActivate = () => {
+
+    for (let i = 0; i < bots.length; i += 1) {
+      if (bots[i].fileName === ActiveBot) {
+        client.send(
+          new UpdateItemCommand({
+            TableName: process.env.AWS_TABLE_NAME,
+            Key: {
+              pk: { S: "team:" + session.user.name},
+              sk: { S: "team:" + session.user.name},
+            },
+            UpdateExpression: 'SET active_version = :bot_file_name',
+            ExpressionAttributeValues: {
+              ':bot_file_name': { S: bots[i].s3Key },
+            },
+          }),
+        );
+        return;
+      }
+    }
+
+  };
+
+  const botNames = bots.map((bots) => bots.fileName);
+
+  return (
+    <div style={{ display: 'flex' }}>
+      <Autocomplete
+        disablePortal
+        value={ActiveBot}
+        onChange={(event: any, newBot: string | null) => {
+          setValue(newBot);
+        }}
+        id="bots_dropdown"
+        options={botNames}
+        sx={{ width: 800 }}
+        renderInput={(params) => <TextField {...params} label="Bots" />}
+      />
+      <Button
+        variant="primary"
+        style={{ marginLeft: 10 }}
+        onClick={onActivate}
+        size="lg"
+      >
+        Activate
+      </Button>
+    </div>
+  );
+};
 
 const Submissions: NextPage = ({
   submissionData,
@@ -158,6 +218,20 @@ const Submissions: NextPage = ({
                 />
 
                 <Button onClick={handleUploadClick}>Upload</Button>
+              </Card.Body>
+            </Card>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="col-md-12">
+            <Card className="mb-3">
+              <Card.Body>
+                <Card.Title>Available Scrimmages</Card.Title>
+                <BotsDropdown
+                  bots={submissionData}
+                  username={userData?.user.name!}
+                />
               </Card.Body>
             </Card>
           </div>
@@ -274,6 +348,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   for (let i = 0; i < numSubmissions; i += 1) {
     const submission: Submission = {
       fileName: sorted[i].upload_name as string,
+      s3Key: sorted[i].s3_key,
       submissionURL: process.env.S3_URL_TEMPLATE + sorted[i].s3_key as string,
       timeStamp: sorted[i].timeStamp as string,
       isActive: (sorted[i].s3_key === activeVersion) as boolean,
