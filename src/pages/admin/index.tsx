@@ -8,62 +8,7 @@ import { Button, Card, Table } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import useSWR from 'swr';
 import { Match } from '@pages/api/admin/admin-match-history';
-
-const TableRow: React.FC<{ match: Match }> = ({ match }) => {
-  let outcomeMsg = '';
-  if (match.outcome === 'team1') {
-    outcomeMsg = match.player1;
-  } else if (match.outcome === 'team2') {
-    outcomeMsg = match.player2;
-  } else {
-    outcomeMsg = 'unknown';
-  }
-
-  return (
-    <tr>
-      <td>{match.id}</td>
-      <td>{match.player1}</td>
-      <td>{match.player2}</td>
-      <td>{match.category}</td>
-      <td>{match.status}</td>
-      <td>{outcomeMsg}</td>
-      <td>
-        <a href={match.replay}>Download</a>
-      </td>
-    </tr>
-  );
-};
-
-const TableBody: React.FC<{ data: Match[] }> = ({ data }) => {
-  if (data == null) {
-    console.log('data is null');
-  } else if (data.length == 0) {
-    console.log('data is zero');
-  }
-  // eslint-disable-next-line react/jsx-key
-  return (
-    <tbody>
-      {data && data.map((item: Match) => <TableRow match={item} />)}
-    </tbody>
-  );
-};
-
-const MatchTable: React.FC<{ data: Match[] }> = ({ data }) => (
-  <Table striped bordered hover className='text-center'>
-    <thead>
-      <tr>
-        <th>Match ID</th>
-        <th>Player 1</th>
-        <th>Player 2</th>
-        <th>Category</th>
-        <th>Status</th>
-        <th>Outcome</th>
-        <th>Replay</th>
-      </tr>
-    </thead>
-    <TableBody data={data} />
-  </Table>
-);
+import MatchTable from '@components/MatchTable';
 
 const Admin: NextPage = () => {
   const { status, data } = useSession();

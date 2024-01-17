@@ -27,7 +27,7 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
 });
 
 export interface Match {
-  id: number;
+  id: string;
   player1: string;
   player2: string;
   category: string;
@@ -63,7 +63,7 @@ export default async function handler(
 
   if (result.Items) {
     matchData = result.Items.map((item: any) => ({
-      id: item.pk ? parseInt(item.pk.S.slice(6)) : -1,
+      id: item.pk ? item.pk.S.slice(6) : '-1',
       player1: item.sk ? item.sk.S.slice(5) : 'unknown',
       player2: item.opponent ? item.opponent.S.slice(5) : 'unknown',
       category: item.category ? item.category.S : 'unknown',
