@@ -280,7 +280,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     ProjectionExpression: '#teamName, #rating',
     ExpressionAttributeNames: {
       '#teamName': 'name',
-      '#rating': 'rating',
+      '#rating': 'num',
     },
   };
 
@@ -311,15 +311,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   const defaultRating = process.env.DEFAULT_RATING || 0;
 
   const items = teamdata.Items.sort((i1, i2) => {
-    const i2Rating = parseInt(i2.rating ? i2.rating.N : defaultRating, 10);
-    const i1Rating = parseInt(i1.rating ? i1.rating.N : defaultRating, 10);
+    const i2Rating = parseInt(i2.num ? i2.num.N : defaultRating, 10);
+    const i1Rating = parseInt(i1.num ? i1.num.N : defaultRating, 10);
     return i2Rating - i1Rating;
   });
 
   const teams: Leaderboard[] = items.filter((item: any) => item.name).map((item, idx) => ({
     ranking: idx + 1,
     tname: item.name.S as string,
-    rating: parseInt(item.rating ? item.rating.N : defaultRating, 10),
+    rating: parseInt(item.num ? item.num.N : defaultRating, 10),
   }));
 
   function sortmap(t: Leaderboard, att: string) {
