@@ -30,7 +30,27 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 
-// id is a number
+
+/* Dynamo DB Config */
+
+const config: DynamoDBClientConfig = {
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_LOCAL as string,
+    secretAccessKey: process.env.AWS_SECRET_KEY_LOCAL as string,
+  },
+  region: process.env.AWS_REGION_LOCAL,
+};
+
+const client = DynamoDBDocument.from(new DynamoDB(config), {
+  marshallOptions: {
+    convertEmptyValues: true,
+    removeUndefinedValues: true,
+    convertClassInstanceToMap: true,
+  },
+});
+
+
+/* Team Member Display Component */
 const TeamMemberField = ({ id }: { id: number }) => {
   const name = `user${id}`;
   const placeholder = `Team Member ${id}`;
@@ -49,22 +69,8 @@ const TeamMemberField = ({ id }: { id: number }) => {
     </InputGroup>
   );
 };
-const config: DynamoDBClientConfig = {
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_LOCAL as string,
-    secretAccessKey: process.env.AWS_SECRET_KEY_LOCAL as string,
-  },
-  region: process.env.AWS_REGION_LOCAL,
-};
 
-const client = DynamoDBDocument.from(new DynamoDB(config), {
-  marshallOptions: {
-    convertEmptyValues: true,
-    removeUndefinedValues: true,
-    convertClassInstanceToMap: true,
-  },
-});
-
+/* Profile Page Component */
 const Profile: NextPage = ({
   team,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -94,6 +100,7 @@ const Profile: NextPage = ({
     window.location.reload();
     window.location.reload();
   };
+
   const createTeam = async (user: string | null | undefined) => {
     if (!user) return;
     const teamName = document.getElementById('teamname') as HTMLInputElement;
