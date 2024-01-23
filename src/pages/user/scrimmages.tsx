@@ -252,10 +252,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
   // scan player table for team names
   const teamScanParams: ScanCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'begins_with(pk, :pk) AND begins_with(sk, :sk)',
+    FilterExpression: 'record_type = :record',
     ExpressionAttributeValues: {
-      ':pk': { S: 'team:' },
-      ':sk': { S: 'team:' },
+      ':record': { S: 'team' },
     },
     ProjectionExpression: '#teamName, #rating',
     ExpressionAttributeNames: {

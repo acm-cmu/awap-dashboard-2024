@@ -271,10 +271,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   const params: ScanCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'begins_with(pk, :pk) AND begins_with(sk, :sk) AND record_type = :record',
+    FilterExpression: 'record_type = :record',
     ExpressionAttributeValues: {
-      ':pk': { S: 'team:' },
-      ':sk': { S: 'team:' },
       ':record': { S: 'team' },
     },
     ProjectionExpression: '#teamName, #rating',
