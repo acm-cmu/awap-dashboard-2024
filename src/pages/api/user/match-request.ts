@@ -41,12 +41,12 @@ export default async function handler(
     TableName: process.env.AWS_TABLE_NAME,
     IndexName: process.env.AWS_REVERSE_INDEX,
     KeyConditionExpression: 'sk = :team_name and begins_with(pk, :pk)',
-    FilterExpression: 'item_status = :status and opponent = :opp',
+    FilterExpression: 'item_status = :status and contains(players, :opp)',
     ExpressionAttributeValues: {
       ':team_name': { S: "team:" + player },
       ':pk': { S: "match:" },
       ':status': { S: 'PENDING' },
-      ':opp': { S: opp },
+      ':opp': { M: {teamName: {S: opp}, current: {BOOL: false}} },
     },
   };
 
