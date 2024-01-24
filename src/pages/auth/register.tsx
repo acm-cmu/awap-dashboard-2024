@@ -22,9 +22,10 @@ import axios from 'axios';
 const Register: NextPage = () => {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [name, setName] = useState('');
   const [username, setUsername] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [bracket, setBracket] = useState('beginner');
   const [passwordRepeat, setPasswordRepeat] = useState('');
 
   const login = async (e: SyntheticEvent) => {
@@ -44,7 +45,7 @@ const Register: NextPage = () => {
     }
   };
 
-  const register = (e: SyntheticEvent) => {
+  const register = async (e: SyntheticEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
@@ -57,22 +58,23 @@ const Register: NextPage = () => {
     }
 
     // rewrite this to use axios
-    axios
+    await axios
       .post('/api/auth/register', {
         username,
         password,
-        bracket,
+        name,
+        email,
       })
-      .then((res) => res.status)
-      .then((status) => {
-        if (status === 400) {
-          toast.error('Username already exists!');
-        } else if (status === 200) {
+      .then((res) => {
+        if(res.status === 200) {
           toast.dismiss();
           toast.success('Account created successfully!', { autoClose: 2000 });
           login(e);
         }
-      })
+      }).catch((error) => {
+        toast.error('Account with this username already exists');
+      }
+      )
       .finally(() => setSubmitting(false));
   };
 
@@ -87,6 +89,22 @@ const Register: NextPage = () => {
                 <p className="text-black-50">Create your team account</p>
 
                 <form onSubmit={register}>
+                <InputGroup className="mb-3">
+                    <InputGroup.Text>
+                      <FontAwesomeIcon icon={faUser} fixedWidth />
+                    </InputGroup.Text>
+                    <Form.Control
+                      onChange={(e) => setName(e.target.value)}
+                      name="name"
+                      minLength={1}
+                      maxLength={50}
+                      required
+                      disabled={submitting}
+                      placeholder="Name"
+                      aria-label="Name"
+                    />
+                  </InputGroup>
+
                   <InputGroup className="mb-3">
                     <InputGroup.Text>
                       <FontAwesomeIcon icon={faUser} fixedWidth />
@@ -98,8 +116,23 @@ const Register: NextPage = () => {
                       maxLength={20}
                       required
                       disabled={submitting}
-                      placeholder="Team Name"
-                      aria-label="Team Name"
+                      placeholder="Username"
+                      aria-label="Username"
+                    />
+                  </InputGroup>
+
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text>
+                      <FontAwesomeIcon icon={faUser} fixedWidth />
+                    </InputGroup.Text>
+                    <Form.Control
+                      type="email"
+                      onChange={(e) => setEmail(e.target.value)}
+                      name="email"
+                      required
+                      disabled={submitting}
+                      placeholder="name@example.com"
+                      aria-label="Email"
                     />
                   </InputGroup>
 
@@ -137,13 +170,7 @@ const Register: NextPage = () => {
                     />
                   </InputGroup>
 
-                  <Form.Select
-                    aria-label="Default select example"
-                    onChange={(e) => setBracket(e.target.value)}
-                  >
-                    <option value="beginner">Beginner</option>
-                    <option value="advanced">Advanced</option>
-                  </Form.Select>
+
 
                   <br />
                   <Button

@@ -1,13 +1,12 @@
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  GetItemCommand,
-  PutItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { hash } from 'bcrypt';
+import { get } from 'http';
 
 const config: DynamoDBClientConfig = {
   credentials: {
@@ -33,53 +32,47 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { username, password, bracket } = req.body;
+  const { username, password, name, email } = req.body;
 
   const hashedpassword = await hash(password, 10);
 
-  const user = await client.send(
-    new GetItemCommand({
-      TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
-      Key: {
-        username: { S: username },
-      },
-    }),
-  );
+  try {
 
-  if (user.Item) {
-    res.status(400).json({ message: 'user already exists' });
-  } else {
-    await client.send(
-      new PutItemCommand({
+    const user = await client.send(
+      new GetCommand ({
         TableName: process.env.AWS_TABLE_NAME,
-        Item: {
-          pk: { S: 'user:'+username },
-          sk: { S: 'user:'+username },
+        Key: {
+          pk: 'user:' + username,
+          sk: 'user:' + username,
         },
       }),
     );
 
-    await client.send(
-      new PutItemCommand({
-        TableName: process.env.AWS_PLAYER_TABLE_NAME,
-        Item: {
-          team_name: { S: username },
-          bracket: { S: bracket },
-          current_submission_id: { S: '' },
-        },
-      }),
-    );
+    if (user.Item) {
+      console.log('user already exists');
+      return res.status(400).json({ message: 'user already exists' });
+    } else {
+      await client.send(
+        new PutCommand ({
+          TableName: process.env.AWS_TABLE_NAME,
+          Item: {
+            pk: `user:${username}`,
+            sk: `user:${username}`,
+            record_type: 'user',
+            name: name,
+            email: email,
+            password: hashedpassword,
+            role: 'user',
+            image: getRandomIntInclusive(1, 27),
+          },
+        }),
+      );
 
-    await client.send(
-      new PutItemCommand({
-        TableName: process.env.AWS_RATINGS_TABLE_NAME,
-        Item: {
-          team_name: { S: username },
-          current_rating: { N: '0' },
-        },
-      }),
-    );
-
-    res.status(200).json({ message: 'success' });
+     return res.status(200).json({ message: 'success' });
+    }
+  }
+  catch (err) {
+    console.log(err)
+    return res.status(400).json({ message: err });
   }
 }

@@ -18,7 +18,7 @@ import {
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, QueryCommand, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand, GetCommandInput, QueryCommand, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 
@@ -93,12 +93,15 @@ const TableBody: React.FC<{ data: any; image: string }> = ({ data, image }) => (
 );
 
 const Submissions: NextPage = ({
-  submissionData,
+  teamData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
 
   const [file, setFile] = useState<any>(null);
   // const { status, data } = useSession()
+
+  const submissionData = teamData.submissionData;
+  const team = teamData.team;
 
   const uploadFile = async (user: string) => {
     if (!file) return;
@@ -132,7 +135,7 @@ const Submissions: NextPage = ({
   };
 
   const handleUploadClick = async () =>
-    uploadFile(userData?.user.name as string);
+    uploadFile(team);
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
@@ -210,6 +213,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  const result = await client.send(new GetCommand({
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: "user:" + session.user.name,
+      sk: "user:" + session.user.name
+    },
+  }));
+
+  if(!result || !result.Item || !result.Item.team) {
+    return {
+      redirect: {
+        destination: '/team',
+        permanent: false,
+      },
+    };
+  }
+
+  const team = result.Item.team;
+
   const queryParams: QueryCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
@@ -218,51 +240,59 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       '#sk': 'sk',
     },
     ExpressionAttributeValues: {
-      ':pk': "team:" + session.user.name,
-      ':sk': "team:" + session.user.name + "#bot"
+      ':pk': "team:" + team,
+      ':sk': "team:" + team + "#bot"
     },
   };
-
 
   const command = new QueryCommand(queryParams);
   const queryResult = await client.send(command);
   if (!queryResult.Items || !queryResult.Items[0]) {
     return {
-      props: { submissionData: [] },
-    };
+      props: { 
+        teamData: {
+          team,
+          submissionData: [],
+          },
+      }
+    }
   }
 
-  const userData = queryResult.Items;
+  const teamData = queryResult.Items;
 
   /* run a GetItem command to search with primary key team:teamname and sort key team:teamname */
 
-  const getItemParams: GetItemCommandInput = {
+  const getItemParams: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     Key: {
-      pk: {S : "team:" + session.user.name},
-      sk: {S : "team:" + session.user.name}
+      pk: "team:" + team,
+      sk: "team:" + team,
     },
     ProjectionExpression: "active_version"
   };
 
-  const getItemCommand = new GetItemCommand(getItemParams);
+  const getItemCommand = new GetCommand(getItemParams);
   const getItemResult = await client.send(getItemCommand);
   if (!getItemResult || !getItemResult.Item) {
     return {
       props: {
-        submissionData: [],
+        teamData: {
+          team,
+          submissionData: [],
+        }
       },
     };
   }
-  const activeVersion = getItemResult.Item.active_version.S ? getItemResult.Item.active_version.S : "";
+
+  const activeVersion = getItemResult.Item.active_version ? getItemResult.Item.active_version : "";
 
   console.log("active version: " + activeVersion)
 
 
   const submissionData: Submission[] = [];
-  const numSubmissions = userData.length;
+  const numSubmissions = teamData.length;
 
-  const sorted = userData
+  const sorted = teamData
     .sort((a, b) => {
       if (a.timeStamp === undefined) return 1;
       if (b.timeStamp === undefined) return -1;
@@ -283,7 +313,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 
   return {
-    props: { submissionData },
+    props: { 
+      teamData: {
+        team,
+        submissionData,
+      }
+    },
   };
 };
 export default Submissions;

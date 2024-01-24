@@ -9,6 +9,7 @@ import {
   faCode,
   faPencil,
   faLock,
+  faPeopleGroup,
 } from '@fortawesome/free-solid-svg-icons';
 import React, { PropsWithChildren } from 'react';
 import { Nav } from 'react-bootstrap';
@@ -51,6 +52,9 @@ const ProtectedSidebarUserItems = () => {
         </SidebarNavItem>
         <SidebarNavItem icon={faPencil} href="/user/scrimmages">
           Scrimmages
+        </SidebarNavItem>
+        <SidebarNavItem icon={faPeopleGroup} href="/team/">
+          Team
         </SidebarNavItem>
       </>
     );
