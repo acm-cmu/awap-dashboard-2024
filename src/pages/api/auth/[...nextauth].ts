@@ -4,7 +4,7 @@ import {
   DynamoDBClientConfig,
   GetItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 import NextAuth, { NextAuthOptions } from 'next-auth';
 
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -45,10 +45,11 @@ export const authOptions: NextAuthOptions = {
         };
 
         const user = await client.send(
-          new GetItemCommand({
-            TableName: process.env.AWS_USER_ACCOUNT_TABLE_NAME,
+          new GetCommand({
+            TableName: process.env.AWS_TABLE_NAME,
             Key: {
-              username: { S: username },
+              pk: `user:${username}` as string,
+              sk: `user:${username}` as string,
             },
           }),
         );
@@ -59,7 +60,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const hashedpassword: string =
-          user.Item.password.S !== undefined ? user.Item.password.S : '';
+          user.Item.password !== undefined ? user.Item.password : '';
 
         const match = await compare(password, hashedpassword);
 
@@ -67,12 +68,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error('invalid credentials');
         }
 
+
         return {
           id: username,
           name: username,
-          role: user.Item.role.S,
-          email: user.Item.email !== undefined ? user.Item.email.S : '',
-          image: user.Item.image !== undefined ? user.Item.image.N : '0',
+          role: user.Item.role,
+          email: user.Item.email !== undefined ? user.Item.email : '',
+          image: user.Item.image !== undefined ? user.Item.image : '0',
         };
       },
     }),

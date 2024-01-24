@@ -1,9 +1,15 @@
 import { UserLayout } from '@layout';
 import { GetServerSideProps, InferGetServerSidePropsType, NextPage } from 'next';
-import { Card } from 'react-bootstrap';
+import { Card, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
 import { useRouter } from 'next/router'
 import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, GetCommand, GetCommandInput } from '@aws-sdk/lib-dynamodb';
+import { unstable_getServerSession } from 'next-auth';
+import { authOptions } from '@pages/api/auth/[...nextauth]';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { userInfo } from 'os';
+import { useSession } from 'next-auth/react';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -22,72 +28,76 @@ const config: DynamoDBClientConfig = {
     },
   });
 
+  /* Team Member Display Component */
+const TeamMemberField = ({ name }: { name: string }) => {
+    return (
+        <div className="d-flex mb-3">
+            <div className="avatar avatar-sm me-1">
+                <FontAwesomeIcon icon={faUser} fixedWidth />
+            </div>
+            <div>{name}</div>
+        </div>
+    );
+  };
+
 const Team: NextPage = ({
-    submissionData,
+    teamData,
   }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
     const router = useRouter();
-    const { teamId } = router.query;
+    const { teamname } = router.query;
 
+    const { data: session, status } = useSession();
 
     return (
         <UserLayout>
-            <Card className="mb-3">
-            <Card.Body>
-                <Card.Title>Getting Started</Card.Title>
-                <Card.Text>
-                Follow through the instructions below to learn more about installation
-                instructions, how you can upload your bot submissions, request
-                scrimmages with other players, and check out your match results!
-                </Card.Text>
-            </Card.Body>
-            </Card>
-            <Card className="mb-3">
-            <Card.Body>
-                <Card.Title>Upload Bots</Card.Title>
-                <Card.Text>
-                Navigate to the submissions page to upload your bot files and view
-                your previous submissions. You may upload submissions at any time and
-                your current file will be used as your submission for any scrimmages
-                you may request or matches we run.
-                </Card.Text>
-            </Card.Body>
-            </Card>
-            <Card className="mb-3">
-            <Card.Body>
-                <Card.Title>Scrimmages</Card.Title>
-                <Card.Text>
-                Find the scrimmages page to request unranked matches with any teams
-                listed in the dropdown. You may request up to 5 scrimmages per hour.
-                These scrimmages do not affect your rating on the leaderboard.
-                </Card.Text>
-            </Card.Body>
-            </Card>
-            <Card>
-            <Card.Body>
-                <Card.Title>Leaderboard</Card.Title>
-                <Card.Text>
-                Check out the leaderboard to see how your rating is against other
-                teams participating in AWAP.{' '}
-                </Card.Text>
-            </Card.Body>
-            </Card>
+            <div className="bg-light min-vh-100 d-flex flex-row dark:bg-transparent">
+            <Container>
+                <Row className="justify-content-center">
+                <Col md={6}>
+                    <Card className="mb-4 rounded-0">
+                    <Card.Body className="p-4">
+                        <h1 className="text-center">{teamname}</h1>
+                        <div>
+                            <p><strong>Members:</strong></p>
+                            {teamData.members.map((member: string) => (
+                                <TeamMemberField name={member} />
+                            ))}
+                        </div>
+                        <div>
+                            <p><strong>Rating:</strong> {teamData.rating ? teamData.rating : 0}</p>
+                        </div>
+                    </Card.Body>
+                    </Card>
+                </Col>
+                </Row>
+            </Container>
+            </div>
         </UserLayout>
     );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+    const session = await unstable_getServerSession(
+        context.req,
+        context.res,
+        authOptions,
+    );
+
+    if(!session) {
+        return {
+            redirect: {
+                destination: '/auth/login',
+                permanent: false,
+            },
+        };
+    }
+
+    const username = session.user.name;
+      
     const { teamname } = context.params;
 
     console.log(teamname);
-
-    // check if the teamname exists in DB
-    // if it does not, redirect to /team page
-    // if it does, check if the user is in the team
-    // if the user is not in the team, pass in authenticated = false props
-    // if the user is in the team, pass in authenticated = true props
-
-    // Use getItem to check if the team exists
 
     const getParams : GetCommandInput = {
         TableName: process.env.AWS_TABLE_NAME,
@@ -97,25 +107,37 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       };
     
-      const command = new GetCommand(getParams);
-      const result = await client.send(command);
+    const command = new GetCommand(getParams);
+    const result = await client.send(command);
     
-      const teamData = result.Item;
-      console.log(teamData);
+    const teamData = result.Item;
     
-      if (!teamData) {
+    if (!teamData || !teamData.members) {
         return {
-          redirect: {
-            destination: '/team',
-            permanent: false,
-          },
+            redirect: {
+                destination: '/team',
+                permanent: false,
+            },
         };
       }
 
+    if(!teamData.members.includes(username)) {
+        return {
+            props: {
+                members: teamData.members,
+                teamname: teamData.name,
+                rating: teamData.rating,
+                authenticated: false,
+            }
+        };
+    }
 
     return {
-        props: { authenticated: true },
-    };
-  }
+        props: { 
+            teamData,
+            authenticated: true
+        },
+    }
+}
 
 export default Team;

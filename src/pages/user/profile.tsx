@@ -23,7 +23,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
 import { useRouter } from 'next/router';
@@ -257,7 +257,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const params: ScanCommandInput = {
+  const params: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     FilterExpression: 'pk = :user_name',
     ExpressionAttributeValues: {
@@ -265,7 +265,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   };
 
-  const command = new ScanCommand(params);
+  const command = new GetCommand(params);
   const result = await client.send(command);
 
   const userData = result.Items;
