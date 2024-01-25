@@ -125,7 +125,7 @@ const Team: NextPage = ({
         const newBracket = document.getElementById('newbracket') as HTMLInputElement;
         const newBracketValue = newBracket.value;
 
-        await axios.post('/api/user/bracket-change',
+        await axios.post('/api/team/bracket-change',
         {
             team,
             bracket: newBracketValue,
@@ -206,8 +206,8 @@ const Team: NextPage = ({
                                     className="form-select mb-3"
                                     aria-label="Default select example"
                                     id="newbracket"
+                                    defaultValue={teamData.bracket ? teamData.bracket : 'beginner'}
                                 >
-                                    <option value="" selected disabled hidden>Choose here</option>
                                     <option value="beginner">Beginner</option>
                                     <option value="advanced">Advanced</option>
                                 </select>

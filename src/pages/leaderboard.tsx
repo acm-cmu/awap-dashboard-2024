@@ -274,7 +274,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   const params: QueryInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    IndexName: 'record_type-index',
+    IndexName: process.env.AWS_RECORD_INDEX,
     KeyConditionExpression: 'record_type = :record',
     ExpressionAttributeValues: {
       ':record': { S: 'team' },

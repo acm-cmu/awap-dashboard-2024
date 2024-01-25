@@ -4,8 +4,9 @@ import {
   QueryCommand,
   QueryCommandInput,
   QueryCommandOutput,
+  QueryInput,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
@@ -45,83 +46,72 @@ export default async function handler(
     return res.status(401).json({ message: 'You must be logged in.' });
   }
 
-  const teamname = session.user.name;
+  const user = session.user.name;
 
-  // console.log('Match History request from');
-  // console.log(teamname);
+  try {
 
-  const paramsOne: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX1,
-    KeyConditionExpression: 'TEAM_1 = :team_name',
+  const userInfo = await client.send(
+    new GetCommand({
+      TableName: process.env.AWS_TABLE_NAME,
+      Key: {
+        "pk" : `user:${user}`,
+        "sk" : `user:${user}`
+      },
+      ProjectionExpression: 'team',
+    }),
+  );
+
+  if (!userInfo.Item) {
+    return res.status(401).json({ message: 'User not found.' });
+  }
+
+  const teamname = userInfo.Item.team;
+
+  console.log(teamname);
+
+  const queryMatchParams: QueryCommandInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    IndexName: process.env.AWS_REVERSE_INDEX,
+    KeyConditionExpression: 'sk = :team_name and begins_with(pk, :pk)',
     ExpressionAttributeValues: {
-      ':team_name': { S: teamname },
+      ':team_name': { S: `team:${teamname}` },
+      ':pk': { S: 'match:'}
     },
   };
 
-  const commandOne = new QueryCommand(paramsOne);
-  const resultPlayerOne: QueryCommandOutput = await client.send(commandOne);
+  const command = new QueryCommand(queryMatchParams);
+  const matchHistoryResult: QueryCommandOutput = await client.send(command);
 
-  let matchDataPlayerOne: Match[] = [];
+  let teamMatchData: Match[] = [];
 
-  if (resultPlayerOne.Items) {
-    matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_1.S,
-      opponent: item.TEAM_2.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_URL ? item.REPLAY_URL.S : null,
-      status: item.MATCH_STATUS.S,
+  if (matchHistoryResult.Items) {
+    teamMatchData = matchHistoryResult.Items.map((item: any) => ({
+      id: item.match_id.N,
+      player: teamname,
+      opponent: item.players.L[0].S === teamname ? item.players.L[1].S : item.players.L[0].S,
+      outcome: item.placement ? item.placement.N.toString(): "PENDING",
+      type: item.category.S,
+      replay: item.s3_key ? process.env.S3_URL_TEMPLATE + item.s3_key.S : null,
+      status: item.item_status.S,
     }));
   }
 
-  for (let i = 0; i < matchDataPlayerOne.length; i += 1) {
-    if (matchDataPlayerOne[i].outcome === 'team1') {
-      matchDataPlayerOne[i].outcome = 'WIN';
-    } else if (matchDataPlayerOne[i].outcome === 'team2') {
-      matchDataPlayerOne[i].outcome = 'LOSS';
+  for (let i = 0; i < teamMatchData.length; i += 1) {
+    if (teamMatchData[i].outcome === '1') {
+      teamMatchData[i].outcome = 'WIN';
+    } else if (teamMatchData[i].outcome === '2') {
+      teamMatchData[i].outcome = 'LOSS';
     }
   }
 
-  const paramsTwo: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX2,
-    KeyConditionExpression: 'TEAM_2 = :team_name',
-    ExpressionAttributeValues: {
-      ':team_name': { S: teamname },
-    },
-  };
-
-  const commandTwo = new QueryCommand(paramsTwo);
-  const resultPlayerTwo: QueryCommandOutput = await client.send(commandTwo);
-
-  let matchDataPlayerTwo: Match[] = [];
-
-  if (resultPlayerTwo.Items) {
-    matchDataPlayerTwo = resultPlayerTwo.Items.map((item: any) => ({
-      id: item.MATCH_ID.N,
-      player: item.TEAM_2.S,
-      opponent: item.TEAM_1.S,
-      outcome: item.OUTCOME.S,
-      type: item.MATCH_TYPE.S,
-      replay: item.REPLAY_URL ? item.REPLAY_URL.S : null,
-      status: item.MATCH_STATUS.S,
-    }));
-  }
-
-  for (let i = 0; i < matchDataPlayerTwo.length; i += 1) {
-    if (matchDataPlayerTwo[i].outcome === 'team1') {
-      matchDataPlayerTwo[i].outcome = 'LOSS';
-    } else if (matchDataPlayerTwo[i].outcome === 'team2') {
-      matchDataPlayerTwo[i].outcome = 'WIN';
-    }
-  }
-
-  const matchData = matchDataPlayerOne.concat(matchDataPlayerTwo);
   // sort matchData by id
-  const sortedMatchData = matchData.sort(
+  const sortedMatchData = teamMatchData.sort(
     (a, b) => parseInt(b.id, 10) - parseInt(a.id, 10),
   );
   return res.status(200).json(sortedMatchData);
+  }
+  catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
 }

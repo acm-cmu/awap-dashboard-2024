@@ -33,19 +33,28 @@ export default async function handler(
     return res.status(405).send({ message: 'Method not allowed' });
   }
 
-  const { player } = req.body;
-  const { opp } = req.body;
+  const { player, opp } = req.body;
 
+  console.log(player, opp);
+
+  if (!player || !opp) {
+    return res
+      .status(400)
+      .send({ message: 'Error creating match request', error: 'No player' });
+  }
+
+  /*
   const params: QueryCommandInput = {
-    TableName: process.env.AWS_MATCH_TABLE_NAME,
-    IndexName: process.env.AWS_MATCH_TABLE_INDEX1,
-    KeyConditionExpression: 'TEAM_1 = :team_name ',
+    TableName: process.env.AWS_TABLE_NAME,
+    IndexName: process.env.AWS_REVERSE_INDEX,
+    KeyConditionExpression: 'sk = :team_name and begins_with(pk, :pk)',
+    FilterExpression: 'item_status = :status and contains(players, :opp)',
     ExpressionAttributeValues: {
-      ':team_name': { S: player },
-      ':status': { S: 'pending' },
-      ':opp': { S: opp },
+      ':team_name': { S: `team:${player}`},
+      ':pk': { S: "match:" },
+      ':status': { S: 'PENDING' },
+      ':opp': { S: `team:${opp}` },
     },
-    FilterExpression: 'MATCH_STATUS = :status and TEAM_2 = :opp',
   };
 
   const queryCommand = new QueryCommand(params);
@@ -53,9 +62,9 @@ export default async function handler(
 
   if (queryResult.Items?.length) {
     const matchTimeData = queryResult.Items.map((item: any) => ({
-      status: item.MATCH_STATUS.S,
-      last_updated: item.LAST_UPDATED.S,
-      id: item.MATCH_ID.N,
+      status: item.item_status.S,
+      last_updated: item.timestamp.S,
+      id: item.match_id.N,
     }));
 
     // check if last_updated is less than 30 minutes ago
@@ -77,28 +86,33 @@ export default async function handler(
       }
     }
   }
+  */
 
   const playerData = await client.send(
     new GetItemCommand({
-      TableName: process.env.AWS_PLAYER_TABLE_NAME,
+      TableName: process.env.AWS_TABLE_NAME,
       Key: {
-        team_name: { S: player },
+        pk: {S : "team:" + player},
+        sk: {S : "team:" + player}
       },
+      ProjectionExpression: "active_version"
     }),
   );
 
-  const playerBotName = playerData.Item?.current_submission_id.S;
+  const playerBotName = playerData.Item?.active_version?.S;
 
   const oppData = await client.send(
     new GetItemCommand({
-      TableName: process.env.AWS_PLAYER_TABLE_NAME,
+      TableName: process.env.AWS_TABLE_NAME,
       Key: {
-        team_name: { S: opp },
+        pk: {S : "team:" + opp},
+        sk: {S : "team:" + opp}
       },
+      ProjectionExpression: "active_version"
     }),
   );
 
-  const oppBotName = oppData.Item?.current_submission_id.S;
+  const oppBotName = oppData.Item?.active_version?.S;
 
   if (!playerBotName || !oppBotName) {
     return res

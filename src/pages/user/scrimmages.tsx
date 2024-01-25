@@ -14,10 +14,11 @@ import { Card, Table, Button } from 'react-bootstrap';
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  ScanCommand,
+  QueryCommand,
+  QueryCommandInput,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, GetCommand, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -37,6 +38,7 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
+    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -128,13 +130,13 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
 
 const ScrimmageRequestDropdown: React.FC<{
   teams: Team[];
-  username: string;
+  userteam: string;
   setCurrentTeamSearch: React.Dispatch<React.SetStateAction<Team | null>>;
-}> = ({ teams, username, setCurrentTeamSearch }) => {
+}> = ({ teams, userteam, setCurrentTeamSearch }) => {
   const [TeamValue, setValue] = useState<string | null>(null);
 
   const teamnames = teams.map((team: Team) => team.name);
-  const index = teamnames.indexOf(username);
+  const index = teamnames.indexOf(userteam);
   if (index > -1) teamnames.splice(index, 1);
 
   const onSearch = () => {
@@ -189,7 +191,7 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
 );
 
 // Scrimmages Page
-const Scrimmages: NextPage = ({
+const Scrimmages: NextPage = ({ userTeam,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const session = useSession({ required: true });
@@ -219,7 +221,7 @@ const Scrimmages: NextPage = ({
           <Card.Title>Available Scrimmages</Card.Title>
           <ScrimmageRequestDropdown
             teams={teams}
-            username={session.data.user?.name}
+            userteam={userTeam}
             setCurrentTeamSearch={setCurrentTeamSearch}
           />
         </Card.Body>
@@ -227,7 +229,7 @@ const Scrimmages: NextPage = ({
       {CurrentTeamSearch && (
         <TeamInfo
           oppTeam={CurrentTeamSearch}
-          playerTeam={session.data.user.name}
+          playerTeam={userTeam}
         />
       )}
       <Card>
@@ -264,16 +266,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-  
-  const userInfo = await client.send(new GetCommand({
-    TableName: process.env.AWS_TABLE_NAME,
-    Key: {
-      pk: "user:" + session.user.name,
-      sk: "user:" + session.user.name
-    },
-  }));
 
-  if(!userInfo || !userInfo.Item || !userInfo.Item.team) {
+  const userInfo = await client.send(
+    new GetCommand({
+      TableName: process.env.AWS_TABLE_NAME,
+      Key: {
+        pk: `user:${session.user.name}`,
+        sk: `user:${session.user.name}`,
+      },
+      ProjectionExpression: '#team',
+      ExpressionAttributeNames: {
+        '#team': 'team',
+      },
+    }),
+  );
+
+  if (!userInfo || !userInfo.Item || !userInfo.Item.team) {
     return {
       redirect: {
         destination: '/team',
@@ -281,26 +289,42 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-  
-  // scan player table for team names
-  const teamScanParams: ScanCommandInput = {
-    TableName: process.env.AWS_RATINGS_TABLE_NAME,
-    ProjectionExpression: 'team_name, current_rating',
+
+  const team = userInfo.Item.team;
+
+  // query player table for team names
+  const teamQueryParams: QueryCommandInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    IndexName: process.env.AWS_RECORD_INDEX,
+    KeyConditionExpression: 'record_type = :record',
+    ExpressionAttributeValues: {
+      ':record': { S: 'team' },
+    },
+    ProjectionExpression: '#teamName, #rating',
+    ExpressionAttributeNames: {
+      '#teamName': 'name',
+      '#rating': 'num',
+    },
   };
 
-  const command = new ScanCommand(teamScanParams);
+
+  const command = new QueryCommand(teamQueryParams);
   const result = await client.send(command);
+  const defaultRating = process.env.DEFAULT_RATING || 0;
 
   let teams: Team[] = [];
   if (result.Items) {
-    teams = result.Items.map((item: any) => ({
-      name: item.team_name.S,
-      rating: item.current_rating.N,
+    teams = result.Items.filter((item: any) => item.name).map((item: any) => ({
+      name: item.name.S,
+      rating: item.num ? item.num.N: defaultRating as number,
     }));
   }
 
   return {
-    props: { teams }, // will be passed to the page component as props
+    props: { 
+      userTeam: team,
+      teams
+    }, // will be passed to the page component as props
   };
 };
 
