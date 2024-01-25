@@ -32,6 +32,7 @@ import AWS from 'aws-sdk';
     return result;
   }
   
+  
   export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -41,59 +42,39 @@ import AWS from 'aws-sdk';
     }
 
     try {
-        const { user, teamName } = req.body;
+        const { teamname } = req.body;
 
       // check if team name exists
         const team = await client.send(
             new GetItemCommand({
             TableName: process.env.AWS_TABLE_NAME,
             Key: {
-                pk: { S: `team:${teamName}`},
-                sk: { S: `team:${teamName}`},
+                pk: { S: `team:${teamname}` },
+                sk: { S: `team:${teamname}` },
             },
             }),
         );
 
-        if (team.Item) {
-            return res.status(400).json({ message: 'Team name already exists' });
+        if (!team.Item) {
+            return res.status(400).json({ message: 'Team does not exist!' });
         }
         else {
-            // add team to table
-            await client.send(
-                new PutItemCommand({
-                TableName: process.env.AWS_TABLE_NAME,
-                Item: {
-                    pk: { S: `team:${teamName}` },
-                    sk: { S: `team:${teamName}` },
-                    record_type: { S: "team" },
-                    name: { S: teamName },
-                    members: { SS: [user] },
-                    bracket: { S: "beginner" },
-                    num: { N: '0' },
-                    active_version: { S: '' },
-                    secret_key: { S: generateSecretKey() },
-                  },
-                }),
-            );
+                await client.send(
+                    new UpdateItemCommand({
+                    TableName: process.env.AWS_TABLE_NAME,
+                    Key: {
+                        pk: { S: `team:${teamname}` },
+                        sk: { S: `team:${teamname}` },
+                    },
+                    UpdateExpression: "SET secret_key = :secret_key",
+                    ExpressionAttributeValues: {
+                        ":secret_key": { S: generateSecretKey() },
+                    },
+                    }),
+                );
 
-            // add team field to user
-            await client.send(
-                new UpdateCommand({
-                TableName: process.env.AWS_TABLE_NAME,
-                Key: {
-                    pk: `user:${user}`,
-                    sk: `user:${user}`,
-                },
-                UpdateExpression: "SET team = :team",
-                ExpressionAttributeValues: {
-                    ":team": teamName,
-                },
-                }),
-            );
-
-            res.status(200).json({ teamName });
-        }
-    
+                return res.status(200).json({ message: 'Regenerated Join Key' });
+            }
     } catch (err) {
       console.log(err);
       return res.status(400).json({ message: err });

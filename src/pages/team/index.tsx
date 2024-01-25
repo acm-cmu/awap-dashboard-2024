@@ -12,6 +12,7 @@ import Router, { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { unstable_getServerSession } from 'next-auth';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
+import { useCookies } from 'react-cookie';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -24,7 +25,6 @@ const config: DynamoDBClientConfig = {
   
   const client = DynamoDBDocument.from(new DynamoDB(config), {
     marshallOptions: {
-      convertEmptyValues: true,
       removeUndefinedValues: true,
       convertClassInstanceToMap: true,
     },
@@ -39,16 +39,21 @@ const TeamHub: NextPage = ({
 
     const { data: session, status } = useSession();
 
+    const [cookies, setCookie, removeCookie] = useCookies(['user']);
+
     const router = useRouter();
 
-    const createTeam = async () => {
-        console.log(createTeamname);
+    const createTeam = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
 
         await axios.post('/api/team/create-team', {
-            user: session?.user.name,
+            user: session.user.name,
             teamName: createTeamname,
         }).then((response) => {
             toast.success("Team created successfully!");
+            setCookie('user', { ...cookies.user, teamname: createTeamname },  { path: '/', expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), secure: true, sameSite: 'strict' });
             // redirect to team page
             router.push(`team/${createTeamname}`);
 
@@ -58,9 +63,23 @@ const TeamHub: NextPage = ({
         });
     }
 
-    const joinTeam = () => {
-        console.log(joinTeamname);
-        console.log(joinSecretKey);
+    const joinTeam = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        await axios.post('/api/team/join-team', {
+            user: session.user.name,
+            teamName: joinTeamname,
+            secretKey: joinSecretKey,
+        }).then((response) => {
+            toast.success("Team joined successfully!");
+            // redirect to team page
+            setCookie('user', { ...cookies.user, teamname: joinTeamname },  { path: '/', expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), secure: true, sameSite: 'strict' });
+            router.push(`team/${joinTeamname}`);
+        }
+        ).catch((error) => {
+            toast.error(error.response.data.message);
+        });
     }
 
 
@@ -90,6 +109,35 @@ const TeamHub: NextPage = ({
             <Card.Text>
                 If you have a secret key, you can join an existing team.
             </Card.Text>
+            <Form onSubmit={joinTeam}>
+                <Form.Group controlId="teamName">
+                <Form.Label><strong>Team Name</strong></Form.Label>
+                <Form.Control
+                    className="mb-2"
+                    type="text"
+                    placeholder="Enter team name"
+                    onChange={(e) => setJoinTeamname(e.target.value)}
+                    minLength={3}
+                    maxLength={20}
+                    required
+                />
+                </Form.Group>
+                <Form.Group controlId="secretKey">
+                <Form.Label><strong>Secret Key</strong></Form.Label>
+                <Form.Control
+                    className="mb-2"
+                    type="text"
+                    placeholder="Enter secret key"
+                    onChange={(e) => setJoinSecretKey(e.target.value)}
+                    minLength={3}
+                    maxLength={20}
+                    required
+                />
+                </Form.Group>
+                <Button variant="dark" type="submit">
+                Join Team
+                </Button>
+            </Form>
 
         </Card.Body>
         </Card>
@@ -99,10 +147,11 @@ const TeamHub: NextPage = ({
             <Card.Text>
                 If you don't have a team, you can create one.
             </Card.Text>
-            <Form>
+            <Form onSubmit={createTeam}>
                 <Form.Group controlId="teamName">
-                <Form.Label>Team Name</Form.Label>
+                <Form.Label><strong>Team Name</strong></Form.Label>
                 <Form.Control
+                    className="mb-2"
                     type="text"
                     placeholder="Enter team name"
                     onChange={(e) => setCreateTeamname(e.target.value)}
@@ -111,7 +160,7 @@ const TeamHub: NextPage = ({
                     required
                 />
                 </Form.Group>
-                <Button variant="primary" onClick={createTeam}>
+                <Button variant="dark" type='submit'>
                 Create Team
                 </Button>
             </Form>
@@ -148,14 +197,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   
     const command = new GetCommand(getParams);
     const result = await client.send(command);
-    if (!result || !result.Item || !result.Item.team) {
+    if (!result || !result.Item || !result.Item.team || result.Item.team === '') {
       return {
         props: { team: null },
       };
     }
-
-    console.log(result.Item);
-
+    
     return {
         props: { team: result.Item.team },
     };

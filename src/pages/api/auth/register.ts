@@ -18,7 +18,6 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
-    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -64,6 +63,7 @@ export default async function handler(
             password: hashedpassword,
             role: 'user',
             image: getRandomIntInclusive(1, 27),
+            team: '',
           },
         }),
       );

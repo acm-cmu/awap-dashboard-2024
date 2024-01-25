@@ -36,7 +36,6 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
-    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -157,6 +156,7 @@ const Submissions: NextPage = ({
                   type="file"
                   name="image"
                   id="selectFile"
+                  accept='.py'
                   onChange={(e: any) => setFile(e.target.files[0])}
                 />
 

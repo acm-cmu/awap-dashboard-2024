@@ -43,7 +43,6 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
-    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -77,6 +76,7 @@ const Account: NextPage = ({
                         alt="Team Logo"
                       />
                     </div>
+                    <br />
                     <div>
                       Name: <strong>{userInfo.name}</strong>
                     </div>
@@ -84,7 +84,7 @@ const Account: NextPage = ({
                       Email: <strong>{userInfo.email}</strong>
                     </div>
                     <div>
-                      Team: <strong>{userInfo.team}</strong>
+                      Team: <strong>{userInfo.team ? userInfo.team : "Not Joined"}</strong>
                     </div>
                     <div>
                       Role: <strong>{userInfo.role}</strong>
@@ -129,7 +129,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const result = await client.send(command);
 
   const userData = result.Item;
-  console.log(userData);
 
   if (!userData) {
     return {
@@ -149,7 +148,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     name: userData.name,
     email: userData.email,
     image: userData.image,
-    role: userData.role,
+    role: userData.role === 'user' ? 'Competitor' : 'Admin',
     team: userData.team,
   };
 
