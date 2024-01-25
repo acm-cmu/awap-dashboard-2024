@@ -117,7 +117,7 @@ const Admin: NextPage = () => {
             <Card.Body>
               <Card.Title>Beginner</Card.Title>
               <Card.Text>
-                <Button onClick={startBeginnerTournament}>
+                <Button onClick={startBeginnerTournament} variant='dark'>
                   Start a Tournament (Beginner)
                 </Button>
               </Card.Text>
@@ -128,7 +128,7 @@ const Admin: NextPage = () => {
             <Card.Body>
               <Card.Title>Advanced</Card.Title>
               <Card.Text>
-                <Button onClick={startAdvancedTournament}>
+                <Button onClick={startAdvancedTournament} variant='dark'>
                   Start a Tournament (Advanced)
                 </Button>
               </Card.Text>
@@ -139,7 +139,7 @@ const Admin: NextPage = () => {
             <Card.Body>
               <Card.Title>Ranked Scrimmages</Card.Title>
               <Card.Text>
-                <Button onClick={startRankedScrimmages}>
+                <Button onClick={startRankedScrimmages} variant='dark'>
                   Start Ranked Scrimmages
                 </Button>
               </Card.Text>
@@ -150,7 +150,7 @@ const Admin: NextPage = () => {
             <Card.Body>
               <Card.Title>Global Match History</Card.Title>
               <Button
-                variant='primary'
+                variant='dark'
                 className='mb-3'
                 onClick={async () => {
                   mutate();
