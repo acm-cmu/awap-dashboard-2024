@@ -24,7 +24,7 @@ const Register: NextPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
 
@@ -66,118 +66,116 @@ const Register: NextPage = () => {
         email,
       })
       .then((res) => {
-        if(res.status === 200) {
+        if (res.status === 200) {
           toast.dismiss();
           toast.success('Account created successfully!', { autoClose: 2000 });
           login(e);
         }
-      }).catch((error) => {
+      })
+      .catch(() => {
         toast.error('Account with this username already exists');
-      }
-      )
+      })
       .finally(() => setSubmitting(false));
   };
 
   return (
-    <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
+    <div className='bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent'>
       <Container>
-        <Row className="justify-content-center">
+        <Row className='justify-content-center'>
           <Col md={6}>
-            <Card className="mb-4 rounded-0">
-              <Card.Body className="p-4">
-                <h1 className="text-center">Register for AWAP 2024</h1>
-                <p className="text-black-50">Create your team account</p>
+            <Card className='mb-4 rounded-0'>
+              <Card.Body className='p-4'>
+                <h1 className='text-center'>Register for AWAP 2024</h1>
+                <p className='text-black-50'>Create your team account</p>
 
                 <form onSubmit={register}>
-                <InputGroup className="mb-3">
+                  <InputGroup className='mb-3'>
                     <InputGroup.Text>
                       <FontAwesomeIcon icon={faUser} fixedWidth />
                     </InputGroup.Text>
                     <Form.Control
                       onChange={(e) => setName(e.target.value)}
-                      name="name"
+                      name='name'
                       minLength={1}
                       maxLength={50}
                       required
                       disabled={submitting}
-                      placeholder="Name"
-                      aria-label="Name"
+                      placeholder='Name'
+                      aria-label='Name'
                     />
                   </InputGroup>
 
-                  <InputGroup className="mb-3">
+                  <InputGroup className='mb-3'>
                     <InputGroup.Text>
                       <FontAwesomeIcon icon={faUser} fixedWidth />
                     </InputGroup.Text>
                     <Form.Control
                       onChange={(e) => setUsername(e.target.value)}
-                      name="username"
+                      name='username'
                       minLength={3}
                       maxLength={20}
                       required
                       disabled={submitting}
-                      placeholder="Username"
-                      aria-label="Username"
+                      placeholder='Username'
+                      aria-label='Username'
                     />
                   </InputGroup>
 
-                  <InputGroup className="mb-3">
+                  <InputGroup className='mb-3'>
                     <InputGroup.Text>
                       <FontAwesomeIcon icon={faUser} fixedWidth />
                     </InputGroup.Text>
                     <Form.Control
-                      type="email"
+                      type='email'
                       onChange={(e) => setEmail(e.target.value)}
-                      name="email"
+                      name='email'
                       required
                       disabled={submitting}
-                      placeholder="name@example.com"
-                      aria-label="Email"
+                      placeholder='name@example.com'
+                      aria-label='Email'
                     />
                   </InputGroup>
 
-                  <InputGroup className="mb-3">
+                  <InputGroup className='mb-3'>
                     <InputGroup.Text>
                       <FontAwesomeIcon icon={faLock} fixedWidth />
                     </InputGroup.Text>
                     <Form.Control
                       onChange={(e) => setPassword(e.target.value)}
-                      type="password"
-                      name="password"
+                      type='password'
+                      name='password'
                       minLength={8}
                       maxLength={20}
                       required
                       disabled={submitting}
-                      placeholder="Password"
-                      aria-label="Password"
+                      placeholder='Password'
+                      aria-label='Password'
                     />
                   </InputGroup>
 
-                  <InputGroup className="mb-3">
+                  <InputGroup className='mb-3'>
                     <InputGroup.Text>
                       <FontAwesomeIcon icon={faLock} fixedWidth />
                     </InputGroup.Text>
                     <Form.Control
                       onChange={(e) => setPasswordRepeat(e.target.value)}
-                      type="password"
-                      name="password_repeat"
+                      type='password'
+                      name='password_repeat'
                       minLength={8}
                       maxLength={20}
                       required
                       disabled={submitting}
-                      placeholder="Repeat password"
-                      aria-label="Repeat password"
+                      placeholder='Repeat password'
+                      aria-label='Repeat password'
                     />
                   </InputGroup>
 
-
-
                   <br />
                   <Button
-                    type="submit"
-                    className="d-block w-100"
+                    type='submit'
+                    className='d-block w-100'
                     disabled={submitting}
-                    variant="success"
+                    variant='success'
                   >
                     Create Account
                   </Button>

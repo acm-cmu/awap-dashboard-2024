@@ -1,12 +1,12 @@
+import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 import {
-  DynamoDB,
-  DynamoDBClientConfig,
-} from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+  DynamoDBDocument,
+  GetCommand,
+  PutCommand,
+} from '@aws-sdk/lib-dynamodb';
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { hash } from 'bcrypt';
-import { get } from 'http';
 
 const config: DynamoDBClientConfig = {
   credentials: {
@@ -36,43 +36,39 @@ export default async function handler(
   const hashedpassword = await hash(password, 10);
 
   try {
-
     const user = await client.send(
-      new GetCommand ({
+      new GetCommand({
         TableName: process.env.AWS_TABLE_NAME,
         Key: {
-          pk: 'user:' + username,
-          sk: 'user:' + username,
+          pk: `user:${username}`,
+          sk: `user:${username}`,
         },
       }),
     );
 
-    if (user.Item) {
-      console.log('user already exists');
+    if (user.Item)
       return res.status(400).json({ message: 'user already exists' });
-    } else {
-      await client.send(
-        new PutCommand ({
-          TableName: process.env.AWS_TABLE_NAME,
-          Item: {
-            pk: `user:${username}`,
-            sk: `user:${username}`,
-            record_type: 'user',
-            name: name,
-            email: email,
-            password: hashedpassword,
-            role: 'user',
-            image: getRandomIntInclusive(1, 27),
-            team: '',
-          },
-        }),
-      );
+    
+    await client.send(
+      new PutCommand({
+        TableName: process.env.AWS_TABLE_NAME,
+        Item: {
+          pk: `user:${username}`,
+          sk: `user:${username}`,
+          record_type: 'user',
+          name,
+          email,
+          password: hashedpassword,
+          role: 'user',
+          image: getRandomIntInclusive(1, 27),
+          team: '',
+        },
+      }),
+    );
 
-     return res.status(200).json({ message: 'success' });
-    }
-  }
-  catch (err) {
-    console.log(err)
+    return res.status(200).json({ message: 'success' });
+
+  } catch (err) {
     return res.status(400).json({ message: err });
   }
 }

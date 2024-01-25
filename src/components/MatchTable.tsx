@@ -6,7 +6,9 @@ import {
 } from 'material-react-table';
 import { Match } from '@pages/api/admin/admin-match-history';
 
-const MatchTable = (props: any) => {
+const ReplayCell = ({ cell } : { cell : any }) => <a href={cell.getValue()}>Download</a>;
+
+const MatchTable = (props: { data: Match[] }) => {
   const { data } = props;
   const columns = useMemo<MRT_ColumnDef<Match>[]>(
     () => [
@@ -51,17 +53,17 @@ const MatchTable = (props: any) => {
       {
         accessorKey: 'replay',
         header: 'Replay',
-        Cell: ({ cell }) => <a href={cell.getValue<string>()}>Download</a>,
+        Cell: ReplayCell,
         filterVariant: 'multi-select',
         size: 180,
       },
     ],
-    []
+    [],
   );
 
   const table = useMaterialReactTable({
     columns,
-    data: data ? data : [],
+    data,
     enableFacetedValues: true,
     enableColumnResizing: true,
     enableFullScreenToggle: false,

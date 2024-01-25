@@ -88,7 +88,6 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
   playerTeam,
 }) => {
   const requestMatch = async () => {
-    console.log('request sent');
     axios
       .post('/api/user/match-request', {
         player: playerTeam,
@@ -96,12 +95,11 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
       })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
-          console.log('request sent');
           toast.success('Match Request Sent!');
         }
       })
       .catch((reason: AxiosError) => {
-        if (reason.response!.status === 500) {
+        if (reason.response?.status === 500) {
           toast.error('Internal Error, please try again later');
         } else if (reason.response?.status === 412) {
           toast.error('You have already requested a match with this team');
@@ -110,17 +108,16 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
         } else {
           toast.error('Something went wrong');
         }
-        console.log(reason.message);
       });
   };
 
   return (
-    <Card className="mb-3">
+    <Card className='mb-3'>
       <Card.Body>
         <Card.Title>{oppTeam.name}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted" />
+        <Card.Subtitle className='mb-2 text-muted' />
         <Card.Text>Rating: {oppTeam.rating}</Card.Text>
-        <Button variant="dark" onClick={requestMatch}>
+        <Button variant='dark' onClick={requestMatch}>
           Request Match
         </Button>
       </Card.Body>
@@ -157,16 +154,16 @@ const ScrimmageRequestDropdown: React.FC<{
         onChange={(event: any, newTeamValue: string | null) => {
           setValue(newTeamValue);
         }}
-        id="teams_dropdown"
+        id='teams_dropdown'
         options={teamnames}
         sx={{ width: 800 }}
-        renderInput={(params) => <TextField {...params} label="Teams" />}
+        renderInput={(params) => <TextField {...params} label='Teams' />}
       />
       <Button
-        variant="dark"
+        variant='dark'
         style={{ marginLeft: 10 }}
         onClick={onSearch}
-        size="lg"
+        size='lg'
       >
         Search
       </Button>
@@ -175,7 +172,7 @@ const ScrimmageRequestDropdown: React.FC<{
 };
 
 const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
-  <Table striped bordered hover className="text-center">
+  <Table striped bordered hover className='text-center'>
     <thead>
       <tr>
         <th>Match ID</th>
@@ -191,7 +188,8 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
 );
 
 // Scrimmages Page
-const Scrimmages: NextPage = ({ userTeam,
+const Scrimmages: NextPage = ({
+  userTeam,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const session = useSession({ required: true });
@@ -216,7 +214,7 @@ const Scrimmages: NextPage = ({ userTeam,
 
   return (
     <UserLayout>
-      <Card className="mb-3">
+      <Card className='mb-3'>
         <Card.Body>
           <Card.Title>Available Scrimmages</Card.Title>
           <ScrimmageRequestDropdown
@@ -227,17 +225,14 @@ const Scrimmages: NextPage = ({ userTeam,
         </Card.Body>
       </Card>
       {CurrentTeamSearch && (
-        <TeamInfo
-          oppTeam={CurrentTeamSearch}
-          playerTeam={userTeam}
-        />
+        <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={userTeam} />
       )}
       <Card>
         <Card.Body>
           <Card.Title>Scrimmage History</Card.Title>
           <Button
-            variant="dark"
-            className="mb-3"
+            variant='dark'
+            className='mb-3'
             onClick={async () => {
               mutate();
             }}
@@ -290,7 +285,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const team = userInfo.Item.team;
+  const { team } = userInfo.Item;
 
   // query player table for team names
   const teamQueryParams: QueryCommandInput = {
@@ -307,7 +302,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   };
 
-
   const command = new QueryCommand(teamQueryParams);
   const result = await client.send(command);
   const defaultRating = process.env.DEFAULT_RATING || 0;
@@ -316,14 +310,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (result.Items) {
     teams = result.Items.filter((item: any) => item.name).map((item: any) => ({
       name: item.name.S,
-      rating: item.num ? item.num.N: defaultRating as number,
+      rating: item.num ? item.num.N : (defaultRating as number),
     }));
   }
 
   return {
-    props: { 
+    props: {
       userTeam: team,
-      teams
+      teams,
     }, // will be passed to the page component as props
   };
 };

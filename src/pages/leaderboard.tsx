@@ -16,11 +16,9 @@ import {
   DynamoDB,
   DynamoDBClientConfig,
   QueryCommand,
-  QueryCommandInput,
   QueryInput,
-  ScanCommand,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 
 const config: DynamoDBClientConfig = {
   credentials: {
@@ -51,7 +49,7 @@ type RankLabelProps = {
 
 const RankLabel = ({ rank }: RankLabelProps) => (
   <td
-    className="text-black d-table-cell text-uppercase text-center me-2"
+    className='text-black d-table-cell text-uppercase text-center me-2'
     style={{
       backgroundColor: rankColorMap[rank],
       fontSize: '.96rem',
@@ -103,14 +101,14 @@ const THSort = (props: THSortProps) => {
 
   return (
     <a
-      className="text-decoration-none"
-      role="button"
+      className='text-decoration-none'
+      role='button'
       tabIndex={0}
       onClick={onClick}
       onKeyDown={onClick}
     >
       {children}
-      <FontAwesomeIcon icon={icon} fixedWidth size="xs" />
+      <FontAwesomeIcon icon={icon} fixedWidth size='xs' />
     </a>
   );
 };
@@ -139,18 +137,18 @@ const Pagination = (props: PaginationProps) => {
   }, [currentPage]);
 
   return (
-    <div className="row align-items-center justify-content-center">
-      <div className="col-12 text-center text-sm-start col-sm-auto col-lg mb-3">
-        Showing <span className="fw-semibold">{from}</span> to{' '}
-        <span className="fw-semibold">{Math.min(to, total)}</span> of{' '}
-        <span className="fw-semibold">{total}</span> results
+    <div className='row align-items-center justify-content-center'>
+      <div className='col-12 text-center text-sm-start col-sm-auto col-lg mb-3'>
+        Showing <span className='fw-semibold'>{from}</span> to{' '}
+        <span className='fw-semibold'>{Math.min(to, total)}</span> of{' '}
+        <span className='fw-semibold'>{total}</span> results
       </div>
-      <div className="col-auto ms-sm-auto mb-3">
+      <div className='col-auto ms-sm-auto mb-3'>
         Rows per page:{' '}
         <Form.Select
           value={perPage}
-          className="d-inline-block w-auto"
-          aria-label="Item per page"
+          className='d-inline-block w-auto'
+          aria-label='Item per page'
           onChange={(event) => {
             router.push({
               pathname: router.pathname,
@@ -168,25 +166,25 @@ const Pagination = (props: PaginationProps) => {
           <option value={100}>100</option>
         </Form.Select>
       </div>
-      <div className="col-auto ms-sm-auto mb-3 overflow-auto">
+      <div className='col-auto ms-sm-auto mb-3 overflow-auto'>
         <ReactPaginate
           forcePage={pageIndex}
           pageCount={lastPage}
           marginPagesDisplayed={1}
           pageRangeDisplayed={3}
-          containerClassName="pagination mb-0"
-          previousClassName="page-item"
-          pageClassName="page-item"
-          breakClassName="page-item"
-          nextClassName="page-item"
-          previousLinkClassName="page-link"
-          pageLinkClassName="page-link"
-          breakLinkClassName="page-link"
-          nextLinkClassName="page-link"
-          previousLabel="‹"
-          nextLabel="›"
-          activeClassName="active"
-          disabledClassName="disabled"
+          containerClassName='pagination mb-0'
+          previousClassName='page-item'
+          pageClassName='page-item'
+          breakClassName='page-item'
+          nextClassName='page-item'
+          previousLinkClassName='page-link'
+          pageLinkClassName='page-link'
+          breakLinkClassName='page-link'
+          nextLinkClassName='page-link'
+          previousLabel='‹'
+          nextLabel='›'
+          activeClassName='active'
+          disabledClassName='disabled'
           onPageChange={(selectedItem) => {
             router.push({
               pathname: router.pathname,
@@ -218,16 +216,16 @@ const Teams: NextPage<Props> = (props) => {
         <Card.Body>
           <Pagination meta={meta} />
           <Table responsive bordered hover>
-            <thead className="bg-light">
+            <thead className='bg-light'>
               <tr>
                 <th>
-                  <THSort name="ranking">Ranking</THSort>
+                  <THSort name='ranking'>Ranking</THSort>
                 </th>
                 <th>
-                  <THSort name="tname">Team name</THSort>
+                  <THSort name='tname'>Team name</THSort>
                 </th>
-                <th className="text-end">
-                  <THSort name="rating">Rating</THSort>
+                <th className='text-end'>
+                  <THSort name='rating'>Rating</THSort>
                 </th>
               </tr>
             </thead>
@@ -237,7 +235,7 @@ const Teams: NextPage<Props> = (props) => {
                   <RankLabel key={team.tname} rank={team.ranking} />
                   {/* <td>{team.ranking}</td> */}
                   <td>{team.tname}</td>
-                  <td className="text-end">{team.rating}</td>
+                  <td className='text-end'>{team.rating}</td>
                 </tr>
               ))}
             </tbody>
@@ -249,9 +247,7 @@ const Teams: NextPage<Props> = (props) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<Props> = async (
-  context,
-) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
   let page = 1;
   if (context.query?.page && typeof context.query.page === 'string') {
     page = parseInt(context.query.page, 10);
@@ -310,16 +306,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   const defaultRating = process.env.DEFAULT_RATING || '0';
 
   const items = teamdata.Items.sort((i1, i2) => {
-    const i2Rating = parseInt((i2.num && i2.num.N) ? i2.num.N : defaultRating, 10);
-    const i1Rating = parseInt((i2.num && i2.num.N) ? i2.num.N : defaultRating, 10);
+    const i2Rating = parseInt(
+      i2.num && i2.num.N ? i2.num.N : defaultRating,
+      10,
+    );
+    const i1Rating = parseInt(
+      i2.num && i2.num.N ? i2.num.N : defaultRating,
+      10,
+    );
     return i2Rating - i1Rating;
   });
 
-  const teams: Leaderboard[] = items.filter((item: any) => item.name).map((item, idx) => ({
-    ranking: idx + 1,
-    tname: item.name.S as string,
-    rating: parseInt((item.num && item.num.N) ? item.num.N : defaultRating, 10),
-  }));
+  const teams: Leaderboard[] = items
+    .filter((item: any) => item.name)
+    .map((item, idx) => ({
+      ranking: idx + 1,
+      tname: item.name.S as string,
+      rating: parseInt(item.num && item.num.N ? item.num.N : defaultRating, 10),
+    }));
 
   function sortmap(t: Leaderboard, att: string) {
     if (att === 'tname') return t.tname;

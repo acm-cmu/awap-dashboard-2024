@@ -2,9 +2,6 @@ import {
   DynamoDB,
   DynamoDBClientConfig,
   GetItemCommand,
-  QueryCommand,
-  QueryCommandInput,
-  QueryCommandOutput,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import axios from 'axios';
@@ -34,8 +31,6 @@ export default async function handler(
   }
 
   const { player, opp } = req.body;
-
-  console.log(player, opp);
 
   if (!player || !opp) {
     return res
@@ -92,10 +87,10 @@ export default async function handler(
     new GetItemCommand({
       TableName: process.env.AWS_TABLE_NAME,
       Key: {
-        pk: {S : "team:" + player},
-        sk: {S : "team:" + player}
+        pk: { S: `team:${player}` },
+        sk: { S: `team:${player}` },
       },
-      ProjectionExpression: "active_version"
+      ProjectionExpression: 'active_version',
     }),
   );
 
@@ -105,10 +100,10 @@ export default async function handler(
     new GetItemCommand({
       TableName: process.env.AWS_TABLE_NAME,
       Key: {
-        pk: {S : "team:" + opp},
-        sk: {S : "team:" + opp}
+        pk: { S: `team:${opp}` },
+        sk: { S: `team:${opp}` },
       },
-      ProjectionExpression: "active_version"
+      ProjectionExpression: 'active_version',
     }),
   );
 

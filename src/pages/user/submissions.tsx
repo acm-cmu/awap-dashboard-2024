@@ -3,22 +3,22 @@ import type { NextPage } from 'next';
 import Image from 'next/image';
 import { UserLayout } from '@layout';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisVertical, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { Button, Card, Dropdown } from 'react-bootstrap';
+import { faUsers } from '@fortawesome/free-solid-svg-icons';
+import { Button, Card } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  DynamoDB,
-  DynamoDBClientConfig,
-  GetItemCommand,
-  GetItemCommandInput,
-  ScanCommand,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, GetCommand, GetCommandInput, QueryCommand, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocument,
+  GetCommand,
+  GetCommandInput,
+  QueryCommand,
+  QueryCommandInput,
+} from '@aws-sdk/lib-dynamodb';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 
@@ -48,45 +48,47 @@ interface Submission {
   isActive: boolean;
 }
 
-const TableRow: React.FC<{ submission: any; image: string }> = ({
+const TableRow: React.FC<{ submission: Submission; image: string }> = ({
   submission,
   image,
 }) => (
-  <tr className="align-middle">
-    <td className="text-center">
-      <div className="avatar avatar-md d-inline-flex position-relative">
+  <tr className='align-middle'>
+    <td className='text-center'>
+      <div className='avatar avatar-md d-inline-flex position-relative'>
         <Image
           fill
-          className="rounded-circle"
+          className='rounded-circle'
           src={`/assets/avatars/avatar_${image}.jpg`}
-          alt="profile pic"
+          alt='profile pic'
         />
-        <span className="avatar-status position-absolute d-block bottom-0 end-0 bg-success rounded-circle border border-white" />
+        <span className='avatar-status position-absolute d-block bottom-0 end-0 bg-success rounded-circle border border-white' />
       </div>
     </td>
     <td>
       <div>
-        <a href={submission.submissionURL} target="_blank" rel="noreferrer">
+        <a href={submission.submissionURL} target='_blank' rel='noreferrer'>
           {submission.fileName}
         </a>
       </div>
     </td>
 
     <td>
-      <div className="small text-black-50" />
-      <div className="fw-semibold">{submission.timeStamp}</div>
+      <div className='small text-black-50' />
+      <div className='fw-semibold'>{submission.timeStamp}</div>
     </td>
     <td>
-      <div className="small text-black-50" />
-      <div className="fw-semibold">{submission.isActive ? "Active" : "Inactive"}</div>
+      <div className='small text-black-50' />
+      <div className='fw-semibold'>
+        {submission.isActive ? 'Active' : 'Inactive'}
+      </div>
     </td>
   </tr>
 );
 
-const TableBody: React.FC<{ data: any; image: string }> = ({ data, image }) => (
+const TableBody: React.FC<{ data: Submission[]; image: string }> = ({ data, image }) => (
   <tbody>
     {data.map((item: any) => (
-      <TableRow submission={item} image={image}/>
+      <TableRow submission={item} image={image} />
     ))}
   </tbody>
 );
@@ -95,12 +97,8 @@ const Submissions: NextPage = ({
   teamData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
-
   const [file, setFile] = useState<any>(null);
-  // const { status, data } = useSession()
-
-  const submissionData = teamData.submissionData;
-  const team = teamData.team;
+  const { submissionData, team } : { submissionData: Submission[]; team: string } = teamData;
 
   const uploadFile = async (user: string) => {
     if (!file) return;
@@ -133,8 +131,7 @@ const Submissions: NextPage = ({
     setFile(null);
   };
 
-  const handleUploadClick = async () =>
-    uploadFile(team);
+  const handleUploadClick = async () => uploadFile(team);
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
@@ -147,15 +144,15 @@ const Submissions: NextPage = ({
 
     return (
       <UserLayout>
-        <div className="row">
-          <div className="col-md-12">
-            <Card className="mb-4">
+        <div className='row'>
+          <div className='col-md-12'>
+            <Card className='mb-4'>
               <Card.Header>Upload Submission</Card.Header>
               <Card.Body>
                 <input
-                  type="file"
-                  name="image"
-                  id="selectFile"
+                  type='file'
+                  name='image'
+                  id='selectFile'
                   accept='.py'
                   onChange={(e: any) => setFile(e.target.files[0])}
                 />
@@ -166,16 +163,16 @@ const Submissions: NextPage = ({
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-md-12">
-            <Card className="mb-4">
+        <div className='row'>
+          <div className='col-md-12'>
+            <Card className='mb-4'>
               <Card.Header>Previous Submissions</Card.Header>
               <Card.Body>
-                <div className="table-responsive">
-                  <table className="table border mb-0">
-                    <thead className="table-light fw-semibold">
-                      <tr className="align-middle">
-                        <th className="text-center">
+                <div className='table-responsive'>
+                  <table className='table border mb-0'>
+                    <thead className='table-light fw-semibold'>
+                      <tr className='align-middle'>
+                        <th className='text-center'>
                           <FontAwesomeIcon icon={faUsers} fixedWidth />
                         </th>
                         <th>Uploaded File Name</th>
@@ -213,15 +210,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const result = await client.send(new GetCommand({
-    TableName: process.env.AWS_TABLE_NAME,
-    Key: {
-      pk: "user:" + session.user.name,
-      sk: "user:" + session.user.name
-    },
-  }));
+  const result = await client.send(
+    new GetCommand({
+      TableName: process.env.AWS_TABLE_NAME,
+      Key: {
+        pk: `user:${session.user.name}`,
+        sk: `user:${session.user.name}`,
+      },
+    }),
+  );
 
-  if(!result || !result.Item || !result.Item.team) {
+  if (!result || !result.Item || !result.Item.team) {
     return {
       redirect: {
         destination: '/team',
@@ -230,7 +229,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const team = result.Item.team;
+  const { team } = result.Item;
 
   const queryParams: QueryCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
@@ -240,8 +239,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       '#sk': 'sk',
     },
     ExpressionAttributeValues: {
-      ':pk': "team:" + team,
-      ':sk': "team:" + team + "#bot"
+      ':pk': `team:${team}`,
+      ':sk': `team:${team}#bot`,
     },
   };
 
@@ -249,13 +248,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const queryResult = await client.send(command);
   if (!queryResult.Items || !queryResult.Items[0]) {
     return {
-      props: { 
+      props: {
         teamData: {
           team,
           submissionData: [],
-          },
-      }
-    }
+        },
+      },
+    };
   }
 
   const teamData = queryResult.Items;
@@ -265,10 +264,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const getItemParams: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     Key: {
-      pk: "team:" + team,
-      sk: "team:" + team,
+      pk: `team:${team}`,
+      sk: `team:${team}`,
     },
-    ProjectionExpression: "active_version"
+    ProjectionExpression: 'active_version',
   };
 
   const getItemCommand = new GetCommand(getItemParams);
@@ -279,15 +278,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamData: {
           team,
           submissionData: [],
-        }
+        },
       },
     };
   }
 
-  const activeVersion = getItemResult.Item.active_version ? getItemResult.Item.active_version : "";
-
-  console.log("active version: " + activeVersion)
-
+  const activeVersion = getItemResult.Item.active_version
+    ? getItemResult.Item.active_version
+    : '';
 
   const submissionData: Submission[] = [];
   const numSubmissions = teamData.length;
@@ -304,20 +302,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   for (let i = 0; i < numSubmissions; i += 1) {
     const submission: Submission = {
       fileName: sorted[i].upload_name as string,
-      submissionURL: process.env.S3_URL_TEMPLATE + sorted[i].s3_key as string,
+      submissionURL: (process.env.S3_URL_TEMPLATE + sorted[i].s3_key) as string,
       timeStamp: sorted[i].timeStamp as string,
       isActive: (sorted[i].s3_key === activeVersion) as boolean,
     };
     submissionData.push(submission);
   }
 
-
   return {
-    props: { 
+    props: {
       teamData: {
         team,
         submissionData,
-      }
+      },
     },
   };
 };

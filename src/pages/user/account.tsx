@@ -2,36 +2,28 @@
 import type { NextPage } from 'next';
 import { UserLayout } from '@layout';
 import {
-  Form,
-  InputGroup,
   Row,
   Col,
   Container,
   Card,
-  Button,
 } from 'react-bootstrap';
 import Image from 'next/image';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  GetItemCommand,
-  GetItemInput,
-  QueryCommand,
-  ScanCommand,
 } from '@aws-sdk/client-dynamodb';
-import axios, { AxiosError, AxiosResponse } from 'axios';
 
-import { DynamoDBDocument, GetCommand, GetCommandInput, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocument,
+  GetCommand,
+  GetCommandInput,
+} from '@aws-sdk/lib-dynamodb';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { toast } from 'react-toastify';
-
 
 const config: DynamoDBClientConfig = {
   credentials: {
@@ -61,19 +53,19 @@ const Account: NextPage = ({
   if (status === 'authenticated') {
     return (
       <UserLayout>
-        <div className="bg-light min-vh-100 d-flex flex-row dark:bg-transparent">
+        <div className='bg-light min-vh-100 d-flex flex-row dark:bg-transparent'>
           <Container>
-            <Row className="justify-content-center">
+            <Row className='justify-content-center'>
               <Col md={6}>
-                <Card className="mb-4 rounded-0">
-                  <Card.Body className="p-4">
-                    <h1 className="text-center">{session.user.name}</h1>
-                    <div className="text-center">
+                <Card className='mb-4 rounded-0'>
+                  <Card.Body className='p-4'>
+                    <h1 className='text-center'>{session.user.name}</h1>
+                    <div className='text-center'>
                       <Image
                         width={300}
                         height={300}
                         src={`/assets/avatars/avatar_${userInfo.image}.jpg`}
-                        alt="Team Logo"
+                        alt='Team Logo'
                       />
                     </div>
                     <br />
@@ -84,7 +76,10 @@ const Account: NextPage = ({
                       Email: <strong>{userInfo.email}</strong>
                     </div>
                     <div>
-                      Team: <strong>{userInfo.team ? userInfo.team : "Not Joined"}</strong>
+                      Team:{' '}
+                      <strong>
+                        {userInfo.team ? userInfo.team : 'Not Joined'}
+                      </strong>
                     </div>
                     <div>
                       Role: <strong>{userInfo.role}</strong>
@@ -117,11 +112,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const params : GetCommandInput = {
+  const params: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     Key: {
-      pk: "user:" + session.user.name,
-      sk: "user:" + session.user.name,
+      pk: `user:${session.user.name}`,
+      sk: `user:${session.user.name}`,
     },
   };
 
@@ -132,16 +127,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if (!userData) {
     return {
-      props: { 
+      props: {
         userInfo: {
-          name: "None",
-          email: "None",
+          name: 'None',
+          email: 'None',
           image: 0,
-          role: "Competitor",
-          team: "None",
+          role: 'Competitor',
+          team: 'None',
         },
-      }
-    }
+      },
+    };
   }
 
   const userInfo = {

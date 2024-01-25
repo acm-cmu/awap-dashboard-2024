@@ -4,10 +4,9 @@ import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 import { useEffect } from 'react';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Button, Card, Table } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import useSWR from 'swr';
-import { Match } from '@pages/api/admin/admin-match-history';
 import MatchTable from '@components/MatchTable';
 
 const Admin: NextPage = () => {
@@ -17,7 +16,7 @@ const Admin: NextPage = () => {
 
   const { data: MatchData, mutate } = useSWR(
     '/api/admin/admin-match-history',
-    fetcher
+    fetcher,
   );
 
   useEffect(() => {
@@ -25,19 +24,17 @@ const Admin: NextPage = () => {
   }, [status]);
 
   const startBeginnerTournament = async () => {
-    console.log('request sent');
     axios
       .post('/api/admin/start-tournament', {
         bracket: 'beginner',
       })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
-          console.log('request sent');
           toast.success('Beginner Tournament Started!');
         }
       })
       .catch((reason: AxiosError) => {
-        if (reason.response!.status === 500) {
+        if (reason.response?.status === 500) {
           toast.error('Internal Error, please try again later');
         } else if (reason.response?.status === 412) {
           toast.error('You have already requested a match with this team');
@@ -46,24 +43,21 @@ const Admin: NextPage = () => {
         } else {
           toast.error('Something went wrong');
         }
-        console.log(reason.message);
       });
   };
 
   const startAdvancedTournament = async () => {
-    console.log('request sent');
     axios
       .post('/api/admin/start-tournament', {
         bracket: 'advanced',
       })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
-          console.log('request sent');
           toast.success('Advanced Tournament Started!');
         }
       })
       .catch((reason: AxiosError) => {
-        if (reason.response!.status === 500) {
+        if (reason.response?.status === 500) {
           toast.error('Internal Error, please try again later');
         } else if (reason.response?.status === 412) {
           toast.error('You have already requested a match with this team');
@@ -72,22 +66,19 @@ const Admin: NextPage = () => {
         } else {
           toast.error('Something went wrong');
         }
-        console.log(reason.message);
       });
   };
 
   const startRankedScrimmages = async () => {
-    console.log('request sent');
     axios
       .post('/api/admin/start-ranked-scrimmages')
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
-          console.log('request sent');
           toast.success('Ranked Scrimmages Started!');
         }
       })
       .catch((reason: AxiosError) => {
-        if (reason.response!.status === 500) {
+        if (reason.response?.status === 500) {
           toast.error('Internal Error, please try again later');
         } else if (reason.response?.status === 412) {
           toast.error('You have already requested a match with this team');
@@ -96,7 +87,6 @@ const Admin: NextPage = () => {
         } else {
           toast.error('Something went wrong');
         }
-        console.log(reason.message);
       });
   };
 

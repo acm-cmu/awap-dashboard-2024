@@ -38,57 +38,57 @@ const Login: NextPage = () => {
 
   return (
     // render login form
-    <div className="bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent">
+    <div className='bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent'>
       <Container>
-        <Row className="justify-content-center align-items-center px-3">
+        <Row className='justify-content-center align-items-center px-3'>
           <Col lg={8}>
             <Row>
-              <Col md={7} className="bg-white border p-5">
-                <div className="">
+              <Col md={7} className='bg-white border p-5'>
+                <div className=''>
                   <h1>Login</h1>
-                  <p className="text-black-50">
+                  <p className='text-black-50'>
                     Sign In to your AWAP Dashboard
                   </p>
 
                   <form onSubmit={login}>
-                    <InputGroup className="mb-3">
+                    <InputGroup className='mb-3'>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faUser} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
                         onChange={(e) => setUsername(e.target.value)}
-                        type="text"
-                        name="username"
+                        type='text'
+                        name='username'
                         minLength={3}
                         maxLength={20}
                         required
-                        placeholder="Username"
-                        aria-label="Username"
+                        placeholder='Username'
+                        aria-label='Username'
                       />
                     </InputGroup>
 
-                    <InputGroup className="mb-3">
+                    <InputGroup className='mb-3'>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faLock} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
                         onChange={(e) => setPassword(e.target.value)}
-                        type="password"
-                        name="password"
+                        type='password'
+                        name='password'
                         minLength={8}
                         maxLength={20}
                         required
-                        placeholder="Password"
-                        aria-label="Password"
+                        placeholder='Password'
+                        aria-label='Password'
                       />
                     </InputGroup>
 
                     <Row>
                       <Col xs={6}>
                         <Button
-                          className="px-4"
-                          variant="primary"
-                          type="submit"
+                          className='px-4'
+                          variant='primary'
+                          type='submit'
                         >
                           Login
                         </Button>
@@ -99,15 +99,15 @@ const Login: NextPage = () => {
               </Col>
               <Col
                 md={5}
-                className="bg-primary text-white d-flex align-items-center justify-content-center p-5"
+                className='bg-primary text-white d-flex align-items-center justify-content-center p-5'
               >
-                <div className="text-center">
+                <div className='text-center'>
                   <h2>Sign up</h2>
                   <p>Want to compete in AWAP 2024?</p>
-                  <Link href="/auth/register">
+                  <Link href='/auth/register'>
                     <button
-                      className="btn btn-lg btn-outline-light mt-3"
-                      type="button"
+                      className='btn btn-lg btn-outline-light mt-3'
+                      type='button'
                     >
                       Register Now!
                     </button>

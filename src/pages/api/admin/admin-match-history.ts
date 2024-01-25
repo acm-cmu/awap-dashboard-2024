@@ -1,4 +1,5 @@
 import {
+  AttributeValue,
   DynamoDB,
   DynamoDBClientConfig,
   QueryCommand,
@@ -37,7 +38,7 @@ export interface Match {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const session = await unstable_getServerSession(req, res, authOptions);
 
@@ -57,19 +58,19 @@ export default async function handler(
   const command = new QueryCommand(params);
   const result: QueryCommandOutput = await client.send(command);
 
-  let matchData: Match[] = [];
-
   if (result.Items) {
-    matchData = result.Items.map((item: any) => ({
+    const matchData = result.Items.map((item: Record<string, AttributeValue>) => ({
       id: item.match_id ? item.match_id.N : -1,
-      player1: item.players ? item.players.L[0].M.teamName.S : 'unknown',
-      player2: item.players ? item.players.L[1].M.teamName.S : 'unknown',
+      player1: (item.players && item.players.L && item.players.L[0] && item.players.L[0].M) ? item.players.L[0].M.teamName.S : 'unknown',
+      player2: (item.players && item.players.L && item.players.L[1] && item.players.L[1].M) ? item.players.L[1].M.teamName.S : 'unknown',
       category: item.category ? item.category.S : 'unknown',
       status: item.item_status ? item.item_status.S : 'unknown',
       outcome: item.placement ? item.placement.N : '-1',
       replay: item.s3_key ? item.s3_key.S : 'unknown',
     }));
+
+    return res.status(200).json(matchData);
   }
 
-  return res.status(200).json(matchData);
+  return res.status(200).json([]);
 }
