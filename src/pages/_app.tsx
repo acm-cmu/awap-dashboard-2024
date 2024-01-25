@@ -11,6 +11,8 @@ import { SessionProvider } from 'next-auth/react';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
+import { CookiesProvider } from 'react-cookie';
+
 // You change this configuration value to false so that the Font Awesome core SVG library
 // will not try and insert <style> elements into the <head> of the page.
 // Next.js blocks this from happening anyway so you might as well not even try.
@@ -23,12 +25,14 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   // https://react-bootstrap.github.io/getting-started/server-side-rendering/
   // eslint-disable-next-line react/jsx-props-no-spreading
   return (
-    <SSRProvider>
-      <SessionProvider session={session}>
-        <Component {...pageProps} />
-        <ToastContainer />
-      </SessionProvider>
-    </SSRProvider>
+    <CookiesProvider>
+      <SSRProvider>
+        <SessionProvider session={session}>
+          <Component {...pageProps} />
+          <ToastContainer />
+        </SessionProvider>
+      </SSRProvider>
+    </CookiesProvider>
   );
 }
 

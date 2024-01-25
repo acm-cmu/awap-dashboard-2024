@@ -15,6 +15,9 @@ import { useRouter } from 'next/router';
 import {
   DynamoDB,
   DynamoDBClientConfig,
+  QueryCommand,
+  QueryCommandInput,
+  QueryInput,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
@@ -269,9 +272,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     order = context.query.order;
   }
 
-  const params: ScanCommandInput = {
+  const params: QueryInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'record_type = :record',
+    IndexName: 'record_type-index',
+    KeyConditionExpression: 'record_type = :record',
     ExpressionAttributeValues: {
       ':record': { S: 'team' },
     },
@@ -282,7 +286,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     },
   };
 
-  const command = new ScanCommand(params);
+  const command = new QueryCommand(params);
   const teamdata = await client.send(command);
 
   console.log(teamdata.Items);

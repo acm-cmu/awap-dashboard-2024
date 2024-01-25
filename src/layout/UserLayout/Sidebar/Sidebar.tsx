@@ -30,31 +30,31 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
         show: isShow,
         'md-hide': !isShowMd,
       })}
-      id="sidebar"
+      id='sidebar'
     >
-      <div className="sidebar-brand d-none d-md-flex align-items-center justify-content-center">
+      <div className='sidebar-brand d-none d-md-flex align-items-center justify-content-center'>
         <Image
-          src="/assets/img/logodraft.png"
-          className="logo"
+          src='/assets/img/logodraft.png'
+          className='logo'
           width={isNarrow ? 50 : 100}
           height={isNarrow ? 50 : 100}
-          alt="awap logo"
+          alt='awap logo'
         />
       </div>
 
-      <div className="sidebar-nav flex-fill">
+      <div className='sidebar-nav flex-fill'>
         <SidebarNav />
       </div>
 
       <Button
-        variant="link"
-        className="sidebar-toggler d-none d-md-inline-block rounded-0 text-end pe-4 fw-bold shadow-none"
+        variant='link'
+        className='sidebar-toggler d-none d-md-inline-block rounded-0 text-end pe-4 fw-bold shadow-none'
         onClick={toggleIsNarrow}
-        type="button"
-        aria-label="sidebar toggler"
+        type='button'
+        aria-label='sidebar toggler'
       >
         <FontAwesomeIcon
-          className="sidebar-toggler-chevron"
+          className='sidebar-toggler-chevron'
           icon={faAngleLeft}
           fontSize={24}
         />
@@ -77,7 +77,7 @@ export const SidebarOverlay = (props: {
         'sidebar-overlay position-fixed top-0 bg-dark w-100 h-100 opacity-50',
         {
           'd-none': !isShowSidebar,
-        },
+        }
       )}
       onClick={toggleSidebar}
     />

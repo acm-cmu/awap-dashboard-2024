@@ -18,7 +18,6 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
-    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },

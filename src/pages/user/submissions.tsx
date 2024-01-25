@@ -19,7 +19,7 @@ import {
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, QueryCommand, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand, GetCommandInput, QueryCommand, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -39,12 +39,10 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
-    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
 });
-
 interface Submission {
   fileName: string;
   s3Key: string;
@@ -53,9 +51,10 @@ interface Submission {
   isActive: boolean;
 }
 
-const TableRow: React.FC<{ submission: any; image: string }> = ({
+const TableRow: React.FC<{ submission: any; image: string; activateFn: any }> = ({
   submission,
   image,
+  activateFn
 }) => (
   <tr className="align-middle">
     <td className="text-center">
@@ -85,80 +84,121 @@ const TableRow: React.FC<{ submission: any; image: string }> = ({
       <div className="small text-black-50" />
       <div className="fw-semibold">{submission.isActive ? "Active" : "Inactive"}</div>
     </td>
+    <td>
+    <Button variant="secondary" onClick={(e: any) => activateFn(submission.s3Key)}>
+                    Activate
+                </Button>
+    </td>
   </tr>
 );
 
-const TableBody: React.FC<{ data: any; image: string }> = ({ data, image }) => (
+const TableBody: React.FC<{ data: any; image: string; activateFn: any }> = ({ data, image, activateFn }) => (
   <tbody>
     {data.map((item: any) => (
-      <TableRow submission={item} image={image}/>
+      <TableRow submission={item} image={image} activateFn={activateFn}/>
     ))}
   </tbody>
 );
 
-const BotsDropdown: React.FC<{
-  bots: Submission[];
-  username: string;
-}> = ({ bots, username}) => {
-  const [ActiveBot, setValue] = useState<string | null>(null);
 
-  const onActivate = () => {
-
-    for (let i = 0; i < bots.length; i += 1) {
-      if (bots[i].fileName === ActiveBot) {
-        client.send(
-          new UpdateItemCommand({
-            TableName: process.env.AWS_TABLE_NAME,
-            Key: {
-              pk: { S: "team:" + session.user.name},
-              sk: { S: "team:" + session.user.name},
-            },
-            UpdateExpression: 'SET active_version = :bot_file_name',
-            ExpressionAttributeValues: {
-              ':bot_file_name': { S: bots[i].s3Key },
-            },
-          }),
-        );
-        return;
-      }
-    }
-
-  };
-
-  const botNames = bots.map((bots) => bots.fileName);
-
-  return (
-    <div style={{ display: 'flex' }}>
-      <Autocomplete
-        disablePortal
-        value={ActiveBot}
-        onChange={(event: any, newBot: string | null) => {
-          setValue(newBot);
-        }}
-        id="bots_dropdown"
-        options={botNames}
-        sx={{ width: 800 }}
-        renderInput={(params) => <TextField {...params} label="Bots" />}
-      />
-      <Button
-        variant="primary"
-        style={{ marginLeft: 10 }}
-        onClick={onActivate}
-        size="lg"
-      >
-        Activate
-      </Button>
-    </div>
-  );
-};
 
 const Submissions: NextPage = ({
-  submissionData,
+  teamData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
 
   const [file, setFile] = useState<any>(null);
   // const { status, data } = useSession()
+
+  const submissionData = teamData.submissionData;
+  const team = teamData.team;
+  const handleActivate = async (fileName: string) => {
+      console.log("activate called")
+      console.log(fileName)
+      await axios.post('/api/user/activate_bot', {
+        team,
+        fileName
+      });
+      window.location.reload();
+      // client.send(
+      //   new UpdateItemCommand({
+      //     TableName: process.env.AWS_TABLE_NAME,
+      //     Key: {
+      //       pk: { S: "team:" + team},
+      //       sk: { S: "team:" + team},
+      //     },
+      //     UpdateExpression: 'SET active_version = :bot_file_name',
+      //     ExpressionAttributeValues: {
+      //       ':bot_file_name': { S: fileName },
+      //     },
+          
+      //   }),
+      // );
+          
+    
+      };
+    
+
+  // const BotsDropdown: React.FC<{
+  //   bots: Submission[];
+  //   teamname: string;
+  // }> = ({ bots, teamname}) => {
+  //   const [ActiveBot, setValue] = useState<string | null>(null);
+  
+  //   const onActivate = () => {
+  //     console.log("activated")
+  //     // console.log(team)
+  //     console.log(teamname)
+  //     console.log(config)
+  //     for (let i = 0; i < bots.length; i += 1) {
+  //       if (bots[i].fileName === ActiveBot) {
+
+  //         client.send(
+  //           new UpdateItemCommand({
+  //             TableName: process.env.AWS_TABLE_NAME,
+  //             Key: {
+  //               pk: { S: "team:" + teamname},
+  //               sk: { S: "team:" + teamname},
+  //             },
+  //             UpdateExpression: 'SET active_version = :bot_file_name',
+  //             ExpressionAttributeValues: {
+  //               ':bot_file_name': { S: bots[i].s3Key },
+  //             },
+              
+  //           }),
+  //         );
+  //         return;
+  //       }
+  //     }
+  
+  //   };
+  
+  //   const botNames = bots.map((bots) => bots.fileName);
+  
+  //   return (
+  //     <div style={{ display: 'flex' }}>
+  //       <Autocomplete
+  //         disablePortal
+  //         value={ActiveBot}
+  //         onChange={(event: any, newBot: string | null) => {
+  //           setValue(newBot);
+  //         }}
+  //         id="bots_dropdown"
+  //         options={botNames}
+  //         sx={{ width: 800 }}
+  //         renderInput={(params) => <TextField {...params} label="Bots" />}
+  //       />
+  //       <Button
+  //         variant="primary"
+  //         style={{ marginLeft: 10 }}
+  //         onClick={onActivate}
+  //         size="lg"
+  //       >
+  //         Activate
+  //       </Button>
+  //     </div>
+  //   );
+  // };
 
   const uploadFile = async (user: string) => {
     if (!file) return;
@@ -192,7 +232,7 @@ const Submissions: NextPage = ({
   };
 
   const handleUploadClick = async () =>
-    uploadFile(userData?.user.name as string);
+    uploadFile(team);
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
@@ -214,6 +254,7 @@ const Submissions: NextPage = ({
                   type="file"
                   name="image"
                   id="selectFile"
+                  accept='.py'
                   onChange={(e: any) => setFile(e.target.files[0])}
                 />
 
@@ -223,19 +264,19 @@ const Submissions: NextPage = ({
           </div>
         </div>
 
-        <div className="row">
+        {/* <div className="row">
           <div className="col-md-12">
             <Card className="mb-3">
               <Card.Body>
                 <Card.Title>Activate Bot</Card.Title>
                 <BotsDropdown
                   bots={submissionData}
-                  username={userData?.user.name!}
+                  teamname={team}
                 />
               </Card.Body>
             </Card>
           </div>
-        </div>
+        </div> */}
 
         <div className="row">
           <div className="col-md-12">
@@ -253,9 +294,10 @@ const Submissions: NextPage = ({
                         {/* <th className="text-center">Successful</th> */}
                         <th>Time Submitted</th>
                         <th>Active Version</th>
+                        <th>Activate</th>
                       </tr>
                     </thead>
-                    <TableBody data={submissionData} image={image} />
+                    <TableBody data={submissionData} image={image} activateFn={handleActivate} />
                   </table>
                 </div>
               </Card.Body>
@@ -284,6 +326,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  const result = await client.send(new GetCommand({
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: "user:" + session.user.name,
+      sk: "user:" + session.user.name
+    },
+  }));
+
+  if(!result || !result.Item || !result.Item.team) {
+    return {
+      redirect: {
+        destination: '/team',
+        permanent: false,
+      },
+    };
+  }
+
+  const team = result.Item.team;
+
   const queryParams: QueryCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
@@ -292,51 +353,59 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       '#sk': 'sk',
     },
     ExpressionAttributeValues: {
-      ':pk': "team:" + session.user.name,
-      ':sk': "team:" + session.user.name + "#bot"
+      ':pk': "team:" + team,
+      ':sk': "team:" + team + "#bot"
     },
   };
-
 
   const command = new QueryCommand(queryParams);
   const queryResult = await client.send(command);
   if (!queryResult.Items || !queryResult.Items[0]) {
     return {
-      props: { submissionData: [] },
-    };
+      props: { 
+        teamData: {
+          team,
+          submissionData: [],
+          },
+      }
+    }
   }
 
-  const userData = queryResult.Items;
+  const teamData = queryResult.Items;
 
   /* run a GetItem command to search with primary key team:teamname and sort key team:teamname */
 
-  const getItemParams: GetItemCommandInput = {
+  const getItemParams: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     Key: {
-      pk: {S : "team:" + session.user.name},
-      sk: {S : "team:" + session.user.name}
+      pk: "team:" + team,
+      sk: "team:" + team,
     },
     ProjectionExpression: "active_version"
   };
 
-  const getItemCommand = new GetItemCommand(getItemParams);
+  const getItemCommand = new GetCommand(getItemParams);
   const getItemResult = await client.send(getItemCommand);
   if (!getItemResult || !getItemResult.Item) {
     return {
       props: {
-        submissionData: [],
+        teamData: {
+          team,
+          submissionData: [],
+        }
       },
     };
   }
-  const activeVersion = getItemResult.Item.active_version.S ? getItemResult.Item.active_version.S : "";
+
+  const activeVersion = getItemResult.Item.active_version ? getItemResult.Item.active_version : "";
 
   console.log("active version: " + activeVersion)
 
 
   const submissionData: Submission[] = [];
-  const numSubmissions = userData.length;
+  const numSubmissions = teamData.length;
 
-  const sorted = userData
+  const sorted = teamData
     .sort((a, b) => {
       if (a.timeStamp === undefined) return 1;
       if (b.timeStamp === undefined) return -1;
@@ -358,7 +427,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 
   return {
-    props: { submissionData },
+    props: { 
+      teamData: {
+        team,
+        submissionData,
+      }
+    },
   };
 };
 export default Submissions;

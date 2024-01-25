@@ -9,11 +9,15 @@ import {
   faCode,
   faPencil,
   faLock,
+  faPeopleGroup,
 } from '@fortawesome/free-solid-svg-icons';
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useEffect } from 'react';
 import { Nav } from 'react-bootstrap';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import axios from 'axios';
+import { useCookies } from 'react-cookie';
+
 
 type SidebarNavItemProps = {
   href: string;
@@ -46,6 +50,24 @@ const ProtectedSidebarUserItems = () => {
     if (!data?.user || data.user.role !== 'user') return null;
     return (
       <>
+        <SidebarNavItem icon={faPeopleGroup} href="/team">
+          Team
+        </SidebarNavItem>
+      </>
+    );
+  }
+  return null;
+};
+
+const ProtectedSidebarTeamItems = () => {
+  const { status, data } = useSession();
+
+  const [cookies, setCookie, removeCookie] = useCookies(['user']);
+
+  if (status === 'authenticated') {
+    if (!data?.user || data.user.role !== 'user' || !cookies.user || !cookies.user.teamname || cookies.user.teamname === '') return null;
+    return (
+      <>
         <SidebarNavItem icon={faCode} href="/user/submissions">
           Submissions
         </SidebarNavItem>
@@ -56,7 +78,7 @@ const ProtectedSidebarUserItems = () => {
     );
   }
   return null;
-};
+}
 
 const ProtectedSidebarAdminItems = () => {
   const { status, data } = useSession();
@@ -85,6 +107,7 @@ export default function SidebarNav() {
       </SidebarNavItem>
 
       <ProtectedSidebarUserItems />
+      <ProtectedSidebarTeamItems />
       <ProtectedSidebarAdminItems />
     </ul>
   );

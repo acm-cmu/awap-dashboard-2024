@@ -50,7 +50,7 @@ export default function HeaderProfileNav({ img }: { img: string }) {
           <Dropdown.Header className="bg-light fw-bold rounded-top">
             Account
           </Dropdown.Header>
-          <Link href="/user/profile" passHref legacyBehavior>
+          <Link href="/user/account" passHref legacyBehavior>
             <Dropdown.Item>
               <ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
             </Dropdown.Item>

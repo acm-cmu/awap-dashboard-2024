@@ -5,7 +5,7 @@ import {
   UpdateItemCommand,
   PutItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const config: DynamoDBClientConfig = {
@@ -18,7 +18,6 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
-    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -31,74 +30,24 @@ export default async function handler(
   if (req.method !== 'POST') {
     res.status(405).json({ message: 'Method not allowed' });
   }
-  console.log("entered bracket change handler")
   try {
-    const { user, bracket, teamName } = req.body;
-    console.log("new bracket" + bracket)
-    // const submission_id = user + timeStamp;
-    // const team = await client.send(
-    //   new GetItemCommand({
-    //     TableName: process.env.AWS_TABLE_NAME,
-    //     Key: {
-    //       pk: { S: "team:"+ teamName},
-    //       sk: { S: "team:"+ teamName},
-    //     },
-    //   }),
-    // );
+    const { team, bracket } = req.body;
+   
+    client.send(
+      new UpdateCommand({
+        TableName: process.env.AWS_TABLE_NAME,
+        Key: {
+          pk: "team:"+ team,
+          sk: "team:"+ team,
+        },
+        UpdateExpression: 'SET bracket = :bracket',
+        ExpressionAttributeValues: {
+          ':bracket': bracket,
+        },
+        ReturnValues: 'UPDATED_NEW',
+      }),
+    );
 
-    // if (!team.Item) {
-    //   client.send(
-    //     new PutItemCommand({
-    //       TableName: process.env.AWS_TABLE_NAME,
-    //       Item: {
-    //         pk: { S: "team:"+ teamName},
-    //         sk: { S: "team:"+ teamName},
-    //         record_type: { S: "team"},
-    //         bracket: { S: bracket },
-    //       },
-    //     }),
-    //   );
-    // } else {
-      client.send(
-        new UpdateItemCommand({
-          TableName: process.env.AWS_TABLE_NAME,
-          Key: {
-            pk: { S: "team:"+ teamName},
-            sk: { S: "team:"+ teamName},
-          },
-          UpdateExpression: 'SET active_version = :bracket',
-          ExpressionAttributeValues: {
-            ':bracket': { S: bracket },
-          },
-          ReturnValues: 'UPDATED_NEW',
-        }),
-      );
-      // const prevSubs = teamUser.Item.PREVIOUS_SUBMISSION_URLS.SS;
-      // const prevUploaded = teamUser.Item.UPLOADED_FILE_NAME.SS;
-      // if (prevSubs && prevUploaded) {
-      //   prevSubs.push(s3url);
-      //   prevUploaded.push(uploadedName);
-
-      //   client.send(
-      //     new UpdateItemCommand({
-      //       TableName: process.env.AWS_PLAYER_TABLE_NAME,
-      //       Key: {
-      //         TEAM_NAME: { S: user },
-      //       },
-      //       UpdateExpression:
-      //         'SET BOT_FILE_NAME = :fileName, CURRENT_SUBMISSION_URL = :s2, PREVIOUS_SUBMISSION_URLS = :prevSubs, RATING = :rating, UPLOADED_FILE_NAME = :uploadedName',
-      //       ExpressionAttributeValues: {
-      //         ':fileName': { S: fileName },
-      //         ':s2': { S: s3url },
-      //         ':rating': { N: '2' },
-      //         ':prevSubs': { SS: prevSubs },
-      //         ':uploadedName': { SS: prevUploaded },
-      //       },
-      //       ReturnValues: 'UPDATED_NEW',
-      //     }),
-      //   );
-      // }
-    // }
     res.status(200).json({ bracket });
   } catch (err) {
     console.log(err);

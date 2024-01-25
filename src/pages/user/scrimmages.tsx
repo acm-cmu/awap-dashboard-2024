@@ -17,12 +17,14 @@ import {
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
+import { unstable_getServerSession } from 'next-auth';
+import { authOptions } from '@pages/api/auth/[...nextauth]';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -35,7 +37,6 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
-    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -248,7 +249,39 @@ const Scrimmages: NextPage = ({
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions,
+  );
+
+  if (!session || !session.user) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    };
+  }
+  
+  const userInfo = await client.send(new GetCommand({
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: "user:" + session.user.name,
+      sk: "user:" + session.user.name
+    },
+  }));
+
+  if(!userInfo || !userInfo.Item || !userInfo.Item.team) {
+    return {
+      redirect: {
+        destination: '/team',
+        permanent: false,
+      },
+    };
+  }
+  
   // scan player table for team names
   const teamScanParams: ScanCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
