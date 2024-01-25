@@ -15,6 +15,9 @@ import { useRouter } from 'next/router';
 import {
   DynamoDB,
   DynamoDBClientConfig,
+  QueryCommand,
+  QueryCommandInput,
+  QueryInput,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
@@ -29,6 +32,7 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
+    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -268,14 +272,22 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     order = context.query.order;
   }
 
-  const params: ScanCommandInput = {
-    TableName: process.env.AWS_RATINGS_TABLE_NAME,
-    ProjectionExpression: 'team_name, current_rating, updated_timestamp',
+  const params: QueryInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    IndexName: 'record_type-index',
+    KeyConditionExpression: 'record_type = :record',
+    ExpressionAttributeValues: {
+      ':record': { S: 'team' },
+    },
+    ProjectionExpression: '#teamName, #rating',
+    ExpressionAttributeNames: {
+      '#teamName': 'name',
+      '#rating': 'num',
+    },
   };
 
-  const command = new ScanCommand(params);
+  const command = new QueryCommand(params);
   const teamdata = await client.send(command);
-  // console.log('teamdata: ', teamdata.Items);
 
   if (teamdata.Items === undefined) {
     return {
@@ -295,35 +307,18 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     };
   }
 
-  const unfiltered = teamdata.Items.sort((i1, i2) => {
-    if (i1.team_name.S === i2.team_name.S) {
-      if (
-        (i2.updated_timestamp.S as string) < (i1.updated_timestamp.S as string)
-      ) {
-        return -1;
-      }
-      return 1;
-    }
-    if ((i1.team_name.S as string) < (i2.team_name.S as string)) {
-      return -1;
-    }
-    return 1;
-  });
-  const unordered = unfiltered.filter(
-    (val, idx) => idx === 0 || val.team_name !== unfiltered[idx - 1].team_name,
-  );
-  const items = unordered.sort((i1, i2) => {
-    if (i1.current_rating.N === undefined || i2.current_rating.N === undefined)
-      return 0;
-    const i2Rating = parseInt(i2.current_rating.N, 10);
-    const i1Rating = parseInt(i1.current_rating.N, 10);
+  const defaultRating = process.env.DEFAULT_RATING || 0;
+
+  const items = teamdata.Items.sort((i1, i2) => {
+    const i2Rating = parseInt(i2.num ? i2.num.N : defaultRating, 10);
+    const i1Rating = parseInt(i1.num ? i1.num.N : defaultRating, 10);
     return i2Rating - i1Rating;
   });
 
-  const teams: Leaderboard[] = items.map((item, idx) => ({
+  const teams: Leaderboard[] = items.filter((item: any) => item.name).map((item, idx) => ({
     ranking: idx + 1,
-    tname: item.team_name.S as string,
-    rating: parseInt(item.current_rating.N as string, 10),
+    tname: item.name.S as string,
+    rating: parseInt(item.num ? item.num.N : defaultRating, 10),
   }));
 
   function sortmap(t: Leaderboard, att: string) {
