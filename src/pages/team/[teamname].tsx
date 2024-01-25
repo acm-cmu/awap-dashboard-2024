@@ -30,7 +30,16 @@ const config: DynamoDBClientConfig = {
     },
   });
 
-const LeaveTeamModal = ({ show, handleClose, handleLeaveTeam, numMembers }) => {
+interface TeamData {
+    members: string[];
+    teamname: string;
+    rating: number;
+    authenticated: boolean;
+    bracket: string;
+    secret_key: string;
+}
+
+const LeaveTeamModal = ({ show, handleClose, handleLeaveTeam, numMembers } : { show: boolean, handleClose: any, handleLeaveTeam: any, numMembers: number }) => {
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
@@ -67,11 +76,11 @@ const TeamMemberField = ({ name }: { name: string }) => {
   };
 
 const Team: NextPage = ({
-    teamData,
+    teamData
   }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
 
     const router = useRouter();
-    const { teamname } = router.query;
+    const teamname : string = router.query.teamname ? router.query.teamname.toString() : '';
 
     const { data: session, status } = useSession();
 
@@ -114,7 +123,7 @@ const Team: NextPage = ({
         });
     }
 
-    const handleRegenerateSecretKey = async (e) => {
+    const handleRegenerateSecretKey = async (e : any) => {
         e.preventDefault();
         e.stopPropagation();
         regenerateSecretKey();
@@ -142,7 +151,7 @@ const Team: NextPage = ({
 
     };
 
-    const handleChangeBracket = async (e) => {
+    const handleChangeBracket = async (e : any) => {
         e.preventDefault();
         e.stopPropagation();
         changeBracket(teamname);
@@ -151,7 +160,7 @@ const Team: NextPage = ({
     const leaveTeam = async () => {
         await axios.post('/api/team/leave-team',
         {
-            user: session.user.name,
+            user: session?.user.name,
             team: teamname,
         })
         .then((res) => {
@@ -168,7 +177,7 @@ const Team: NextPage = ({
         router.push('/team');
     }
 
-    const handleLeaveTeam = async (e) => {
+    const handleLeaveTeam = async (e : any) => {
         e.preventDefault();
         e.stopPropagation();
         leaveTeam();
@@ -256,7 +265,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     const username = session.user.name;
       
-    const { teamname } = context.params;
+    const teamname : string = context.query.teamname ? context.query.teamname.toString() : '';
 
 
     const getParams : GetCommandInput = {
@@ -287,18 +296,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         authenticated = false;
     }
 
-    const members = Array.from(teamData.members);
+    const members : string[] = Array.from(teamData.members);
+
+    const teamDataInfo : TeamData = {
+        members: members,
+        teamname: teamData.name,
+        rating: teamData.num,
+        authenticated: authenticated,
+        bracket: teamData.bracket,
+        secret_key: teamData.secret_key,
+    }
 
     return {
         props: {
-            teamData: {
-                members: members,
-                teamname: teamData.name,
-                rating: teamData.num,
-                authenticated: authenticated,
-                bracket: teamData.bracket,
-                secret_key: teamData.secret_key,
-            }
+            teamData: teamDataInfo,
         }
     };
 }

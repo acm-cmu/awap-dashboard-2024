@@ -66,7 +66,8 @@ import AWS from 'aws-sdk';
         }),
       );
 
-      if(updatedMembers.Attributes === undefined || updatedMembers.Attributes?.members.length === 0) {
+      if(updatedMembers.Attributes === undefined || updatedMembers.Attributes.members === undefined || 
+        updatedMembers.Attributes.members.SS === undefined || updatedMembers.Attributes.members.SS.length === 0) {
         await client.send(
           new DeleteCommand({
             TableName: process.env.AWS_TABLE_NAME,

@@ -43,13 +43,13 @@ const TeamHub: NextPage = ({
 
     const router = useRouter();
 
-    const createTeam = async (e) => {
+    const createTeam = async (e : any) => {
         e.preventDefault();
         e.stopPropagation();
 
 
         await axios.post('/api/team/create-team', {
-            user: session.user.name,
+            user: session?.user.name,
             teamName: createTeamname,
         }).then((response) => {
             toast.success("Team created successfully!");
@@ -63,12 +63,12 @@ const TeamHub: NextPage = ({
         });
     }
 
-    const joinTeam = async (e) => {
+    const joinTeam = async (e : any) => {
         e.preventDefault();
         e.stopPropagation();
 
         await axios.post('/api/team/join-team', {
-            user: session.user.name,
+            user: session?.user.name,
             teamName: joinTeamname,
             secretKey: joinSecretKey,
         }).then((response) => {
