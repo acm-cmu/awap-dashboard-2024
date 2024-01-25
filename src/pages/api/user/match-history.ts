@@ -88,7 +88,7 @@ export default async function handler(
     teamMatchData = matchHistoryResult.Items.map((item: any) => ({
       id: item.match_id.N,
       player: teamname,
-      opponent: item.players.L[0].S === teamname ? item.players.L[1].S : item.players.L[0].S,
+      opponent: item.players.L[0].M.current.B ? item.players.L[1].M.teamName.S : item.players.L[0].M.teamName.S,
       outcome: item.placement ? item.placement.N.toString(): "PENDING",
       type: item.category.S,
       replay: item.s3_key ? process.env.S3_URL_TEMPLATE + item.s3_key.S : null,

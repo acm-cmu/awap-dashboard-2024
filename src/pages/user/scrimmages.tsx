@@ -120,7 +120,7 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
         <Card.Title>{oppTeam.name}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted" />
         <Card.Text>Rating: {oppTeam.rating}</Card.Text>
-        <Button variant="primary" onClick={requestMatch}>
+        <Button variant="dark" onClick={requestMatch}>
           Request Match
         </Button>
       </Card.Body>
@@ -163,7 +163,7 @@ const ScrimmageRequestDropdown: React.FC<{
         renderInput={(params) => <TextField {...params} label="Teams" />}
       />
       <Button
-        variant="primary"
+        variant="dark"
         style={{ marginLeft: 10 }}
         onClick={onSearch}
         size="lg"
@@ -236,7 +236,7 @@ const Scrimmages: NextPage = ({ userTeam,
         <Card.Body>
           <Card.Title>Scrimmage History</Card.Title>
           <Button
-            variant="primary"
+            variant="dark"
             className="mb-3"
             onClick={async () => {
               mutate();
