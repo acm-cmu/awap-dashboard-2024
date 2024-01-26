@@ -27,6 +27,7 @@ export default function HeaderProfileNav({ img }: { img: string }) {
   const logout = async () => {
     await signOut({ callbackUrl: '/api/auth/logout' });
   };
+  console.log(img);
 
   return (
     <Nav>
@@ -41,7 +42,7 @@ export default function HeaderProfileNav({ img }: { img: string }) {
             <Image
               fill
               className='rounded-circle'
-              src={`/assets/avatars/avatar_${img}.jpg`}
+              src={`/assets/avatars/avatar_${img}.png`}
               alt='profile pic'
             />
           </div>
