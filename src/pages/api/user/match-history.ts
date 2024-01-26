@@ -65,8 +65,6 @@ export default async function handler(
 
     const teamname = userInfo.Item.team;
 
-    console.log(teamname);
-
     const queryMatchParams: QueryCommandInput = {
       TableName: process.env.AWS_TABLE_NAME,
       IndexName: process.env.AWS_REVERSE_INDEX,
@@ -112,7 +110,6 @@ export default async function handler(
     );
     return res.status(200).json(sortedMatchData);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 }

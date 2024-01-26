@@ -59,15 +59,13 @@ export default async function handler(
       s3_object_name: item.active_version.S,
     }),
   );
-  // console.log(playerData);
 
   requestData = {
     game_engine_name: process.env.GAME_ENGINE_NAME,
     user_submissions: playerData,
   };
-  // console.log(requestData);
+
   try {
-    console.log(requestData);
     const response = await axios.post(
       `http://${process.env.MATCHMAKING_SERVER_IP}/scrimmage/`,
       requestData,

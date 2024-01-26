@@ -87,7 +87,6 @@ export default async function handler(
 
     return res.status(200).json({ message: 'Successfully joined team!' });
   } catch (err) {
-    console.log(err);
     return res.status(400).json({ message: err });
   }
 }
