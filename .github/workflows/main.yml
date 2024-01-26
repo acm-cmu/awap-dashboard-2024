@@ -13,7 +13,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd awap-dashboard
+            cd awap-dashboard-2024
             PID_DASHBOARD=$(sudo lsof -i:3000 -t)
             sudo kill -9 $PID_DASHBOARD
             git pull
