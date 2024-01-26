@@ -34,7 +34,7 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
     >
       <div className='sidebar-brand d-none d-md-flex align-items-center justify-content-center'>
         <Image
-          src='/assets/img/logodraft2.png'
+          src='/assets/img/logodraft.png'
           className='logo'
           width={isNarrow ? 50 : 100}
           height={isNarrow ? 50 : 100}

@@ -20,7 +20,7 @@ const GettingStarted: NextPage = () => (
         <Card.Text>
           Navigate to the submissions page to upload your bot files and view
           your previous submissions. You may upload submissions at any time and
-          your current file will be used as your submission for any scrimmages
+          your currently activated file will be used as your submission for any scrimmages
           you may request or matches we run.
         </Card.Text>
       </Card.Body>
