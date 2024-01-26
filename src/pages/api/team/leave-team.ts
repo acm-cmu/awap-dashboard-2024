@@ -4,7 +4,6 @@ import {
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import {
-  DeleteCommand,
   DynamoDBDocument,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
@@ -51,7 +50,7 @@ export default async function handler(
 
     // for some reason string sets are weird so had to use UpdateItemCommand instead of UpdateCommand
 
-    const updatedMembers = await client.send(
+    await client.send(
       new UpdateItemCommand({
         TableName: process.env.AWS_TABLE_NAME,
         Key: {
