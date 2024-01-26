@@ -60,7 +60,7 @@ export default async function handler(
           email,
           password: hashedpassword,
           role: 'user',
-          image: getRandomIntInclusive(1, 21),
+          image: getRandomIntInclusive(1, 27),
           team: '',
         },
       }),
