@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { Button, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
-import Link from 'next/link';
 import { SyntheticEvent, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
