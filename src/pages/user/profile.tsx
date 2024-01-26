@@ -76,21 +76,20 @@ const Profile: NextPage = ({
     const teamName = document.getElementById('teamname') as HTMLInputElement;
     const newBracket = document.getElementById('newbracket') as HTMLInputElement;
     const newBracketValue = newBracket.value;
-    console.log(newBracketValue)
     await axios.post('/api/user/bracket-change', {
       user,
       bracket: newBracketValue,
       teamName: teamName.value,
     })
     // .then((res) => res.status)
-    .then((res) => {
-      if (res.status === 400) {
-        toast.error('Bracket change not successful!');
-      } else if (res.status === 200) {
-        toast.dismiss();
-        toast.success('Bracket changed successfully!', { autoClose: 2000 });
-      }
-    });
+      .then((res) => {
+        if (res.status === 400) {
+          toast.error('Bracket change not successful!');
+        } else if (res.status === 200) {
+          toast.dismiss();
+          toast.success('Bracket changed successfully!', { autoClose: 2000 });
+        }
+      });
     window.location.reload();
     window.location.reload();
   };
@@ -99,17 +98,16 @@ const Profile: NextPage = ({
     const teamName = document.getElementById('teamname') as HTMLInputElement;
     // console.log(teamName);
     const teamNameValue = teamName.value;
-    console.log(teamNameValue)
     await axios
       .post('/api/user/create-team', {
         user,
         teamName: teamNameValue,
       })
       .then((res) => res.status)
-      .then((status) => {
-        if (status === 400) {
+      .then((status1) => {
+        if (status1 === 400) {
           toast.error('Team name already in use!');
-        } else if (status === 200) {
+        } else if (status1 === 200) {
           toast.dismiss();
           toast.success('Team created successfully!', { autoClose: 2000 });
         }
@@ -135,7 +133,6 @@ const Profile: NextPage = ({
   }, [status]);
 
   if (status === 'authenticated') {
-    console.log(session.user.image)
     return (
       <UserLayout>
         <div className="bg-light min-vh-100 d-flex flex-row dark:bg-transparent">
@@ -236,6 +233,7 @@ const Profile: NextPage = ({
   return <div>loading</div>;
 };
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  let bracketN = 'Beginner';
   const session = await unstable_getServerSession(
     context.req,
     context.res,
@@ -250,12 +248,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-
+  const userquery = `user:${session.user.name}`; 
   const params: ScanCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     FilterExpression: 'pk = :user_name',
     ExpressionAttributeValues: {
-      ':user_name': { S: "user:"+ session.user.name },
+      ':user_name': { S: userquery },
     },
   };
 
@@ -268,18 +266,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       props: { team: { bracket: null } }, // will be passed to the page component as props
     };
   }
+  const teamquery = `team:${userData[0].team.S}`; 
   const result2 = await client.send(new ScanCommand({
     TableName: process.env.AWS_TABLE_NAME,
     FilterExpression: 'pk = :team_name AND record_type= :bracket',
     ExpressionAttributeValues: {
-      ':team_name': { S: "team:"+ userData[0].team.S },
-      ':bracket': { S: "bracket"},
+      ':team_name': { S: teamquery },
+      ':bracket': { S: 'bracket' },
     },
-  }))
+  }));
   const teamData = result2.Items;
-  var bracketN = "Beginner"
-  if(teamData[0] && teamData[0].bracket){
-    bracketN = teamData[0].bracket.S
+  
+
+  if (teamData && teamData[0] && teamData[0].bracket && typeof teamData[0].bracket.S === 'string') {
+    bracketN = teamData[0].bracket.S;
   }
   const team = {
     name: userData[0].team.S,

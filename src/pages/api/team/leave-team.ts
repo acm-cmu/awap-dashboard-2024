@@ -4,7 +4,6 @@ import {
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import {
-  DeleteCommand,
   DynamoDBDocument,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
@@ -51,20 +50,20 @@ export default async function handler(
 
     // for some reason string sets are weird so had to use UpdateItemCommand instead of UpdateCommand
 
-    const updatedMembers = await client.send(
-      new UpdateItemCommand({
-        TableName: process.env.AWS_TABLE_NAME,
-        Key: {
-          pk: { S: `team:${team}` },
-          sk: { S: `team:${team}` },
-        },
-        UpdateExpression: 'DELETE members :user',
-        ExpressionAttributeValues: {
-          ':user': { SS: [user] },
-        },
-        ReturnValues: 'UPDATED_NEW',
-      }),
-    );
+    // const updatedMembers = await client.send(
+    //   new UpdateItemCommand({
+    //     TableName: process.env.AWS_TABLE_NAME,
+    //     Key: {
+    //       pk: { S: `team:${team}` },
+    //       sk: { S: `team:${team}` },
+    //     },
+    //     UpdateExpression: 'DELETE members :user',
+    //     ExpressionAttributeValues: {
+    //       ':user': { SS: [user] },
+    //     },
+    //     ReturnValues: 'UPDATED_NEW',
+    //   }),
+    // );
 
     res.status(200).json({ message: 'User left team' });
   } catch (err) {
