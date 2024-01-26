@@ -64,12 +64,11 @@ export default async function handler(
 
     // check if last_updated is less than 30 minutes ago
     for (let i = 0; i < matchTimeData.length; i += 1) {
-      if (matchTimeData[i].status === 'pending') {
-        const lastUpdated = new Date(matchTimeData[i].last_updated);
-        // console.log(lastUpdated);
-        const now = Date.now();
-        const diff = now - lastUpdated.getTime();
-        const diffMinutes = Math.round(diff / 60000);
+      const lastUpdated = new Date(matchTimeData[i].last_updated);
+      // console.log(lastUpdated);
+      const now = Date.now();
+      const diff = now - lastUpdated.getTime();
+      const diffMinutes = Math.round(diff / 60000);
 
         if (diffMinutes < 30) {
           return res.status(412).send({

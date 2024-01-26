@@ -285,6 +285,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const command = new QueryCommand(params);
   const teamdata = await client.send(command);
 
+  console.log(teamdata.Items);
+  // console.log('teamdata: ', teamdata.Items);
+
   if (teamdata.Items === undefined) {
     return {
       props: {
