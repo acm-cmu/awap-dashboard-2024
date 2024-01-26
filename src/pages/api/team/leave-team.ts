@@ -66,23 +66,6 @@ export default async function handler(
       }),
     );
 
-    if (
-      updatedMembers.Attributes === undefined ||
-      updatedMembers.Attributes.members === undefined ||
-      updatedMembers.Attributes.members.SS === undefined ||
-      updatedMembers.Attributes.members.SS.length === 0
-    ) {
-      await client.send(
-        new DeleteCommand({
-          TableName: process.env.AWS_TABLE_NAME,
-          Key: {
-            pk: `team:${team}`,
-            sk: `team:${team}`,
-          },
-        }),
-      );
-    }
-
     res.status(200).json({ message: 'User left team' });
   } catch (err) {
     res.status(400).json({ message: err });
