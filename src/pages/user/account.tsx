@@ -1,18 +1,10 @@
 /* eslint-disable max-len */
 import type { NextPage } from 'next';
 import { UserLayout } from '@layout';
-import {
-  Row,
-  Col,
-  Container,
-  Card,
-} from 'react-bootstrap';
+import { Row, Col, Container, Card } from 'react-bootstrap';
 import Image from 'next/image';
 import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
-import {
-  DynamoDB,
-  DynamoDBClientConfig,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 
 import {
   DynamoDBDocument,

@@ -4,9 +4,7 @@ import {
   GetItemCommand,
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocument,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const config: DynamoDBClientConfig = {
@@ -75,7 +73,6 @@ export default async function handler(
     );
 
     return res.status(200).json({ message: 'Regenerated Join Key' });
-
   } catch (err) {
     return res.status(400).json({ message: err });
   }

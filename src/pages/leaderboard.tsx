@@ -247,7 +247,9 @@ const Teams: NextPage<Props> = (props) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (
+  context,
+) => {
   let page = 1;
   if (context.query?.page && typeof context.query.page === 'string') {
     page = parseInt(context.query.page, 10);

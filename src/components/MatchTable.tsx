@@ -6,7 +6,9 @@ import {
 } from 'material-react-table';
 import { Match } from '@pages/api/admin/admin-match-history';
 
-const ReplayCell = ({ cell } : { cell : any }) => <a href={cell.getValue()}>Download</a>;
+const ReplayCell = ({ cell }: { cell: any }) => (
+  <a href={cell.getValue()}>Download</a>
+);
 
 const MatchTable = (props: { data: Match[] }) => {
   const { data } = props;

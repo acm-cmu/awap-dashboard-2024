@@ -4,10 +4,7 @@ import {
   GetItemCommand,
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocument,
-  UpdateCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const config: DynamoDBClientConfig = {
@@ -59,7 +56,7 @@ export default async function handler(
 
     if (teamSecretKey !== secretKey)
       return res.status(400).json({ message: 'Incorrect secret key!' });
-    
+
     await client.send(
       new UpdateCommand({
         TableName: process.env.AWS_TABLE_NAME,

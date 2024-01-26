@@ -1,8 +1,5 @@
 /* eslint-disable no-param-reassign */
-import {
-  DynamoDB,
-  DynamoDBClientConfig,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 import NextAuth, { NextAuthOptions } from 'next-auth';
 

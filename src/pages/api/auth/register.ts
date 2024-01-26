@@ -48,7 +48,7 @@ export default async function handler(
 
     if (user.Item)
       return res.status(400).json({ message: 'user already exists' });
-    
+
     await client.send(
       new PutCommand({
         TableName: process.env.AWS_TABLE_NAME,
@@ -67,7 +67,6 @@ export default async function handler(
     );
 
     return res.status(200).json({ message: 'success' });
-
   } catch (err) {
     return res.status(400).json({ message: err });
   }

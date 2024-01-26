@@ -4,14 +4,7 @@ import {
   InferGetServerSidePropsType,
   NextPage,
 } from 'next';
-import {
-  Button,
-  Card,
-  Col,
-  Container,
-  Row,
-  Modal,
-} from 'react-bootstrap';
+import { Button, Card, Col, Container, Row, Modal } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 import {
@@ -65,39 +58,39 @@ const LeaveTeamModal = ({
   handleLeaveTeam: any;
   numMembers: number;
 }) => (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Confirm Leave Team</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>Are you sure you want to leave the team?</p>
-        {numMembers === 1 && (
-          <p>
-            You are the only member of this team. If you leave, the team will be
-            deleted.
-          </p>
-        )}
-      </Modal.Body>
+  <Modal show={show} onHide={handleClose}>
+    <Modal.Header closeButton>
+      <Modal.Title>Confirm Leave Team</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <p>Are you sure you want to leave the team?</p>
+      {numMembers === 1 && (
+        <p>
+          You are the only member of this team. If you leave, the team will be
+          deleted.
+        </p>
+      )}
+    </Modal.Body>
 
-      <Modal.Footer>
-        <Button variant='secondary' onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant='danger' onClick={handleLeaveTeam}>
-          Leave Team
-        </Button>
-      </Modal.Footer>
-    </Modal>
+    <Modal.Footer>
+      <Button variant='secondary' onClick={handleClose}>
+        Close
+      </Button>
+      <Button variant='danger' onClick={handleLeaveTeam}>
+        Leave Team
+      </Button>
+    </Modal.Footer>
+  </Modal>
 );
 
 /* Team Member Display Component */
 const TeamMemberField = ({ name }: { name: string }) => (
-    <div className='d-flex mb-3'>
-      <div className='avatar avatar-sm me-1'>
-        <FontAwesomeIcon icon={faUser} fixedWidth />
-      </div>
-      <div>{name}</div>
+  <div className='d-flex mb-3'>
+    <div className='avatar avatar-sm me-1'>
+      <FontAwesomeIcon icon={faUser} fixedWidth />
     </div>
+    <div>{name}</div>
+  </div>
 );
 
 const Team: NextPage = ({
@@ -164,7 +157,9 @@ const Team: NextPage = ({
 
   const changeBracket = async (team: string | null | undefined) => {
     if (!team) return;
-    const newBracket = document.getElementById('newbracket') as HTMLInputElement;
+    const newBracket = document.getElementById(
+      'newbracket',
+    ) as HTMLInputElement;
     const newBracketValue = newBracket.value;
 
     await axios

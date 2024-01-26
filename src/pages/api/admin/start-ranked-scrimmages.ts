@@ -36,7 +36,8 @@ export default async function handler(
 
   const params: ScanCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'attribute_exists(active_version) and active_version <> :null',
+    FilterExpression:
+      'attribute_exists(active_version) and active_version <> :null',
     ExpressionAttributeValues: {
       ':null': { S: '' },
     },
@@ -51,11 +52,13 @@ export default async function handler(
       .send({ message: 'Error fetching data', error: 'No players found' });
   }
 
-  const playerData = scanResult.Items.filter((item: any) => item.name).map((item: any) => ({
-    username: item.name.S,
-    s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
-    s3_object_name: item.active_version.S,
-  }));
+  const playerData = scanResult.Items.filter((item: any) => item.name).map(
+    (item: any) => ({
+      username: item.name.S,
+      s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
+      s3_object_name: item.active_version.S,
+    }),
+  );
   // console.log(playerData);
 
   requestData = {

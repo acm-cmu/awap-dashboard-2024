@@ -21,8 +21,6 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
 
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
@@ -50,11 +48,11 @@ interface Submission {
   isActive: boolean;
 }
 
-const TableRow: React.FC<{ submission: any; image: string; activateFn: any }> = ({
-  submission,
-  image,
-  activateFn
-}) => (
+const TableRow: React.FC<{
+  submission: any;
+  image: string;
+  activateFn: any;
+}> = ({ submission, image, activateFn }) => (
   <tr className='align-middle'>
     <td className='text-center'>
       <div className='avatar avatar-md d-inline-flex position-relative'>
@@ -86,42 +84,44 @@ const TableRow: React.FC<{ submission: any; image: string; activateFn: any }> = 
       </div>
     </td>
     <td>
-    <Button variant="secondary" onClick={(e: any) => activateFn(submission.s3Key)}>
-                    Activate
-                </Button>
+      <Button
+        variant='outline-dark'
+        onClick={() => activateFn(submission.s3Key)}
+      >
+        Activate
+      </Button>
     </td>
   </tr>
 );
 
-const TableBody: React.FC<{ data: any; image: string; activateFn: any }> = ({ data, image, activateFn }) => (
+const TableBody: React.FC<{ data: any; image: string; activateFn: any }> = ({
+  data,
+  image,
+  activateFn,
+}) => (
   <tbody>
     {data.map((item: any) => (
-      <TableRow submission={item} image={image} activateFn={activateFn}/>
+      <TableRow submission={item} image={image} activateFn={activateFn} />
     ))}
   </tbody>
 );
-
-
 
 const Submissions: NextPage = ({
   teamData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
   const [file, setFile] = useState<any>(null);
-  // const { status, data } = useSession()
 
-  const submissionData = teamData.submissionData;
-  const team = teamData.team;
+  const { team, submissionData } = teamData;
+
   const handleActivate = async (fileName: string) => {
-      console.log("activate called")
-      console.log(fileName)
-      await axios.post('/api/user/activate_bot', {
-        team,
-        fileName
-      });
-      window.location.reload();
+    await axios.post('/api/user/activate_bot', {
+      team,
+      fileName,
+    });
+    window.location.reload();
   };
-    
+
   const uploadFile = async (user: string) => {
     if (!file) return;
     const time1 = new Date().toLocaleString();
@@ -179,7 +179,9 @@ const Submissions: NextPage = ({
                   onChange={(e: any) => setFile(e.target.files[0])}
                 />
 
-                <Button onClick={handleUploadClick}>Upload</Button>
+                <Button onClick={handleUploadClick} variant='dark'>
+                  Upload
+                </Button>
               </Card.Body>
             </Card>
           </div>
@@ -204,7 +206,11 @@ const Submissions: NextPage = ({
                         <th>Activate</th>
                       </tr>
                     </thead>
-                    <TableBody data={submissionData} image={image} activateFn={handleActivate} />
+                    <TableBody
+                      data={submissionData}
+                      image={image}
+                      activateFn={handleActivate}
+                    />
                   </table>
                 </div>
               </Card.Body>
@@ -326,7 +332,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const submission: Submission = {
       fileName: sorted[i].upload_name as string,
       s3Key: sorted[i].s3_key,
-      submissionURL: process.env.S3_URL_TEMPLATE + sorted[i].s3_key as string,
+      submissionURL: (process.env.S3_URL_TEMPLATE + sorted[i].s3_key) as string,
       timeStamp: sorted[i].timeStamp as string,
       isActive: (sorted[i].s3_key === activeVersion) as boolean,
     };
