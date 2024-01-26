@@ -59,7 +59,7 @@ const TableRow: React.FC<{
         <Image
           fill
           className='rounded-circle'
-          src={`/assets/avatars/avatar_${image}.jpg`}
+          src={`/assets/avatars/avatar_${image}.png`}
           alt='profile pic'
         />
         <span className='avatar-status position-absolute d-block bottom-0 end-0 bg-success rounded-circle border border-white' />

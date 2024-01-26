@@ -56,7 +56,7 @@ const Account: NextPage = ({
                       <Image
                         width={300}
                         height={300}
-                        src={`/assets/avatars/avatar_${userInfo.image}.jpg`}
+                        src={`/assets/avatars/avatar_${userInfo.image}.png`}
                         alt='Team Logo'
                       />
                     </div>
