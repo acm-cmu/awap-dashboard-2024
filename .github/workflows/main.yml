@@ -1,22 +1,27 @@
 name: remote ssh command
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+  
 jobs:
+
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
             cd awap-dashboard-2024
-            PID_DASHBOARD=$(sudo lsof -i:3000 -t)
-            sudo kill -9 $PID_DASHBOARD
+            pm2 stop server
+            pm2 delete server
             git pull
             sudo npm install
             sudo npm run build
-            (sudo npm run start -- -p 3000 &)
+            pm2 start npm --name server -- run start
