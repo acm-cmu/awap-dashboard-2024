@@ -282,6 +282,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       '#teamName': 'name',
       '#rating': 'num',
     },
+    ScanIndexForward: false, 
   };
 
   const command = new QueryCommand(params);
