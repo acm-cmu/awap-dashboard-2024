@@ -30,7 +30,7 @@ const GettingStarted: NextPage = () => (
         <Card.Title>Scrimmages</Card.Title>
         <Card.Text>
           Find the scrimmages page to request unranked matches with any teams
-          listed in the dropdown. You may request up to 5 scrimmages per hour.
+          listed in the dropdown. Your team may request up to 5 scrimmages per hour.
           These scrimmages do not affect your rating on the leaderboard.
         </Card.Text>
       </Card.Body>
