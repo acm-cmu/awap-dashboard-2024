@@ -50,21 +50,24 @@ export default function UserLayout({ children }: PropsWithChildren) {
     <>
       <Head>
         <title>AWAP 2024 - Dashboard</title>
-        <meta name="description" content="ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!" />
-        <link rel="icon" href="/favicon.ico" />
+        <meta
+          name='description'
+          content='ACM@CMU presents Mars Makeover - explore, gather, and terraform with your algorithms to win!'
+        />
+        <link rel='icon' href='/favicon.ico' />
       </Head>
 
-      <div ref={ref} className="position-absolute w-100" />
+      <div ref={ref} className='position-absolute w-100' />
 
       <Sidebar isShow={isShowSidebar} isShowMd={isShowSidebarMd} />
 
-      <div className="wrapper d-flex flex-column min-vh-100 bg-light">
+      <div className='wrapper d-flex flex-column min-vh-100 bg-light'>
         <Header
           toggleSidebar={toggleIsShowSidebar}
           toggleSidebarMd={toggleIsShowSidebarMd}
         />
-        <div className="body flex-grow-1 px-3">
-          <Container fluid="lg">{children}</Container>
+        <div className='body flex-grow-1 px-3'>
+          <Container fluid='lg'>{children}</Container>
         </div>
         <Footer />
       </div>

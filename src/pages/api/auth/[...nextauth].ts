@@ -2,7 +2,6 @@
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  GetItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 import NextAuth, { NextAuthOptions } from 'next-auth';
@@ -66,7 +65,6 @@ export const authOptions: NextAuthOptions = {
         if (!match) {
           throw new Error('invalid credentials');
         }
-
 
         return {
           id: username,

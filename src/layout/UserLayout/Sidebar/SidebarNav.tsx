@@ -11,13 +11,11 @@ import {
   faLock,
   faPeopleGroup,
 } from '@fortawesome/free-solid-svg-icons';
-import React, { PropsWithChildren, useEffect } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Nav } from 'react-bootstrap';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import axios from 'axios';
 import { useCookies } from 'react-cookie';
-
 
 type SidebarNavItemProps = {
   href: string;
@@ -30,11 +28,11 @@ const SidebarNavItem = (props: SidebarNavItemProps) => {
   return (
     <Nav.Item>
       <Link href={href} passHref legacyBehavior>
-        <Nav.Link className="px-3 py-2 d-flex align-items-center">
+        <Nav.Link className='px-3 py-2 d-flex align-items-center'>
           {icon ? (
-            <FontAwesomeIcon className="nav-icon ms-n3" icon={icon} />
+            <FontAwesomeIcon className='nav-icon ms-n3' icon={icon} />
           ) : (
-            <span className="nav-icon ms-n3" />
+            <span className='nav-icon ms-n3' />
           )}
           {children}
         </Nav.Link>
@@ -49,11 +47,9 @@ const ProtectedSidebarUserItems = () => {
   if (status === 'authenticated') {
     if (!data?.user || data.user.role !== 'user') return null;
     return (
-      <>
-        <SidebarNavItem icon={faPeopleGroup} href="/team">
-          Team
-        </SidebarNavItem>
-      </>
+      <SidebarNavItem icon={faPeopleGroup} href='/team'>
+        Team
+      </SidebarNavItem>
     );
   }
   return null;
@@ -62,30 +58,37 @@ const ProtectedSidebarUserItems = () => {
 const ProtectedSidebarTeamItems = () => {
   const { status, data } = useSession();
 
-  const [cookies, setCookie, removeCookie] = useCookies(['user']);
+  const [cookies] = useCookies(['user']);
 
   if (status === 'authenticated') {
-    if (!data?.user || data.user.role !== 'user' || !cookies.user || !cookies.user.teamname || cookies.user.teamname === '') return null;
+    if (
+      !data?.user ||
+      data.user.role !== 'user' ||
+      !cookies.user ||
+      !cookies.user.teamname ||
+      cookies.user.teamname === ''
+    )
+      return null;
     return (
       <>
-        <SidebarNavItem icon={faCode} href="/user/submissions">
+        <SidebarNavItem icon={faCode} href='/user/submissions'>
           Submissions
         </SidebarNavItem>
-        <SidebarNavItem icon={faPencil} href="/user/scrimmages">
+        <SidebarNavItem icon={faPencil} href='/user/scrimmages'>
           Scrimmages
         </SidebarNavItem>
       </>
     );
   }
   return null;
-}
+};
 
 const ProtectedSidebarAdminItems = () => {
   const { status, data } = useSession();
   if (status === 'authenticated') {
     if (!data?.user || data.user.role !== 'admin') return null;
     return (
-      <SidebarNavItem icon={faLock} href="/admin">
+      <SidebarNavItem icon={faLock} href='/admin'>
         Admin
       </SidebarNavItem>
     );
@@ -95,14 +98,14 @@ const ProtectedSidebarAdminItems = () => {
 
 export default function SidebarNav() {
   return (
-    <ul className="list-unstyled">
-      <SidebarNavItem icon={faStar} href="/">
+    <ul className='list-unstyled'>
+      <SidebarNavItem icon={faStar} href='/'>
         Home
       </SidebarNavItem>
-      <SidebarNavItem icon={faFileLines} href="/getting_started">
+      <SidebarNavItem icon={faFileLines} href='/getting_started'>
         Getting Started
       </SidebarNavItem>
-      <SidebarNavItem icon={faCalculator} href="/leaderboard">
+      <SidebarNavItem icon={faCalculator} href='/leaderboard'>
         Leaderboard
       </SidebarNavItem>
 

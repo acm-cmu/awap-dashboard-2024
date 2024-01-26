@@ -4,7 +4,7 @@ import { Card } from 'react-bootstrap';
 
 const GettingStarted: NextPage = () => (
   <UserLayout>
-    <Card className="mb-3">
+    <Card className='mb-3'>
       <Card.Body>
         <Card.Title>Getting Started</Card.Title>
         <Card.Text>
@@ -14,7 +14,7 @@ const GettingStarted: NextPage = () => (
         </Card.Text>
       </Card.Body>
     </Card>
-    <Card className="mb-3">
+    <Card className='mb-3'>
       <Card.Body>
         <Card.Title>Upload Bots</Card.Title>
         <Card.Text>
@@ -25,7 +25,7 @@ const GettingStarted: NextPage = () => (
         </Card.Text>
       </Card.Body>
     </Card>
-    <Card className="mb-3">
+    <Card className='mb-3'>
       <Card.Body>
         <Card.Title>Scrimmages</Card.Title>
         <Card.Text>

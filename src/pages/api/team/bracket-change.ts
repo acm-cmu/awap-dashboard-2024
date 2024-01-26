@@ -1,9 +1,6 @@
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  GetItemCommand,
-  UpdateItemCommand,
-  PutItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -32,13 +29,13 @@ export default async function handler(
   }
   try {
     const { team, bracket } = req.body;
-   
+
     client.send(
       new UpdateCommand({
         TableName: process.env.AWS_TABLE_NAME,
         Key: {
-          pk: "team:"+ team,
-          sk: "team:"+ team,
+          pk: `team:${team}`,
+          sk: `team:${team}`,
         },
         UpdateExpression: 'SET bracket = :bracket',
         ExpressionAttributeValues: {

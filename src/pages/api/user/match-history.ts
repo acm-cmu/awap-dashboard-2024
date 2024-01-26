@@ -5,7 +5,7 @@ import {
   QueryCommandInput,
   QueryCommandOutput,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
@@ -45,49 +45,74 @@ export default async function handler(
     return res.status(401).json({ message: 'You must be logged in.' });
   }
 
-  const teamname = session.user.name;
+  const user = session.user.name;
 
-  // console.log('Match History request from');
-  // console.log(teamname);
+  try {
+    const userInfo = await client.send(
+      new GetCommand({
+        TableName: process.env.AWS_TABLE_NAME,
+        Key: {
+          pk: `user:${user}`,
+          sk: `user:${user}`,
+        },
+        ProjectionExpression: 'team',
+      }),
+    );
 
-  const paramsOne: QueryCommandInput = {
-    TableName: process.env.AWS_TABLE_NAME,
-    IndexName: process.env.AWS_REVERSE_INDEX,
-    KeyConditionExpression: 'sk = :team_name and begins_with(pk, :pk)',
-    ExpressionAttributeValues: {
-      ':team_name': { S: "team:" + teamname },
-      ':pk': { S: "match:" }
-    },
-  };
-
-  const commandOne = new QueryCommand(paramsOne);
-  const resultPlayerOne: QueryCommandOutput = await client.send(commandOne);
-
-  let matchDataPlayerOne: Match[] = [];
-
-  if (resultPlayerOne.Items) {
-    matchDataPlayerOne = resultPlayerOne.Items.map((item: any) => ({
-      id: item.match_id.N,
-      player: teamname,
-      opponent: item.players.L[0].M.current.BOOL ? item.players.L[1].M.teamName.S : item.players.L[0].M.teamName.S,
-      outcome: item.placement ? item.placement.N.toString(): "PENDING",
-      type: item.category.S,
-      replay: item.s3_key ? process.env.S3_URL_TEMPLATE + item.s3_key.S : null,
-      status: item.item_status.S,
-    }));
-  }
-
-  for (let i = 0; i < matchDataPlayerOne.length; i += 1) {
-    if (matchDataPlayerOne[i].outcome === '1') {
-      matchDataPlayerOne[i].outcome = 'WIN';
-    } else if (matchDataPlayerOne[i].outcome === '2') {
-      matchDataPlayerOne[i].outcome = 'LOSS';
+    if (!userInfo.Item) {
+      return res.status(401).json({ message: 'User not found.' });
     }
-  }
 
-  // sort matchData by id
-  const sortedMatchData = matchDataPlayerOne.sort(
-    (a, b) => parseInt(b.id, 10) - parseInt(a.id, 10),
-  );
-  return res.status(200).json(sortedMatchData);
+    const teamname = userInfo.Item.team;
+
+    console.log(teamname);
+
+    const queryMatchParams: QueryCommandInput = {
+      TableName: process.env.AWS_TABLE_NAME,
+      IndexName: process.env.AWS_REVERSE_INDEX,
+      KeyConditionExpression: 'sk = :team_name and begins_with(pk, :pk)',
+      ExpressionAttributeValues: {
+        ':team_name': { S: `team:${teamname}` },
+        ':pk': { S: 'match:' },
+      },
+    };
+
+    const command = new QueryCommand(queryMatchParams);
+    const matchHistoryResult: QueryCommandOutput = await client.send(command);
+
+    let teamMatchData: Match[] = [];
+
+    if (matchHistoryResult.Items) {
+      teamMatchData = matchHistoryResult.Items.map((item: any) => ({
+        id: item.match_id.N,
+        player: teamname,
+        opponent: item.players.L[0].M.current.B
+          ? item.players.L[1].M.teamName.S
+          : item.players.L[0].M.teamName.S,
+        outcome: item.placement ? item.placement.N.toString() : 'PENDING',
+        type: item.category.S,
+        replay: item.s3_key
+          ? process.env.S3_URL_TEMPLATE + item.s3_key.S
+          : null,
+        status: item.item_status.S,
+      }));
+    }
+
+    for (let i = 0; i < teamMatchData.length; i += 1) {
+      if (teamMatchData[i].outcome === '1') {
+        teamMatchData[i].outcome = 'WIN';
+      } else if (teamMatchData[i].outcome === '2') {
+        teamMatchData[i].outcome = 'LOSS';
+      }
+    }
+
+    // sort matchData by id
+    const sortedMatchData = teamMatchData.sort(
+      (a, b) => parseInt(b.id, 10) - parseInt(a.id, 10),
+    );
+    return res.status(200).json(sortedMatchData);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: 'Internal server error.' });
+  }
 }

@@ -17,7 +17,7 @@ const ProfileDropdownItem = (props: NavItemProps) => {
 
   return (
     <>
-      <FontAwesomeIcon className="me-2" icon={icon} fixedWidth />
+      <FontAwesomeIcon className='me-2' icon={icon} fixedWidth />
       {children}
     </>
   );
@@ -32,30 +32,30 @@ export default function HeaderProfileNav({ img }: { img: string }) {
     <Nav>
       <Dropdown as={NavItem}>
         <Dropdown.Toggle
-          variant="link"
-          bsPrefix="shadow-none"
-          className="py-0 px-2 rounded-0"
-          id="dropdown-profile"
+          variant='link'
+          bsPrefix='shadow-none'
+          className='py-0 px-2 rounded-0'
+          id='dropdown-profile'
         >
-          <div className="avatar position-relative">
+          <div className='avatar position-relative'>
             <Image
               fill
-              className="rounded-circle"
+              className='rounded-circle'
               src={`/assets/avatars/avatar_${img}.jpg`}
-              alt="profile pic"
+              alt='profile pic'
             />
           </div>
         </Dropdown.Toggle>
-        <Dropdown.Menu className="pt-0">
-          <Dropdown.Header className="bg-light fw-bold rounded-top">
+        <Dropdown.Menu className='pt-0'>
+          <Dropdown.Header className='bg-light fw-bold rounded-top'>
             Account
           </Dropdown.Header>
-          <Link href="/user/account" passHref legacyBehavior>
+          <Link href='/user/account' passHref legacyBehavior>
             <Dropdown.Item>
               <ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
             </Dropdown.Item>
           </Link>
-          <Link href="/" passHref legacyBehavior>
+          <Link href='/' passHref legacyBehavior>
             <Dropdown.Item onClick={() => logout()}>
               <ProfileDropdownItem icon={faPowerOff}>
                 Sign Out

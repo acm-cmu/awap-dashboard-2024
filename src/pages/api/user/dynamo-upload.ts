@@ -35,9 +35,8 @@ export default async function handler(
     const { uploadedName, user, fileName, timeStamp } = req.body;
     const s = process.env.S3_URL_TEMPLATE;
     const s3url = s + fileName;
-    const primarykey = "team:"+ user
-    const sortkey = "team:"+ user+"#bot:" + fileName
-    const submission_id = user + timeStamp;
+    const primarykey = `team:${user}`;
+    const sortkey = `team:${user}#bot:${fileName}`;
     const teamUser = await client.send(
       new GetItemCommand({
         TableName: process.env.AWS_TABLE_NAME,
@@ -51,12 +50,12 @@ export default async function handler(
       new PutItemCommand({
         TableName: process.env.AWS_TABLE_NAME,
         Item: {
-          pk: {S: primarykey},
-          sk: {S: sortkey},
-          record_type: { S: "bot" },
+          pk: { S: primarykey },
+          sk: { S: sortkey },
+          record_type: { S: 'bot' },
           s3_key: { S: fileName },
           upload_name: { S: uploadedName },
-          timeStamp: {S: timeStamp},
+          timeStamp: { S: timeStamp },
         },
       }),
     );
@@ -67,9 +66,9 @@ export default async function handler(
           TableName: process.env.AWS_TABLE_NAME,
           Item: {
             pk: { S: primarykey },
-            sk: { S: primarykey},
-            record_type: {S: "team"},
-            name: {S: user},
+            sk: { S: primarykey },
+            record_type: { S: 'team' },
+            name: { S: user },
             active_version: { S: fileName },
           },
         }),

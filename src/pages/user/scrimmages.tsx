@@ -14,10 +14,11 @@ import { Card, Table, Button } from 'react-bootstrap';
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  ScanCommand,
+  QueryCommand,
+  QueryCommandInput,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, GetCommand, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -37,6 +38,7 @@ const config: DynamoDBClientConfig = {
 
 const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
+    convertEmptyValues: true,
     removeUndefinedValues: true,
     convertClassInstanceToMap: true,
   },
@@ -86,7 +88,6 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
   playerTeam,
 }) => {
   const requestMatch = async () => {
-    console.log('request sent');
     axios
       .post('/api/user/match-request', {
         player: playerTeam,
@@ -94,12 +95,11 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
       })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
-          console.log('request sent');
           toast.success('Match Request Sent!');
         }
       })
       .catch((reason: AxiosError) => {
-        if (reason.response!.status === 500) {
+        if (reason.response?.status === 500) {
           toast.error('Internal Error, please try again later');
         } else if (reason.response?.status === 412) {
           toast.error('You have already requested a match with this team');
@@ -108,17 +108,16 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
         } else {
           toast.error('Something went wrong');
         }
-        console.log(reason.message);
       });
   };
 
   return (
-    <Card className="mb-3">
+    <Card className='mb-3'>
       <Card.Body>
         <Card.Title>{oppTeam.name}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted" />
+        <Card.Subtitle className='mb-2 text-muted' />
         <Card.Text>Rating: {oppTeam.rating}</Card.Text>
-        <Button variant="primary" onClick={requestMatch}>
+        <Button variant='dark' onClick={requestMatch}>
           Request Match
         </Button>
       </Card.Body>
@@ -128,13 +127,13 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
 
 const ScrimmageRequestDropdown: React.FC<{
   teams: Team[];
-  username: string;
+  userteam: string;
   setCurrentTeamSearch: React.Dispatch<React.SetStateAction<Team | null>>;
-}> = ({ teams, username, setCurrentTeamSearch }) => {
+}> = ({ teams, userteam, setCurrentTeamSearch }) => {
   const [TeamValue, setValue] = useState<string | null>(null);
 
   const teamnames = teams.map((team: Team) => team.name);
-  const index = teamnames.indexOf(username);
+  const index = teamnames.indexOf(userteam);
   if (index > -1) teamnames.splice(index, 1);
 
   const onSearch = () => {
@@ -155,16 +154,16 @@ const ScrimmageRequestDropdown: React.FC<{
         onChange={(event: any, newTeamValue: string | null) => {
           setValue(newTeamValue);
         }}
-        id="teams_dropdown"
+        id='teams_dropdown'
         options={teamnames}
         sx={{ width: 800 }}
-        renderInput={(params) => <TextField {...params} label="Teams" />}
+        renderInput={(params) => <TextField {...params} label='Teams' />}
       />
       <Button
-        variant="primary"
+        variant='dark'
         style={{ marginLeft: 10 }}
         onClick={onSearch}
-        size="lg"
+        size='lg'
       >
         Search
       </Button>
@@ -173,7 +172,7 @@ const ScrimmageRequestDropdown: React.FC<{
 };
 
 const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
-  <Table striped bordered hover className="text-center">
+  <Table striped bordered hover className='text-center'>
     <thead>
       <tr>
         <th>Match ID</th>
@@ -190,6 +189,7 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
 
 // Scrimmages Page
 const Scrimmages: NextPage = ({
+  userTeam,
   teams,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const session = useSession({ required: true });
@@ -214,28 +214,25 @@ const Scrimmages: NextPage = ({
 
   return (
     <UserLayout>
-      <Card className="mb-3">
+      <Card className='mb-3'>
         <Card.Body>
           <Card.Title>Available Scrimmages</Card.Title>
           <ScrimmageRequestDropdown
             teams={teams}
-            username={session.data.user?.name}
+            userteam={userTeam}
             setCurrentTeamSearch={setCurrentTeamSearch}
           />
         </Card.Body>
       </Card>
       {CurrentTeamSearch && (
-        <TeamInfo
-          oppTeam={CurrentTeamSearch}
-          playerTeam={session.data.user.name}
-        />
+        <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={userTeam} />
       )}
       <Card>
         <Card.Body>
           <Card.Title>Scrimmage History</Card.Title>
           <Button
-            variant="primary"
-            className="mb-3"
+            variant='dark'
+            className='mb-3'
             onClick={async () => {
               mutate();
             }}
@@ -264,16 +261,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-  
-  const userInfo = await client.send(new GetCommand({
-    TableName: process.env.AWS_TABLE_NAME,
-    Key: {
-      pk: "user:" + session.user.name,
-      sk: "user:" + session.user.name
-    },
-  }));
 
-  if(!userInfo || !userInfo.Item || !userInfo.Item.team) {
+  const userInfo = await client.send(
+    new GetCommand({
+      TableName: process.env.AWS_TABLE_NAME,
+      Key: {
+        pk: `user:${session.user.name}`,
+        sk: `user:${session.user.name}`,
+      },
+      ProjectionExpression: '#team',
+      ExpressionAttributeNames: {
+        '#team': 'team',
+      },
+    }),
+  );
+
+  if (!userInfo || !userInfo.Item || !userInfo.Item.team) {
     return {
       redirect: {
         destination: '/team',
@@ -281,11 +284,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-  
-  // scan player table for team names
-  const teamScanParams: ScanCommandInput = {
+
+  const { team } = userInfo.Item;
+
+  // query player table for team names
+  const teamQueryParams: QueryCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'record_type = :record',
+    IndexName: process.env.AWS_RECORD_INDEX,
+    KeyConditionExpression: 'record_type = :record',
     ExpressionAttributeValues: {
       ':record': { S: 'team' },
     },
@@ -296,7 +302,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     },
   };
 
-  const command = new ScanCommand(teamScanParams);
+  const command = new QueryCommand(teamQueryParams);
   const result = await client.send(command);
   const defaultRating = process.env.DEFAULT_RATING || 0;
 
@@ -304,12 +310,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (result.Items) {
     teams = result.Items.filter((item: any) => item.name).map((item: any) => ({
       name: item.name.S,
-      rating: item.num ? item.num.N: defaultRating as number,
+      rating: item.num ? item.num.N : (defaultRating as number),
     }));
   }
 
   return {
-    props: { teams }, // will be passed to the page component as props
+    props: {
+      userTeam: team,
+      teams,
+    }, // will be passed to the page component as props
   };
 };
 

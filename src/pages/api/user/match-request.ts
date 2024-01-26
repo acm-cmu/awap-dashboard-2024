@@ -2,9 +2,6 @@ import {
   DynamoDB,
   DynamoDBClientConfig,
   GetItemCommand,
-  QueryCommand,
-  QueryCommandInput,
-  QueryCommandOutput,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import axios from 'axios';
@@ -33,19 +30,25 @@ export default async function handler(
     return res.status(405).send({ message: 'Method not allowed' });
   }
 
-  const { player } = req.body;
-  const { opp } = req.body;
+  const { player, opp } = req.body;
 
+  if (!player || !opp) {
+    return res
+      .status(400)
+      .send({ message: 'Error creating match request', error: 'No player' });
+  }
+
+  /*
   const params: QueryCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     IndexName: process.env.AWS_REVERSE_INDEX,
     KeyConditionExpression: 'sk = :team_name and begins_with(pk, :pk)',
     FilterExpression: 'item_status = :status and contains(players, :opp)',
     ExpressionAttributeValues: {
-      ':team_name': { S: "team:" + player },
+      ':team_name': { S: `team:${player}`},
       ':pk': { S: "match:" },
       ':status': { S: 'PENDING' },
-      ':opp': { M: {teamName: {S: opp}, current: {BOOL: false}} },
+      ':opp': { S: `team:${opp}` },
     },
   };
 
@@ -67,24 +70,26 @@ export default async function handler(
       const diff = now - lastUpdated.getTime();
       const diffMinutes = Math.round(diff / 60000);
 
-      if (diffMinutes < 30) {
-        return res.status(412).send({
-          message: 'Error creating match request',
-          error:
-            'A pending match request already exists, please try again later',
-        });
+        if (diffMinutes < 30) {
+          return res.status(412).send({
+            message: 'Error creating match request',
+            error:
+              'A pending match request already exists, please try again later',
+          });
+        }
       }
     }
   }
+  */
 
   const playerData = await client.send(
     new GetItemCommand({
       TableName: process.env.AWS_TABLE_NAME,
       Key: {
-        pk: {S : "team:" + player},
-        sk: {S : "team:" + player}
+        pk: { S: `team:${player}` },
+        sk: { S: `team:${player}` },
       },
-      ProjectionExpression: "active_version"
+      ProjectionExpression: 'active_version',
     }),
   );
 
@@ -94,10 +99,10 @@ export default async function handler(
     new GetItemCommand({
       TableName: process.env.AWS_TABLE_NAME,
       Key: {
-        pk: {S : "team:" + opp},
-        sk: {S : "team:" + opp}
+        pk: { S: `team:${opp}` },
+        sk: { S: `team:${opp}` },
       },
-      ProjectionExpression: "active_version"
+      ProjectionExpression: 'active_version',
     }),
   );
 

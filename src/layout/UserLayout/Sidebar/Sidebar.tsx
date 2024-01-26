@@ -77,7 +77,7 @@ export const SidebarOverlay = (props: {
         'sidebar-overlay position-fixed top-0 bg-dark w-100 h-100 opacity-50',
         {
           'd-none': !isShowSidebar,
-        }
+        },
       )}
       onClick={toggleSidebar}
     />
