@@ -110,7 +110,6 @@ export default async function handler(
   }
   // console.log(requestData);
   try {
-    console.log(requestData);
     const response = await axios.post(
       `http://${process.env.MATCHMAKING_SERVER_IP}/tournament/`,
       requestData,
