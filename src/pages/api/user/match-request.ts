@@ -136,15 +136,12 @@ export default async function handler(
     ],
   };
 
-  // console.log(requestData);
 
   try {
     const response = await axios.post(
       `http://${process.env.MATCHMAKING_SERVER_IP}/match/`,
       requestData,
     );
-
-    // console.log(`Status: ${response.status}`);
 
     if (response.status !== 200) {
       return res

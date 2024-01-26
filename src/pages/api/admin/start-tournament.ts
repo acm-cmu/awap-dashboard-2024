@@ -64,7 +64,6 @@ export default async function handler(
       s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
       s3_object_name: item.active_version.S,
     }));
-    // console.log(playerDataBeginner);
 
     requestData = {
       game_engine_name: process.env.GAME_ENGINE_NAME,
@@ -100,7 +99,6 @@ export default async function handler(
       s3_bucket_name: process.env.S3_UPLOAD_BUCKET,
       s3_object_name: item.active_version.S,
     }));
-    // console.log(playerDataAdvanced);
 
     requestData = {
       game_engine_name: process.env.GAME_ENGINE_NAME,
@@ -108,7 +106,7 @@ export default async function handler(
       user_submissions: playerDataAdvanced,
     };
   }
-  // console.log(requestData);
+
   try {
     const response = await axios.post(
       `http://${process.env.MATCHMAKING_SERVER_IP}/tournament/`,
