@@ -18,6 +18,7 @@
       },
       "rules": {
         "@typescript-eslint/semi": [2, "always"],
+        "@typescript-eslint/indent": "off",
         // Use semicolon as member delimiter for interfaces and type
         "@typescript-eslint/member-delimiter-style": 2
       }
