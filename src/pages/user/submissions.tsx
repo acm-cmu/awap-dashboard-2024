@@ -138,11 +138,17 @@ const Submissions: NextPage = ({
 
   const uploadFile = async (user: string) => {
     if (!file) return;
-    const time1 = new Date().toLocaleString();
-    const time2 = time1.split('/').join('-');
-    const time = time2.split(' ').join('');
+    // if filename contains spaces or ':' reject
+    if(file.name.includes(' ') || file.name.includes(':')) {
+      toast.error('File name cannot contain spaces or colons.');
+      return;
+    }
+    
+    const time = new Date().toISOString();
+    const timeString = time.split('.')[0].replace(/:/g, '-');
+ 
     const submissionID = uuidv4();
-    const fileName = `bot-${user}-${time}-${submissionID}.py`;
+    const fileName = `bot-${user}-${timeString}-${submissionID}.py`;
     const { data } = await axios.post('/api/user/s3-upload', {
       name: fileName,
       type: file.type,
@@ -160,7 +166,7 @@ const Submissions: NextPage = ({
       uploadedName: file.name,
       user,
       fileName,
-      timeStamp: time1,
+      timeStamp: time,
       submissionID,
     });
     window.location.reload();
@@ -386,7 +392,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       fileName: sorted[i].upload_name as string,
       s3Key: sorted[i].s3_key,
       submissionURL: (process.env.S3_URL_TEMPLATE + sorted[i].s3_key) as string,
-      timeStamp: sorted[i].timeStamp as string,
+      timeStamp: new Date(sorted[i].timeStamp).toLocaleString(),
       isActive: (sorted[i].s3_key === activeVersion) as boolean,
     };
     submissionData.push(submission);
