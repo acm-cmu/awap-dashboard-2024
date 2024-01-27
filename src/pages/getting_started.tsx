@@ -10,7 +10,12 @@ const GettingStarted: NextPage = () => (
         <Card.Text>
           Follow through the instructions below to learn more about installation
           instructions, how you can upload your bot submissions, request
-          scrimmages with other players, and check out your match results!
+          scrimmages with other players, and check out your match results! <br/>
+          <br />
+          Landing Page: <a href="http://awap.acmatcmu.com" target="_blank" rel="noopener noreferrer">awap.acmatcmu.com</a><br />
+          Dashboard: <a href="http://dashboard.awap.acmatcmu.com" target="_blank" rel="noopener noreferrer">dashboard.awap.acmatcmu.com</a><br />
+          Player Guide: <a href="http://tinyurl.com/debrisdefense" target="_blank" rel="noopener noreferrer">tinyurl.com/debrisdefense</a><br />
+          
         </Card.Text>
       </Card.Body>
     </Card>
@@ -31,11 +36,12 @@ const GettingStarted: NextPage = () => (
         <Card.Text>
           Find the scrimmages page to request unranked matches with any teams
           listed in the dropdown. Your team may request up to 5 scrimmages per hour.
-          These scrimmages do not affect your rating on the leaderboard.
+          These scrimmages do not affect your rating on the leaderboard. Only the matches 
+          that we will run periodically throughout the competition affect your rating.
         </Card.Text>
       </Card.Body>
     </Card>
-    <Card>
+    <Card className='mb-3'>
       <Card.Body>
         <Card.Title>Leaderboard</Card.Title>
         <Card.Text>
@@ -44,6 +50,7 @@ const GettingStarted: NextPage = () => (
         </Card.Text>
       </Card.Body>
     </Card>
+    
   </UserLayout>
 );
 
