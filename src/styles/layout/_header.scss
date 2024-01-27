@@ -1,10 +1,12 @@
-$header-background: #fff;
+$header-background: #2b4d86;
+$header-text-color: rgba(255, 255, 255, 0.6);
 $header-link-color: rgba(179, 223, 235, 0.681);
 $header-link-color-hover: rgba(37, 112, 140, 0.95);
 $header-brand-color: #8a9ab5;
 
 .header {
   background: $header-background;
+  color: $header-text-color;
 
   .header-brand {
     color: $header-brand-color;
