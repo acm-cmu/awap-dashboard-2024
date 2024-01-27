@@ -90,14 +90,14 @@ const Admin: NextPage = () => {
       });
   };
 
-  const modifyBracketSwitching = async (enabled : boolean) => {
-    await axios.post('/api/admin/modify-permissions', { bracket_switching: enabled })
+  const modifyBracketSwitching = async (enabled: boolean) => {
+    await axios
+      .post('/api/admin/modify-permissions', { bracket_switching: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
           toast.success(`Bracket Switching ${effect}!`);
-        }
-        else {
+        } else {
           toast.error('Unable to modify permission: Bracket Switching');
         }
       })
@@ -108,19 +108,23 @@ const Admin: NextPage = () => {
           toast.error('Unable to modify permission: Bracket Switching');
         }
       });
-  }
+  };
 
-  const enableBracketSwitching = async () => { modifyBracketSwitching(true); }
-  const disableBracketSwitching = async () => { modifyBracketSwitching(false); }
+  const enableBracketSwitching = async () => {
+    modifyBracketSwitching(true);
+  };
+  const disableBracketSwitching = async () => {
+    modifyBracketSwitching(false);
+  };
 
-  const modifyTeamModifications = async (enabled : boolean) => {
-    await axios.post('/api/admin/modify-permissions', { team_modifications: enabled })
+  const modifyTeamModifications = async (enabled: boolean) => {
+    await axios
+      .post('/api/admin/modify-permissions', { team_modifications: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
           toast.success(`Team Modifications ${effect}!`);
-        }
-        else {
+        } else {
           toast.error('Unable to modify permission: Team Modifications');
         }
       })
@@ -131,19 +135,23 @@ const Admin: NextPage = () => {
           toast.error('Unable to modify permission: Team Modifications');
         }
       });
-  }
+  };
 
-  const enableTeamModifications = async () => { modifyTeamModifications(true); }
-  const disableTeamModifications = async () => { modifyTeamModifications(false); }
+  const enableTeamModifications = async () => {
+    modifyTeamModifications(true);
+  };
+  const disableTeamModifications = async () => {
+    modifyTeamModifications(false);
+  };
 
-  const modifyScrimmageRequests = async (enabled : boolean) => {
-    await axios.post('/api/admin/modify-permissions', { scrimmage_requests: enabled })
+  const modifyScrimmageRequests = async (enabled: boolean) => {
+    await axios
+      .post('/api/admin/modify-permissions', { scrimmage_requests: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
           toast.success(`Scrimmage Requests ${effect}!`);
-        }
-        else {
+        } else {
           toast.error('Unable to modify permission: Scrimmage Requests');
         }
       })
@@ -154,19 +162,23 @@ const Admin: NextPage = () => {
           toast.error('Unable to modify permission: Scrimmage Requests');
         }
       });
-  }
+  };
 
-  const enableScrimmageRequests = async () => { modifyScrimmageRequests(true); }
-  const disableScrimmageRequests = async () => { modifyScrimmageRequests(false); }
+  const enableScrimmageRequests = async () => {
+    modifyScrimmageRequests(true);
+  };
+  const disableScrimmageRequests = async () => {
+    modifyScrimmageRequests(false);
+  };
 
-  const modifyCodeSubmissions = async (enabled : boolean) => {
-    await axios.post('/api/admin/modify-permissions', { code_submissions: enabled })
+  const modifyCodeSubmissions = async (enabled: boolean) => {
+    await axios
+      .post('/api/admin/modify-permissions', { code_submissions: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
           toast.success(`Code Submissions ${effect}!`);
-        }
-        else {
+        } else {
           toast.error('Unable to modify permission: Code Submissions');
         }
       })
@@ -177,10 +189,14 @@ const Admin: NextPage = () => {
           toast.error('Unable to modify permission: Code Submissions');
         }
       });
-  }
+  };
 
-  const enableCodeSubmissions = async () => { modifyCodeSubmissions(true); }
-  const disableCodeSubmissions = async () => { modifyCodeSubmissions(false); }
+  const enableCodeSubmissions = async () => {
+    modifyCodeSubmissions(true);
+  };
+  const disableCodeSubmissions = async () => {
+    modifyCodeSubmissions(false);
+  };
 
   if (status === 'authenticated') {
     if (data?.user?.role === 'user') {
@@ -191,16 +207,23 @@ const Admin: NextPage = () => {
           <Card>
             <Card.Body>
               <Card.Title>Admin</Card.Title>
-              <Card.Text>Manage Permissions and run ranked scrimmages and tournaments here.</Card.Text>
+              <Card.Text>
+                Manage Permissions and run ranked scrimmages and tournaments
+                here.
+              </Card.Text>
             </Card.Body>
           </Card>
           <br />
           <Card>
             <Card.Body>
-            <Card.Title>Permissions</Card.Title>
+              <Card.Title>Permissions</Card.Title>
               <div>
                 <div className='mb-3'>
-                  <Button onClick={enableBracketSwitching} variant='dark' className="mr-3">
+                  <Button
+                    onClick={enableBracketSwitching}
+                    variant='dark'
+                    className='mr-3'
+                  >
                     Enable Bracket Switching
                   </Button>
                   <Button onClick={disableBracketSwitching} variant='dark'>
@@ -209,7 +232,11 @@ const Admin: NextPage = () => {
                 </div>
 
                 <div className='mb-3'>
-                  <Button onClick={enableTeamModifications} variant='dark' className="mr-3">
+                  <Button
+                    onClick={enableTeamModifications}
+                    variant='dark'
+                    className='mr-3'
+                  >
                     Enable Team Modifications
                   </Button>
                   <Button onClick={disableTeamModifications} variant='dark'>
@@ -218,17 +245,28 @@ const Admin: NextPage = () => {
                 </div>
 
                 <div className='mb-3'>
-                  <Button onClick={enableScrimmageRequests} variant='dark' className="mr-3">
+                  <Button
+                    onClick={enableScrimmageRequests}
+                    variant='dark'
+                    className='mr-3'
+                  >
                     Enable Scrimmage Requests
                   </Button>
-                  <Button onClick={disableScrimmageRequests} variant='dark' className="ml-3">
+                  <Button
+                    onClick={disableScrimmageRequests}
+                    variant='dark'
+                    className='ml-3'
+                  >
                     Disable Scrimmage Requests
                   </Button>
                 </div>
 
-
                 <div className='mb-3'>
-                  <Button onClick={enableCodeSubmissions} variant='dark' className="mr-3">
+                  <Button
+                    onClick={enableCodeSubmissions}
+                    variant='dark'
+                    className='mr-3'
+                  >
                     Enable Code Submissions
                   </Button>
                   <Button onClick={disableCodeSubmissions} variant='dark'>

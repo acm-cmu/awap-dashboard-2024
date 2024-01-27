@@ -115,7 +115,8 @@ const TableBody: React.FC<{ data: any; image: string; activateFn: any }> = ({
 );
 
 const Submissions: NextPage = ({
-  teamData, configData,
+  teamData,
+  configData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
   const [file, setFile] = useState<any>(null);
@@ -123,7 +124,7 @@ const Submissions: NextPage = ({
   const { team, submissionData } = teamData;
 
   const handleActivate = async (fileName: string) => {
-    if(configData.disabled_code_submissions) {
+    if (configData.disabled_code_submissions) {
       toast.error('Changing active bot is currently disabled.');
       return;
     }
@@ -166,15 +167,14 @@ const Submissions: NextPage = ({
     setFile(null);
   };
 
-  const handleUploadClick = async () => 
-  {
-    if(configData.disabled_code_submissions) {
+  const handleUploadClick = async () => {
+    if (configData.disabled_code_submissions) {
       toast.error('Code submissions are currently disabled.');
       return;
     }
 
     uploadFile(team);
-  }
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
@@ -279,7 +279,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-    // query for config data
+  // query for config data
   const configParams: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     Key: {
@@ -293,7 +293,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const configData = configResult.Item;
 
-  let config: ConfigData = {
+  let configs: ConfigData = {
     disabled_bracket_switching: false,
     disabled_code_submissions: false,
     disabled_scrimmage_requests: false,
@@ -301,7 +301,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 
   if (configData) {
-    config = {
+    configs = {
       disabled_bracket_switching: !configData.bracket_switching,
       disabled_code_submissions: !configData.code_submissions,
       disabled_scrimmage_requests: !configData.scrimmage_requests,
@@ -332,7 +332,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamData: {
           team,
           submissionData: [],
-          configData: config,
+          configData: configs,
         },
       },
     };

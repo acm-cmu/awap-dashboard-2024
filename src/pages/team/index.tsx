@@ -46,7 +46,8 @@ interface ConfigData {
 }
 
 const TeamHub: NextPage = ({
-  team, configData,
+  team,
+  configData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [createTeamname, setCreateTeamname] = useState<string>('');
   const [joinTeamname, setJoinTeamname] = useState<string>('');
@@ -62,9 +63,9 @@ const TeamHub: NextPage = ({
     e.preventDefault();
     e.stopPropagation();
 
-    if(configData.disabled_team_modifications) {
+    if (configData.disabled_team_modifications) {
       toast.error('Team modifications are currently disabled.');
-      return
+      return;
     }
 
     await axios
@@ -96,9 +97,9 @@ const TeamHub: NextPage = ({
     e.preventDefault();
     e.stopPropagation();
 
-    if(configData.disabled_team_modifications) {
+    if (configData.disabled_team_modifications) {
       toast.error('Team modifications are currently disabled.');
-      return
+      return;
     }
 
     await axios
@@ -235,7 +236,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-    // query for config data
+  // query for config data
   const configParams: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     Key: {
@@ -249,7 +250,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const configData = configResult.Item;
 
-  let config: ConfigData = {
+  let configs: ConfigData = {
     disabled_bracket_switching: false,
     disabled_code_submissions: false,
     disabled_scrimmage_requests: false,
@@ -257,7 +258,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 
   if (configData) {
-    config = {
+    configs = {
       disabled_bracket_switching: !configData.bracket_switching,
       disabled_code_submissions: !configData.code_submissions,
       disabled_scrimmage_requests: !configData.scrimmage_requests,
@@ -277,12 +278,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const result = await client.send(command);
   if (!result || !result.Item || !result.Item.team || result.Item.team === '') {
     return {
-      props: { team: null, configData: config },
+      props: { team: null, configData: configs },
     };
   }
 
   return {
-    props: { team: result.Item.team, configData: config },
+    props: { team: result.Item.team, configData: configs },
   };
 };
 

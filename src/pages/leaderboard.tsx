@@ -235,10 +235,12 @@ const Teams: NextPage<Props> = (props) => {
             <tbody>
               {teams.map((team) => (
                 <tr key={team.tname}>
-                  
-                  { <RankLabel key={team.tname} rank={team.ranking} /> }
+                  <RankLabel key={team.tname} rank={team.ranking} />
                   <td>{team.tname}</td>
-                  <td>{team.bracket.charAt(0).toUpperCase() + team.bracket.slice(1)}</td>
+                  <td>
+                    {team.bracket.charAt(0).toUpperCase() +
+                      team.bracket.slice(1)}
+                  </td>
                   <td className='text-end'>{team.rating}</td>
                 </tr>
               ))}
@@ -285,7 +287,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
     ExpressionAttributeNames: {
       '#teamName': 'name',
       '#rating': 'num',
-      '#bracket': 'bracket'
+      '#bracket': 'bracket',
     },
   };
 
@@ -330,7 +332,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       ranking: idx + 1,
       tname: item.name.S as string,
       rating: parseInt(item.num && item.num.N ? item.num.N : defaultRating, 10),
-      bracket: (item.bracket ? item.bracket.S : "beginner") as string,
+      bracket: (item.bracket ? item.bracket.S : 'beginner') as string,
     }));
 
   function sortmap(t: Leaderboard, att: string) {

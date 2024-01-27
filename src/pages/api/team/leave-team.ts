@@ -3,10 +3,7 @@ import {
   DynamoDBClientConfig,
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocument,
-  UpdateCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocument, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const config: DynamoDBClientConfig = {

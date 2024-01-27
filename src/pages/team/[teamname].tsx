@@ -101,7 +101,8 @@ const TeamMemberField = ({ name }: { name: string }) => (
 );
 
 const Team: NextPage = ({
-  teamData, configData,
+  teamData,
+  configData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const teamname: string = router.query.teamname
@@ -159,7 +160,7 @@ const Team: NextPage = ({
   const handleRegenerateSecretKey = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    if(configData.disabled_team_modifications) {
+    if (configData.disabled_team_modifications) {
       toast.error('Team modifications are currently disabled!');
       return;
     }
@@ -193,7 +194,7 @@ const Team: NextPage = ({
   const handleChangeBracket = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    if(configData.disabled_bracket_switching) {
+    if (configData.disabled_bracket_switching) {
       toast.error('Bracket switching is currently disabled!');
       return;
     }
@@ -224,7 +225,7 @@ const Team: NextPage = ({
   const handleLeaveTeam = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    if(configData.disabled_team_modifications) {
+    if (configData.disabled_team_modifications) {
       toast.error('Team modifications are currently disabled!');
       return;
     }
@@ -391,7 +392,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const configData = configResult.Item;
 
-  let config: ConfigData = {
+  let configs: ConfigData = {
     disabled_bracket_switching: false,
     disabled_code_submissions: false,
     disabled_scrimmage_requests: false,
@@ -399,7 +400,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 
   if (configData) {
-    config = {
+    configs = {
       disabled_bracket_switching: !configData.bracket_switching,
       disabled_code_submissions: !configData.code_submissions,
       disabled_scrimmage_requests: !configData.scrimmage_requests,
@@ -419,7 +420,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       teamData: teamDataInfo,
-      configData: config,
+      configData: configs,
     },
   };
 };
