@@ -332,8 +332,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamData: {
           team,
           submissionData: [],
-          configData: configs,
         },
+        configData: configs,
       },
     };
   }
@@ -359,8 +359,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamData: {
           team,
           submissionData: [],
-          configData: config,
         },
+        configData: configs,
       },
     };
   }
@@ -397,8 +397,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       teamData: {
         team,
         submissionData,
-        configData: config,
       },
+      configData: configs,
     },
   };
 };

@@ -99,7 +99,7 @@ const Profile: NextPage = ({
   const createTeam = async (user: string | null | undefined) => {
     if (!user) return;
     const teamName = document.getElementById('teamname') as HTMLInputElement;
-    // console.log(teamName);
+
     const teamNameValue = teamName.value;
     await axios
       .post('/api/user/create-team', {

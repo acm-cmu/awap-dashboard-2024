@@ -90,7 +90,7 @@ export default async function handler(
         outcome: item.placement ? item.placement.N.toString() : 'PENDING',
         type: item.category.S,
         replay: item.s3_key
-          ? process.env.MATCH_S3_URL_TEMPLATE + item.s3_key.S
+          ? process.env.REPLAY_S3_URL_TEMPLATE + item.s3_key.S
           : null,
         status: item.item_status.S,
       }));
