@@ -9,13 +9,6 @@ import { toast } from 'react-toastify';
 import useSWR from 'swr';
 import MatchTable from '@components/MatchTable';
 
-interface ConfigData {
-  disabled_bracket_switching: boolean;
-  disabled_team_modifications: boolean;
-  disabled_scrimmage_requests: boolean;
-  disabled_code_submissions: boolean;
-}
-
 const Admin: NextPage = () => {
   const { status, data } = useSession();
 
@@ -98,7 +91,7 @@ const Admin: NextPage = () => {
   };
 
   const modifyBracketSwitching = async (enabled : boolean) => {
-    axios.post('/api/admin/modify-permissions', { disabled_bracket_switching: enabled })
+    await axios.post('/api/admin/modify-permissions', { bracket_switching: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
@@ -121,7 +114,7 @@ const Admin: NextPage = () => {
   const disableBracketSwitching = async () => { modifyBracketSwitching(false); }
 
   const modifyTeamModifications = async (enabled : boolean) => {
-    axios.post('/api/admin/modify-permissions', { disabled_team_modifications: enabled })
+    await axios.post('/api/admin/modify-permissions', { team_modifications: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
@@ -144,7 +137,7 @@ const Admin: NextPage = () => {
   const disableTeamModifications = async () => { modifyTeamModifications(false); }
 
   const modifyScrimmageRequests = async (enabled : boolean) => {
-    axios.post('/api/admin/modify-permissions', { disabled_scrimmage_requests: enabled })
+    await axios.post('/api/admin/modify-permissions', { scrimmage_requests: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
@@ -167,7 +160,7 @@ const Admin: NextPage = () => {
   const disableScrimmageRequests = async () => { modifyScrimmageRequests(false); }
 
   const modifyCodeSubmissions = async (enabled : boolean) => {
-    axios.post('/api/admin/modify-permissions', { disabled_code_submissions: enabled })
+    await axios.post('/api/admin/modify-permissions', { code_submissions: enabled })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
           const effect = enabled ? 'Enabled' : 'Disabled';
@@ -204,50 +197,45 @@ const Admin: NextPage = () => {
           <br />
           <Card>
             <Card.Body>
-              <Card.Title>Permissions</Card.Title>
-              <Card.Text>
+            <Card.Title>Permissions</Card.Title>
+              <div>
                 <div className='mb-3'>
-                  <Button onClick={enableBracketSwitching} variant='dark'>
+                  <Button onClick={enableBracketSwitching} variant='dark' className="mr-3">
                     Enable Bracket Switching
                   </Button>
                   <Button onClick={disableBracketSwitching} variant='dark'>
                     Disable Bracket Switching
                   </Button>
                 </div>
-              </Card.Text>
 
-              <Card.Text>
                 <div className='mb-3'>
-                  <Button onClick={enableTeamModifications} variant='dark'>
+                  <Button onClick={enableTeamModifications} variant='dark' className="mr-3">
                     Enable Team Modifications
                   </Button>
                   <Button onClick={disableTeamModifications} variant='dark'>
                     Disable Team Modifications
                   </Button>
                 </div>
-              </Card.Text>
 
-              <Card.Text>
                 <div className='mb-3'>
-                  <Button onClick={enableScrimmageRequests} variant='dark'>
+                  <Button onClick={enableScrimmageRequests} variant='dark' className="mr-3">
                     Enable Scrimmage Requests
                   </Button>
-                  <Button onClick={disableScrimmageRequests} variant='dark'>
+                  <Button onClick={disableScrimmageRequests} variant='dark' className="ml-3">
                     Disable Scrimmage Requests
                   </Button>
                 </div>
-              </Card.Text>
 
-              <Card.Text>
+
                 <div className='mb-3'>
-                  <Button onClick={enableCodeSubmissions} variant='dark'>
+                  <Button onClick={enableCodeSubmissions} variant='dark' className="mr-3">
                     Enable Code Submissions
                   </Button>
                   <Button onClick={disableCodeSubmissions} variant='dark'>
                     Disable Code Submissions
                   </Button>
                 </div>
-              </Card.Text>
+              </div>
             </Card.Body>
           </Card>
           <br />
