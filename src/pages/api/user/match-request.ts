@@ -8,7 +8,7 @@ export default async function handler(
   if (req.method !== 'POST')
     return res.status(405).send({ message: 'Method not allowed' });
 
-  const { player, opp } = req.body;
+  const { player, opp, map } = req.body;
 
   if (!player || !opp) {
     return res
@@ -16,9 +16,20 @@ export default async function handler(
       .send({ message: 'Error creating match request', error: 'No player' });
   }
 
-  const matchRequestData = {
-    players: [{ username: player }, { username: opp }],
-  };
+  let matchRequestData = {};
+
+  if (map) {
+    matchRequestData = {
+      players: [{ username: player }, { username: opp }],
+      mapId: map,
+      shuffler: 'random',
+    };
+  } else {
+    matchRequestData = {
+      players: [{ username: player }, { username: opp }],
+      shuffler: 'random',
+    };
+  }
 
   try {
     const response = await axios.post(
@@ -34,11 +45,9 @@ export default async function handler(
     return res.status(200).send({ message: 'Success', data: response.data });
   } catch (err) {
     console.log(err);
-    return res
-      .status(500)
-      .send({
-        message: 'Error fetching data',
-        error: 'Internal Error, please try again later',
-      });
+    return res.status(500).send({
+      message: 'Error fetching data',
+      error: 'Internal Error, please try again later',
+    });
   }
 }

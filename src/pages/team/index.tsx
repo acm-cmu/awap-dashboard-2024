@@ -67,6 +67,14 @@ const TeamHub: NextPage = ({
       toast.error('Team modifications are currently disabled.');
       return;
     }
+    // only allow alphanumeric characters or - or _
+    const regex = /^[a-zA-Z0-9-_]+$/;
+    if (!regex.test(createTeamname)) {
+      toast.error(
+        'Team name must only contain alphanumeric characters, - or _',
+      );
+      return;
+    }
 
     await axios
       .post('/api/team/create-team', {

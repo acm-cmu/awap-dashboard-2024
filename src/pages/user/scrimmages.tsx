@@ -62,27 +62,34 @@ interface ConfigData {
 }
 
 // Table Component
-const TableRow: React.FC<{ match: Match }> = ({ match }) => (
-  <tr>
-    <td>{match.id}</td>
-    <td>{match.opponent}</td>
-    <td>{match.map}</td>
-    <td>{match.status}</td>
-    <td>{match.outcome}</td>
-    <td>{match.type}</td>
-    <td>
-      {match.status === 'finished' ? (
-        match.replay ? (
+const TableRow: React.FC<{ match: Match }> = ({ match }) => {
+  let backgroundColor;
+  if (match.outcome === 'WIN') {
+    backgroundColor = 'rgb(209, 236, 201)'; // light red
+  } else if (match.outcome === 'LOSS') {
+    backgroundColor = 'rgb(245, 205, 213)'; // light green
+  } else if (match.status === 'pending') {
+    backgroundColor = 'rgb(255, 255, 0)'; // yellow
+  }
+
+  return (
+    <tr style={{ backgroundColor }}>
+      <td>{match.id}</td>
+      <td>{match.opponent}</td>
+      <td>{match.map}</td>
+      <td>{match.status}</td>
+      <td>{match.outcome}</td>
+      <td>{match.type}</td>
+      <td>
+        {match.status === 'COMPLETE' ? (
           <a href={match.replay}>Download</a>
         ) : (
-          'Error'
-        )
-      ) : (
-        'N/A'
-      )}
-    </td>
-  </tr>
-);
+          'N/A'
+        )}
+      </td>
+    </tr>
+  );
+};
 
 const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
   // eslint-disable-next-line react/jsx-key
@@ -94,7 +101,8 @@ const TeamInfo: React.FC<{
   oppTeam: Team;
   playerTeam: string;
   disabledScrimmageRequests: boolean;
-}> = ({ oppTeam, playerTeam, disabledScrimmageRequests }) => {
+  map: string | null;
+}> = ({ oppTeam, playerTeam, disabledScrimmageRequests, map }) => {
   const requestMatch = async () => {
     if (disabledScrimmageRequests) {
       toast.error('Scrimmage requests are currently disabled.');
@@ -105,6 +113,7 @@ const TeamInfo: React.FC<{
       .post('/api/user/match-request', {
         player: playerTeam,
         opp: oppTeam.name,
+        map,
       })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
@@ -127,7 +136,12 @@ const TeamInfo: React.FC<{
   return (
     <Card className='mb-3'>
       <Card.Body>
-        <Card.Title>{oppTeam.name}</Card.Title>
+        <Card.Title>
+          <small>Map: {map || 'Random'}</small>{' '}
+          {/* Replace "map" with the actual property in your oppTeam object */}
+          <br />
+          <small>Opponent: {oppTeam.name}</small>
+        </Card.Title>
         <Card.Subtitle className='mb-2 text-muted' />
         <Card.Text>Rating: {oppTeam.rating}</Card.Text>
         <Button variant='dark' onClick={requestMatch}>
@@ -141,9 +155,14 @@ const TeamInfo: React.FC<{
 const ScrimmageRequestDropdown: React.FC<{
   teams: Team[];
   userteam: string;
+  maps: string[];
   setCurrentTeamSearch: React.Dispatch<React.SetStateAction<Team | null>>;
-}> = ({ teams, userteam, setCurrentTeamSearch }) => {
+  setCurrentMapSearch: React.Dispatch<React.SetStateAction<string | null>>;
+}> = ({ teams, userteam, maps, setCurrentTeamSearch, setCurrentMapSearch }) => {
   const [TeamValue, setValue] = useState<string | null>(null);
+  const [MapValue, setMapValue] = useState<string | null>(
+    maps.length ? maps[0] : null,
+  );
 
   const teamnames = teams.map((team: Team) => team.name);
   const index = teamnames.indexOf(userteam);
@@ -154,7 +173,13 @@ const ScrimmageRequestDropdown: React.FC<{
     for (let i = 0; i < teams.length; i += 1) {
       if (teams[i].name === TeamValue) {
         setCurrentTeamSearch(teams[i]);
-        return;
+        break;
+      }
+    }
+    for (let i = 0; i < maps.length; i += 1) {
+      if (maps[i] === MapValue) {
+        setCurrentMapSearch(maps[i]);
+        break;
       }
     }
   };
@@ -171,6 +196,17 @@ const ScrimmageRequestDropdown: React.FC<{
         options={teamnames}
         sx={{ width: 800 }}
         renderInput={(params) => <TextField {...params} label='Teams' />}
+      />
+      <Autocomplete
+        disablePortal
+        value={MapValue}
+        onChange={(event: any, newMapValue: string | null) => {
+          setMapValue(newMapValue);
+        }}
+        id='maps_dropdown'
+        options={maps}
+        sx={{ width: 800, marginLeft: 2 }}
+        renderInput={(params) => <TextField {...params} label='Maps' />}
       />
       <Button
         variant='dark'
@@ -206,9 +242,11 @@ const Scrimmages: NextPage = ({
   userTeam,
   teams,
   configData,
+  maps,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const session = useSession({ required: true });
   const [CurrentTeamSearch, setCurrentTeamSearch] = useState<Team | null>(null);
+  const [CurrentMapSearch, setCurrentMapSearch] = useState<string | null>(null);
 
   const { disabled_scrimmage_requests: disabledScrimmageRequests } = configData;
 
@@ -237,7 +275,9 @@ const Scrimmages: NextPage = ({
           <ScrimmageRequestDropdown
             teams={teams}
             userteam={userTeam}
+            maps={maps}
             setCurrentTeamSearch={setCurrentTeamSearch}
+            setCurrentMapSearch={setCurrentMapSearch}
           />
         </Card.Body>
       </Card>
@@ -246,6 +286,7 @@ const Scrimmages: NextPage = ({
           oppTeam={CurrentTeamSearch}
           playerTeam={userTeam}
           disabledScrimmageRequests={disabledScrimmageRequests}
+          map={CurrentMapSearch}
         />
       )}
       <Card>
@@ -365,11 +406,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }));
   }
 
+  let maps: string[] = [];
+
+  await axios
+    .get(`${process.env.MATCHMAKING_SERVER_IP}/maps/list?pool=unranked`)
+    .then((response: AxiosResponse) => {
+      if (response.status === 200) maps = response.data.pools[0].mapIds;
+    });
+
   return {
     props: {
       userTeam: team,
       teams,
       configData: configs,
+      maps,
     }, // will be passed to the page component as props
   };
 };
