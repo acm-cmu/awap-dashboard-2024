@@ -31,6 +31,7 @@ export interface Match {
   player1: string;
   player2: string;
   category: string;
+  map: string;
   status: string;
   outcome: string;
   replay: string;
@@ -77,6 +78,7 @@ export default async function handler(
             ? item.players.L[1].M.teamName.S
             : 'unknown',
         category: item.category ? item.category.S : 'unknown',
+        map: item.map && item.map.S ? item.map.S : 'unknown',
         status: item.item_status ? item.item_status.S : 'unknown',
         outcome: item.placement ? item.placement.N?.toString() : '-1',
         replay:
