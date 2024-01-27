@@ -65,7 +65,7 @@ const MatchTable = (props: { data: Match[] }) => {
 
   const table = useMaterialReactTable({
     columns,
-    data,
+    data: data == null ? [] : data,
     enableFacetedValues: true,
     enableColumnResizing: true,
     enableFullScreenToggle: false,
