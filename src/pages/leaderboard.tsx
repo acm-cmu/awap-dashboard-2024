@@ -287,7 +287,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       '#rating': 'num',
       '#bracket': 'bracket'
     },
-    ScanIndexForward: false, 
   };
 
   const command = new QueryCommand(params);
