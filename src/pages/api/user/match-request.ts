@@ -17,10 +17,7 @@ export default async function handler(
   }
 
   const matchRequestData = {
-    players: [
-      { username: player },
-      { username: opp },
-    ],
+    players: [{ username: player }, { username: opp }],
   };
 
   try {
@@ -30,12 +27,18 @@ export default async function handler(
     );
 
     if (response.status !== 200)
-      return res.status(500).send({ message: 'Error starting match', data: response.data });
-  
-    return res.status(200).send({ message: 'Success', data: response.data });
+      return res
+        .status(500)
+        .send({ message: 'Error starting match', data: response.data });
 
+    return res.status(200).send({ message: 'Success', data: response.data });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({ message: 'Error fetching data', error: 'Internal Error, please try again later' });
+    return res
+      .status(500)
+      .send({
+        message: 'Error fetching data',
+        error: 'Internal Error, please try again later',
+      });
   }
 }

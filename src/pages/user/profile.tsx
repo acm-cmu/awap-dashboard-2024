@@ -37,7 +37,7 @@ const TeamMemberField = ({ id }: { id: number }) => {
   const ariaLabel = `Team Member ${id}`;
 
   return (
-    <InputGroup className="mb-3">
+    <InputGroup className='mb-3'>
       <InputGroup.Text>
         <FontAwesomeIcon icon={faUser} fixedWidth />
       </InputGroup.Text>
@@ -74,14 +74,17 @@ const Profile: NextPage = ({
   const changeBracket = async (user: string | null | undefined) => {
     if (!user) return;
     const teamName = document.getElementById('teamname') as HTMLInputElement;
-    const newBracket = document.getElementById('newbracket') as HTMLInputElement;
+    const newBracket = document.getElementById(
+      'newbracket',
+    ) as HTMLInputElement;
     const newBracketValue = newBracket.value;
-    await axios.post('/api/user/bracket-change', {
-      user,
-      bracket: newBracketValue,
-      teamName: teamName.value,
-    })
-    // .then((res) => res.status)
+    await axios
+      .post('/api/user/bracket-change', {
+        user,
+        bracket: newBracketValue,
+        teamName: teamName.value,
+      })
+      // .then((res) => res.status)
       .then((res) => {
         if (res.status === 400) {
           toast.error('Bracket change not successful!');
@@ -135,26 +138,26 @@ const Profile: NextPage = ({
   if (status === 'authenticated') {
     return (
       <UserLayout>
-        <div className="bg-light min-vh-100 d-flex flex-row dark:bg-transparent">
+        <div className='bg-light min-vh-100 d-flex flex-row dark:bg-transparent'>
           <Container>
-            <Row className="justify-content-center">
+            <Row className='justify-content-center'>
               <Col md={6}>
-                <Card className="mb-4 rounded-0">
-                  <Card.Body className="p-4">
-                    <h1 className="text-center">Team Actions</h1>
-                    
+                <Card className='mb-4 rounded-0'>
+                  <Card.Body className='p-4'>
+                    <h1 className='text-center'>Team Actions</h1>
+
                     {/* <br /> */}
                     <div>
                       <strong>Create Team</strong>
                     </div>
 
                     <form onSubmit={handleCreateTeam}>
-                    <label>
-                      Team Name: 
-                      <input type="text" name="name" id="teamname" />
-                    </label>
-                    <input type="submit" value="Submit" />
-                  </form>
+                      <label>
+                        Team Name:
+                        <input type='text' name='name' id='teamname' />
+                      </label>
+                      <input type='submit' value='Submit' />
+                    </form>
                     {/* <br />
                     <div>
                       <strong>Add Team Members</strong>
@@ -167,22 +170,22 @@ const Profile: NextPage = ({
                     </label>
                     <input type="submit" value="Submit" />
                   </form> */}
-                  <br />
+                    <br />
                   </Card.Body>
                 </Card>
               </Col>
-            {/* </Row>
+              {/* </Row>
             <Row className="justify-content-center"> */}
               <Col md={6}>
-                <Card className="mb-4 rounded-0">
-                  <Card.Body className="p-4">
-                    <h1 className="text-center">Team Profile</h1>
-                    <div className="text-center">
+                <Card className='mb-4 rounded-0'>
+                  <Card.Body className='p-4'>
+                    <h1 className='text-center'>Team Profile</h1>
+                    <div className='text-center'>
                       <Image
                         width={300}
                         height={300}
                         src={`/assets/avatars/avatar_${session.user.image}.png`}
-                        alt="Team Logo"
+                        alt='Team Logo'
                       />
                     </div>
                     <div>
@@ -193,9 +196,7 @@ const Profile: NextPage = ({
                     </div>
                     <div>
                       Team Name:
-                      <strong>
-                        {team.name}
-                      </strong>
+                      <strong>{team.name}</strong>
                     </div>
                     <div>
                       Bracket:{' '}
@@ -210,15 +211,15 @@ const Profile: NextPage = ({
                     </div>
 
                     <select
-                      className="form-select"
-                      aria-label="Default select example"
-                      id="newbracket"
+                      className='form-select'
+                      aria-label='Default select example'
+                      id='newbracket'
                     >
-                      <option value="beginner">Beginner</option>
-                      <option value="advanced">Advanced</option>
+                      <option value='beginner'>Beginner</option>
+                      <option value='advanced'>Advanced</option>
                     </select>
                     <br />
-                    <Button onClick={handleChangeBracket} variant="dark">
+                    <Button onClick={handleChangeBracket} variant='dark'>
                       Change Bracket
                     </Button>
                   </Card.Body>
@@ -248,7 +249,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   }
-  const userquery = `user:${session.user.name}`; 
+  const userquery = `user:${session.user.name}`;
   const params: ScanCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     FilterExpression: 'pk = :user_name',
@@ -266,19 +267,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       props: { team: { bracket: null } }, // will be passed to the page component as props
     };
   }
-  const teamquery = `team:${userData[0].team.S}`; 
-  const result2 = await client.send(new ScanCommand({
-    TableName: process.env.AWS_TABLE_NAME,
-    FilterExpression: 'pk = :team_name AND record_type= :bracket',
-    ExpressionAttributeValues: {
-      ':team_name': { S: teamquery },
-      ':bracket': { S: 'bracket' },
-    },
-  }));
+  const teamquery = `team:${userData[0].team.S}`;
+  const result2 = await client.send(
+    new ScanCommand({
+      TableName: process.env.AWS_TABLE_NAME,
+      FilterExpression: 'pk = :team_name AND record_type= :bracket',
+      ExpressionAttributeValues: {
+        ':team_name': { S: teamquery },
+        ':bracket': { S: 'bracket' },
+      },
+    }),
+  );
   const teamData = result2.Items;
-  
 
-  if (teamData && teamData[0] && teamData[0].bracket && typeof teamData[0].bracket.S === 'string') {
+  if (
+    teamData &&
+    teamData[0] &&
+    teamData[0].bracket &&
+    typeof teamData[0].bracket.S === 'string'
+  ) {
     bracketN = teamData[0].bracket.S;
   }
   const team = {

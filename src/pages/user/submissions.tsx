@@ -24,6 +24,7 @@ import Router from 'next/router';
 
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
+import { toast } from 'react-toastify';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -46,6 +47,13 @@ interface Submission {
   submissionURL: string;
   timeStamp: string;
   isActive: boolean;
+}
+
+interface ConfigData {
+  disabled_bracket_switching: boolean;
+  disabled_team_modifications: boolean;
+  disabled_scrimmage_requests: boolean;
+  disabled_code_submissions: boolean;
 }
 
 const TableRow: React.FC<{
@@ -108,6 +116,7 @@ const TableBody: React.FC<{ data: any; image: string; activateFn: any }> = ({
 
 const Submissions: NextPage = ({
   teamData,
+  configData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { status, data: userData } = useSession();
   const [file, setFile] = useState<any>(null);
@@ -115,6 +124,11 @@ const Submissions: NextPage = ({
   const { team, submissionData } = teamData;
 
   const handleActivate = async (fileName: string) => {
+    if (configData.disabled_code_submissions) {
+      toast.error('Changing active bot is currently disabled.');
+      return;
+    }
+
     await axios.post('/api/user/activate_bot', {
       team,
       fileName,
@@ -153,7 +167,14 @@ const Submissions: NextPage = ({
     setFile(null);
   };
 
-  const handleUploadClick = async () => uploadFile(team);
+  const handleUploadClick = async () => {
+    if (configData.disabled_code_submissions) {
+      toast.error('Code submissions are currently disabled.');
+      return;
+    }
+
+    uploadFile(team);
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') Router.replace('/auth/login');
@@ -258,6 +279,36 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+  // query for config data
+  const configParams: GetCommandInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: 'config:config_profile_1',
+      sk: 'config:config_profile_1',
+    },
+  };
+
+  const configCommand = new GetCommand(configParams);
+  const configResult = await client.send(configCommand);
+
+  const configData = configResult.Item;
+
+  let configs: ConfigData = {
+    disabled_bracket_switching: false,
+    disabled_code_submissions: false,
+    disabled_scrimmage_requests: false,
+    disabled_team_modifications: false,
+  };
+
+  if (configData) {
+    configs = {
+      disabled_bracket_switching: !configData.bracket_switching,
+      disabled_code_submissions: !configData.code_submissions,
+      disabled_scrimmage_requests: !configData.scrimmage_requests,
+      disabled_team_modifications: !configData.team_modifications,
+    };
+  }
+
   const { team } = result.Item;
 
   const queryParams: QueryCommandInput = {
@@ -281,6 +332,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamData: {
           team,
           submissionData: [],
+          configData: configs,
         },
       },
     };
@@ -307,6 +359,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         teamData: {
           team,
           submissionData: [],
+          configData: config,
         },
       },
     };
@@ -344,6 +397,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       teamData: {
         team,
         submissionData,
+        configData: config,
       },
     },
   };

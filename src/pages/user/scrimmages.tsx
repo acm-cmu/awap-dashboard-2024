@@ -18,7 +18,11 @@ import {
   QueryCommandInput,
 } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocument,
+  GetCommand,
+  GetCommandInput,
+} from '@aws-sdk/lib-dynamodb';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -59,6 +63,13 @@ interface Team {
   rating: number;
 }
 
+interface ConfigData {
+  disabled_bracket_switching: boolean;
+  disabled_team_modifications: boolean;
+  disabled_scrimmage_requests: boolean;
+  disabled_code_submissions: boolean;
+}
+
 // Table Component
 const TableRow: React.FC<{ match: Match }> = ({ match }) => (
   <tr>
@@ -83,11 +94,17 @@ const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
 );
 
 // Team Info Component Card and button to request match
-const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
-  oppTeam,
-  playerTeam,
-}) => {
+const TeamInfo: React.FC<{
+  oppTeam: Team;
+  playerTeam: string;
+  disabledScrimmageRequests: boolean;
+}> = ({ oppTeam, playerTeam, disabledScrimmageRequests }) => {
   const requestMatch = async () => {
+    if (disabledScrimmageRequests) {
+      toast.error('Scrimmage requests are currently disabled.');
+      return;
+    }
+
     axios
       .post('/api/user/match-request', {
         player: playerTeam,
@@ -191,9 +208,12 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
 const Scrimmages: NextPage = ({
   userTeam,
   teams,
+  configData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const session = useSession({ required: true });
   const [CurrentTeamSearch, setCurrentTeamSearch] = useState<Team | null>(null);
+
+  const { disabled_scrimmage_requests: disabledScrimmageRequests } = configData;
 
   const fetcher = async (url: string) => axios.get(url).then((res) => res.data);
 
@@ -225,7 +245,11 @@ const Scrimmages: NextPage = ({
         </Card.Body>
       </Card>
       {CurrentTeamSearch && (
-        <TeamInfo oppTeam={CurrentTeamSearch} playerTeam={userTeam} />
+        <TeamInfo
+          oppTeam={CurrentTeamSearch}
+          playerTeam={userTeam}
+          disabledScrimmageRequests={disabledScrimmageRequests}
+        />
       )}
       <Card>
         <Card.Body>
@@ -259,6 +283,36 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         destination: '/auth/login',
         permanent: false,
       },
+    };
+  }
+
+  // query for config data
+  const configParams: GetCommandInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: 'config:config_profile_1',
+      sk: 'config:config_profile_1',
+    },
+  };
+
+  const configCommand = new GetCommand(configParams);
+  const configResult = await client.send(configCommand);
+
+  const configData = configResult.Item;
+
+  let configs: ConfigData = {
+    disabled_bracket_switching: false,
+    disabled_code_submissions: false,
+    disabled_scrimmage_requests: false,
+    disabled_team_modifications: false,
+  };
+
+  if (configData) {
+    configs = {
+      disabled_bracket_switching: !configData.bracket_switching,
+      disabled_code_submissions: !configData.code_submissions,
+      disabled_scrimmage_requests: !configData.scrimmage_requests,
+      disabled_team_modifications: !configData.team_modifications,
     };
   }
 
@@ -318,6 +372,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       userTeam: team,
       teams,
+      configData: configs,
     }, // will be passed to the page component as props
   };
 };

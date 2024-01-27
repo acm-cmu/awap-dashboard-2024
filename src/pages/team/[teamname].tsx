@@ -47,6 +47,13 @@ interface TeamData {
   secret_key: string;
 }
 
+interface ConfigData {
+  disabled_bracket_switching: boolean;
+  disabled_team_modifications: boolean;
+  disabled_scrimmage_requests: boolean;
+  disabled_code_submissions: boolean;
+}
+
 const LeaveTeamModal = ({
   show,
   handleClose,
@@ -95,6 +102,7 @@ const TeamMemberField = ({ name }: { name: string }) => (
 
 const Team: NextPage = ({
   teamData,
+  configData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
   const teamname: string = router.query.teamname
@@ -152,6 +160,10 @@ const Team: NextPage = ({
   const handleRegenerateSecretKey = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+    if (configData.disabled_team_modifications) {
+      toast.error('Team modifications are currently disabled!');
+      return;
+    }
     regenerateSecretKey();
   };
 
@@ -182,6 +194,10 @@ const Team: NextPage = ({
   const handleChangeBracket = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+    if (configData.disabled_bracket_switching) {
+      toast.error('Bracket switching is currently disabled!');
+      return;
+    }
     changeBracket(teamname);
   };
 
@@ -209,6 +225,10 @@ const Team: NextPage = ({
   const handleLeaveTeam = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+    if (configData.disabled_team_modifications) {
+      toast.error('Team modifications are currently disabled!');
+      return;
+    }
     leaveTeam();
   };
 
@@ -358,6 +378,36 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const members: string[] = Array.from(teamData.members);
 
+  // query for config data
+  const configParams: GetCommandInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: 'config:config_profile_1',
+      sk: 'config:config_profile_1',
+    },
+  };
+
+  const configCommand = new GetCommand(configParams);
+  const configResult = await client.send(configCommand);
+
+  const configData = configResult.Item;
+
+  let configs: ConfigData = {
+    disabled_bracket_switching: false,
+    disabled_code_submissions: false,
+    disabled_scrimmage_requests: false,
+    disabled_team_modifications: false,
+  };
+
+  if (configData) {
+    configs = {
+      disabled_bracket_switching: !configData.bracket_switching,
+      disabled_code_submissions: !configData.code_submissions,
+      disabled_scrimmage_requests: !configData.scrimmage_requests,
+      disabled_team_modifications: !configData.team_modifications,
+    };
+  }
+
   const teamDataInfo: TeamData = {
     members,
     teamname: teamData.name,
@@ -370,6 +420,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       teamData: teamDataInfo,
+      configData: configs,
     },
   };
 };

@@ -37,58 +37,54 @@ const Login: NextPage = () => {
 
   return (
     // render login form
-    <div className="bg-light min-vh-100 d-flex flex-column justify-content-center align-items-center dark:bg-transparent">
+    <div className='bg-light min-vh-100 d-flex flex-column justify-content-center align-items-center dark:bg-transparent'>
       <Container>
-        <Row className="justify-content-center align-items-center px-3">
+        <Row className='justify-content-center align-items-center px-3'>
           <Col lg={10}>
-            <Row className="justify-content-center align-items-center">
-              <Col md={7} className="bg-white border p-5">
-                <div className="">
+            <Row className='justify-content-center align-items-center'>
+              <Col md={7} className='bg-white border p-5'>
+                <div className=''>
                   <h1>AWAP 2024 Login</h1>
-                  <p className="text-black-50">
+                  <p className='text-black-50'>
                     Sign In to your AWAP Dashboard
                   </p>
 
                   <form onSubmit={login}>
-                    <InputGroup className="mb-3">
+                    <InputGroup className='mb-3'>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faUser} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
                         onChange={(e) => setUsername(e.target.value)}
-                        type="text"
-                        name="username"
+                        type='text'
+                        name='username'
                         minLength={3}
                         maxLength={20}
                         required
-                        placeholder="Username"
-                        aria-label="Username"
+                        placeholder='Username'
+                        aria-label='Username'
                       />
                     </InputGroup>
 
-                    <InputGroup className="mb-3">
+                    <InputGroup className='mb-3'>
                       <InputGroup.Text>
                         <FontAwesomeIcon icon={faLock} fixedWidth />
                       </InputGroup.Text>
                       <Form.Control
                         onChange={(e) => setPassword(e.target.value)}
-                        type="password"
-                        name="password"
+                        type='password'
+                        name='password'
                         minLength={8}
                         maxLength={20}
                         required
-                        placeholder="Password"
-                        aria-label="Password"
+                        placeholder='Password'
+                        aria-label='Password'
                       />
                     </InputGroup>
 
                     <Row>
                       <Col xs={6}>
-                        <Button
-                          className="px-4"
-                          variant="dark"
-                          type="submit"
-                        >
+                        <Button className='px-4' variant='dark' type='submit'>
                           Login
                         </Button>
                       </Col>
