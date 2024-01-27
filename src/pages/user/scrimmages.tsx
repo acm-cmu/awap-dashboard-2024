@@ -109,7 +109,7 @@ const TeamInfo: React.FC<{
   oppTeam: Team;
   playerTeam: string;
   disabledScrimmageRequests: boolean;
-  map: string;
+  map: string | null;
 }> = ({ oppTeam, playerTeam, disabledScrimmageRequests, map }) => {
   const requestMatch = async () => {
     if (disabledScrimmageRequests) {
@@ -145,7 +145,7 @@ const TeamInfo: React.FC<{
     <Card className='mb-3'>
       <Card.Body>
         <Card.Title>
-          <small>Map: {map}</small> {/* Replace "map" with the actual property in your oppTeam object */}
+          <small>Map: {map ? map : "Random"}</small> {/* Replace "map" with the actual property in your oppTeam object */}
           <br/>
           <small>Opponent: {oppTeam.name}</small>
         </Card.Title>
@@ -286,7 +286,7 @@ const Scrimmages: NextPage = ({
           />
         </Card.Body>
       </Card>
-      {CurrentTeamSearch && CurrentMapSearch && (
+      {CurrentTeamSearch && (
         <TeamInfo
           oppTeam={CurrentTeamSearch}
           playerTeam={userTeam}
@@ -411,15 +411,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }));
   }
 
-  let maps: string[] = [];
-  const maps_req_url = 'http://' + process.env.MATCHMAKING_SERVER_IP + "/maps/list?pool=unranked"
-  
-  await axios.get(maps_req_url)
-  .then(response => {
-    maps = response.data.pools[0].mapIds;
-  }).catch(error => {
-    toast.error('Error fetching maps, Cannot run scrimmages:', error.message);
-  });
+  let maps : string[] = [];
+
+  await axios.get(`${process.env.MATCHMAKING_SERVER_IP}/maps/list?pool=unranked`)
+    .then((response : AxiosResponse) => {
+      if(response.status === 200)
+        maps = response.data.pools[0].mapIds;
+    }
+  );
 
   return {
     props: {

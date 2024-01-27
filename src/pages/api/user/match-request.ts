@@ -10,16 +10,27 @@ export default async function handler(
 
   const { player, opp, map } = req.body;
 
-  if (!player || !opp || !map) {
+  if (!player || !opp) {
     return res
       .status(400)
       .send({ message: 'Error creating match request', error: 'No player' });
   }
 
-  const matchRequestData = {
-    players: [{ username: player }, { username: opp }],
-    mapId: map,
-  };
+
+  let matchRequestData = {};
+
+  if(map) {
+    matchRequestData = {
+      players: [{ username: player }, { username: opp }],
+      map: map,
+      shuffler: 'random',
+    }
+  } else {
+    matchRequestData = {
+      players: [{ username: player }, { username: opp }],
+      shuffler: 'random',
+    }
+  }
 
   try {
     const response = await axios.post(
@@ -34,6 +45,7 @@ export default async function handler(
 
     return res.status(200).send({ message: 'Success', data: response.data });
   } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .send({
