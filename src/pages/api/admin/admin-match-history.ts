@@ -61,7 +61,7 @@ export default async function handler(
   if (result.Items) {
     const matchData = result.Items.map(
       (item: Record<string, AttributeValue>) => ({
-        id: item.match_id ? item.match_id.N : -1,
+        id: item.match_id ? item.match_id.N?.toString() : '-1',
         player1:
           item.players &&
           item.players.L &&
@@ -78,7 +78,7 @@ export default async function handler(
             : 'unknown',
         category: item.category ? item.category.S : 'unknown',
         status: item.item_status ? item.item_status.S : 'unknown',
-        outcome: item.placement ? item.placement.N : '-1',
+        outcome: item.placement ? item.placement.N?.toString() : '-1',
         replay: item.s3_key ? item.s3_key.S : 'unknown',
       }),
     );
