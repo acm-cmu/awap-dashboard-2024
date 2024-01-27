@@ -8,9 +8,9 @@ export default async function handler(
   if (req.method !== 'POST')
     return res.status(405).send({ message: 'Method not allowed' });
 
-  const { player, opp } = req.body;
+  const { player, opp, map } = req.body;
 
-  if (!player || !opp) {
+  if (!player || !opp || !map) {
     return res
       .status(400)
       .send({ message: 'Error creating match request', error: 'No player' });
@@ -18,6 +18,7 @@ export default async function handler(
 
   const matchRequestData = {
     players: [{ username: player }, { username: opp }],
+    mapId: map,
   };
 
   try {

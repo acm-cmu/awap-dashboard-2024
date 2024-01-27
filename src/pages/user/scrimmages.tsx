@@ -109,7 +109,8 @@ const TeamInfo: React.FC<{
   oppTeam: Team;
   playerTeam: string;
   disabledScrimmageRequests: boolean;
-}> = ({ oppTeam, playerTeam, disabledScrimmageRequests }) => {
+  map: string;
+}> = ({ oppTeam, playerTeam, disabledScrimmageRequests, map }) => {
   const requestMatch = async () => {
     if (disabledScrimmageRequests) {
       toast.error('Scrimmage requests are currently disabled.');
@@ -120,6 +121,7 @@ const TeamInfo: React.FC<{
       .post('/api/user/match-request', {
         player: playerTeam,
         opp: oppTeam.name,
+        map: map,
       })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
@@ -142,7 +144,11 @@ const TeamInfo: React.FC<{
   return (
     <Card className='mb-3'>
       <Card.Body>
-        <Card.Title>{oppTeam.name}</Card.Title>
+        <Card.Title>
+          <small>Map: {map}</small> {/* Replace "map" with the actual property in your oppTeam object */}
+          <br/>
+          <small>Opponent: {oppTeam.name}</small>
+        </Card.Title>
         <Card.Subtitle className='mb-2 text-muted' />
         <Card.Text>Rating: {oppTeam.rating}</Card.Text>
         <Button variant='dark' onClick={requestMatch}>
@@ -156,9 +162,12 @@ const TeamInfo: React.FC<{
 const ScrimmageRequestDropdown: React.FC<{
   teams: Team[];
   userteam: string;
+  maps: string[];
   setCurrentTeamSearch: React.Dispatch<React.SetStateAction<Team | null>>;
-}> = ({ teams, userteam, setCurrentTeamSearch }) => {
+  setCurrentMapSearch: React.Dispatch<React.SetStateAction<string | null>>;
+}> = ({ teams, userteam, maps, setCurrentTeamSearch, setCurrentMapSearch }) => {
   const [TeamValue, setValue] = useState<string | null>(null);
+  const [MapValue, setMapValue] = useState<string | null>(maps[0]!);
 
   const teamnames = teams.map((team: Team) => team.name);
   const index = teamnames.indexOf(userteam);
@@ -169,9 +178,16 @@ const ScrimmageRequestDropdown: React.FC<{
     for (let i = 0; i < teams.length; i += 1) {
       if (teams[i].name === TeamValue) {
         setCurrentTeamSearch(teams[i]);
-        return;
+        break;
       }
     }
+    for (let i = 0; i < maps.length; i += 1) {
+      if (maps[i] === MapValue) {
+        setCurrentMapSearch(maps[i]);
+        break;
+      }
+    }
+    return;
   };
 
   return (
@@ -186,6 +202,17 @@ const ScrimmageRequestDropdown: React.FC<{
         options={teamnames}
         sx={{ width: 800 }}
         renderInput={(params) => <TextField {...params} label='Teams' />}
+      />
+      <Autocomplete
+        disablePortal
+        value={MapValue}
+        onChange={(event: any, newMapValue: string | null) => {
+          setMapValue(newMapValue);
+        }}
+        id='maps_dropdown'
+        options={maps}
+        sx={{ width: 800, marginLeft: 2}}
+        renderInput={(params) => <TextField {...params} label='Maps' />}
       />
       <Button
         variant='dark'
@@ -220,9 +247,11 @@ const Scrimmages: NextPage = ({
   userTeam,
   teams,
   configData,
+  maps,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const session = useSession({ required: true });
   const [CurrentTeamSearch, setCurrentTeamSearch] = useState<Team | null>(null);
+  const [CurrentMapSearch, setCurrentMapSearch] = useState<string | null>(null);
 
   const { disabled_scrimmage_requests: disabledScrimmageRequests } = configData;
 
@@ -249,17 +278,20 @@ const Scrimmages: NextPage = ({
         <Card.Body>
           <Card.Title>Available Scrimmages</Card.Title>
           <ScrimmageRequestDropdown
-            teams={teams}
-            userteam={userTeam}
-            setCurrentTeamSearch={setCurrentTeamSearch}
+             teams={teams}
+             userteam={userTeam}
+             maps={maps}
+             setCurrentTeamSearch={setCurrentTeamSearch}
+             setCurrentMapSearch={setCurrentMapSearch}
           />
         </Card.Body>
       </Card>
-      {CurrentTeamSearch && (
+      {CurrentTeamSearch && CurrentMapSearch && (
         <TeamInfo
           oppTeam={CurrentTeamSearch}
           playerTeam={userTeam}
           disabledScrimmageRequests={disabledScrimmageRequests}
+          map={CurrentMapSearch}
         />
       )}
       <Card>
@@ -379,11 +411,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }));
   }
 
+  let maps: string[] = [];
+  const maps_req_url = 'http://' + process.env.MATCHMAKING_SERVER_IP + "/maps/list?pool=unranked"
+  
+  await axios.get(maps_req_url)
+  .then(response => {
+    maps = response.data.pools[0].mapIds;
+  })
+
   return {
     props: {
       userTeam: team,
       teams,
       configData: configs,
+      maps
     }, // will be passed to the page component as props
   };
 };
