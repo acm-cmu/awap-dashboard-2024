@@ -139,14 +139,14 @@ const Submissions: NextPage = ({
   const uploadFile = async (user: string) => {
     if (!file) return;
     // if filename contains spaces or ':' reject
-    if(file.name.includes(' ') || file.name.includes(':')) {
+    if (file.name.includes(' ') || file.name.includes(':')) {
       toast.error('File name cannot contain spaces or colons.');
       return;
     }
-    
+
     const time = new Date().toISOString();
     const timeString = time.split('.')[0].replace(/:/g, '-');
- 
+
     const submissionID = uuidv4();
     const fileName = `bot-${user}-${timeString}-${submissionID}.py`;
     const { data } = await axios.post('/api/user/s3-upload', {

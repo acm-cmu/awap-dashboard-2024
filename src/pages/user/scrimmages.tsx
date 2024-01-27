@@ -121,7 +121,7 @@ const TeamInfo: React.FC<{
       .post('/api/user/match-request', {
         player: playerTeam,
         opp: oppTeam.name,
-        map: map,
+        map,
       })
       .then((response: AxiosResponse) => {
         if (response.status === 200) {
@@ -145,8 +145,9 @@ const TeamInfo: React.FC<{
     <Card className='mb-3'>
       <Card.Body>
         <Card.Title>
-          <small>Map: {map ? map : "Random"}</small> {/* Replace "map" with the actual property in your oppTeam object */}
-          <br/>
+          <small>Map: {map || 'Random'}</small>{' '}
+          {/* Replace "map" with the actual property in your oppTeam object */}
+          <br />
           <small>Opponent: {oppTeam.name}</small>
         </Card.Title>
         <Card.Subtitle className='mb-2 text-muted' />
@@ -167,7 +168,9 @@ const ScrimmageRequestDropdown: React.FC<{
   setCurrentMapSearch: React.Dispatch<React.SetStateAction<string | null>>;
 }> = ({ teams, userteam, maps, setCurrentTeamSearch, setCurrentMapSearch }) => {
   const [TeamValue, setValue] = useState<string | null>(null);
-  const [MapValue, setMapValue] = useState<string | null>(maps.length ? maps[0] : null);
+  const [MapValue, setMapValue] = useState<string | null>(
+    maps.length ? maps[0] : null,
+  );
 
   const teamnames = teams.map((team: Team) => team.name);
   const index = teamnames.indexOf(userteam);
@@ -187,7 +190,6 @@ const ScrimmageRequestDropdown: React.FC<{
         break;
       }
     }
-    return;
   };
 
   return (
@@ -211,7 +213,7 @@ const ScrimmageRequestDropdown: React.FC<{
         }}
         id='maps_dropdown'
         options={maps}
-        sx={{ width: 800, marginLeft: 2}}
+        sx={{ width: 800, marginLeft: 2 }}
         renderInput={(params) => <TextField {...params} label='Maps' />}
       />
       <Button
@@ -278,11 +280,11 @@ const Scrimmages: NextPage = ({
         <Card.Body>
           <Card.Title>Available Scrimmages</Card.Title>
           <ScrimmageRequestDropdown
-             teams={teams}
-             userteam={userTeam}
-             maps={maps}
-             setCurrentTeamSearch={setCurrentTeamSearch}
-             setCurrentMapSearch={setCurrentMapSearch}
+            teams={teams}
+            userteam={userTeam}
+            maps={maps}
+            setCurrentTeamSearch={setCurrentTeamSearch}
+            setCurrentMapSearch={setCurrentMapSearch}
           />
         </Card.Body>
       </Card>
@@ -411,21 +413,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }));
   }
 
-  let maps : string[] = [];
+  let maps: string[] = [];
 
-  await axios.get(`${process.env.MATCHMAKING_SERVER_IP}/maps/list?pool=unranked`)
-    .then((response : AxiosResponse) => {
-      if(response.status === 200)
-        maps = response.data.pools[0].mapIds;
-    }
-  );
+  await axios
+    .get(`${process.env.MATCHMAKING_SERVER_IP}/maps/list?pool=unranked`)
+    .then((response: AxiosResponse) => {
+      if (response.status === 200) maps = response.data.pools[0].mapIds;
+    });
 
   return {
     props: {
       userTeam: team,
       teams,
       configData: configs,
-      maps
+      maps,
     }, // will be passed to the page component as props
   };
 };

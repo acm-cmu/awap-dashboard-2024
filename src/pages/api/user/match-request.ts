@@ -16,20 +16,19 @@ export default async function handler(
       .send({ message: 'Error creating match request', error: 'No player' });
   }
 
-
   let matchRequestData = {};
 
-  if(map) {
+  if (map) {
     matchRequestData = {
       players: [{ username: player }, { username: opp }],
-      map: map,
+      map,
       shuffler: 'random',
-    }
+    };
   } else {
     matchRequestData = {
       players: [{ username: player }, { username: opp }],
       shuffler: 'random',
-    }
+    };
   }
 
   try {
@@ -46,11 +45,9 @@ export default async function handler(
     return res.status(200).send({ message: 'Success', data: response.data });
   } catch (err) {
     console.log(err);
-    return res
-      .status(500)
-      .send({
-        message: 'Error fetching data',
-        error: 'Internal Error, please try again later',
-      });
+    return res.status(500).send({
+      message: 'Error fetching data',
+      error: 'Internal Error, please try again later',
+    });
   }
 }

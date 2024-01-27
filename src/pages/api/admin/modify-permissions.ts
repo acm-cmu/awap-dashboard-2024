@@ -85,7 +85,9 @@ export default async function handler(
   try {
     const response = await client.send(new UpdateCommand(params));
     if (response)
-      return res.status(200).send({ message: 'Permissions updated successfully!' });
+      return res
+        .status(200)
+        .send({ message: 'Permissions updated successfully!' });
 
     return res.status(400).send({ message: 'Error updating permissions!' });
   } catch (error) {
