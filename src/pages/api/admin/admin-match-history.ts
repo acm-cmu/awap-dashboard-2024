@@ -79,7 +79,10 @@ export default async function handler(
         category: item.category ? item.category.S : 'unknown',
         status: item.item_status ? item.item_status.S : 'unknown',
         outcome: item.placement ? item.placement.N?.toString() : '-1',
-        replay: item.s3_key ? item.s3_key.S : 'unknown',
+        replay:
+          item.s3_key && item.s3_key.S
+            ? process.env.REPLAY_S3_URL_TEMPLATE + item.s3_key.S
+            : 'unknown',
       }),
     );
 
