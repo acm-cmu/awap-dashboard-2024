@@ -25,10 +25,11 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 });
 
-interface Match {
+export interface Match {
   id: string;
   player: string;
   opponent: string;
+  map: string;
   outcome: string;
   type: string;
   replay: string | null;
@@ -87,6 +88,7 @@ export default async function handler(
         opponent: item.players.L[0].M.current.B
           ? item.players.L[1].M.teamName.S
           : item.players.L[0].M.teamName.S,
+        map: item.map ? item.map.S : 'Unknown',
         outcome: item.placement ? item.placement.N.toString() : 'PENDING',
         type: item.category.S,
         replay: item.s3_key
