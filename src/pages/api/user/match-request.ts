@@ -21,7 +21,7 @@ export default async function handler(
   if (map) {
     matchRequestData = {
       players: [{ username: player }, { username: opp }],
-      map,
+      mapId: map,
       shuffler: 'random',
     };
   } else {
