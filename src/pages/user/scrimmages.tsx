@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
 import { useState } from 'react';
 import { Card, Table, Button } from 'react-bootstrap';
+import { Match } from '@pages/api/user/match-history';
 
 import {
   DynamoDB,
@@ -48,16 +49,6 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 });
 
-interface Match {
-  id: string;
-  player: string;
-  opponent: string;
-  outcome: string;
-  type: string;
-  replay: string;
-  status: string;
-}
-
 interface Team {
   name: string;
   rating: number;
@@ -75,12 +66,17 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => (
   <tr>
     <td>{match.id}</td>
     <td>{match.opponent}</td>
+    <td>{match.map}</td>
     <td>{match.status}</td>
     <td>{match.outcome}</td>
     <td>{match.type}</td>
     <td>
       {match.status === 'finished' ? (
-        <a href={match.replay}>Download</a>
+        match.replay ? (
+          <a href={match.replay}>Download</a>
+        ) : (
+          'Error'
+        )
       ) : (
         'N/A'
       )}
@@ -194,6 +190,7 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
       <tr>
         <th>Match ID</th>
         <th>Opponent</th>
+        <th>Map</th>
         <th>Status</th>
         <th>Outcome</th>
         <th>Type</th>
