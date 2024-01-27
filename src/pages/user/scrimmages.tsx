@@ -167,7 +167,7 @@ const ScrimmageRequestDropdown: React.FC<{
   setCurrentMapSearch: React.Dispatch<React.SetStateAction<string | null>>;
 }> = ({ teams, userteam, maps, setCurrentTeamSearch, setCurrentMapSearch }) => {
   const [TeamValue, setValue] = useState<string | null>(null);
-  const [MapValue, setMapValue] = useState<string | null>(maps[0]!);
+  const [MapValue, setMapValue] = useState<string | null>(maps.length ? maps[0] : null);
 
   const teamnames = teams.map((team: Team) => team.name);
   const index = teamnames.indexOf(userteam);
@@ -417,7 +417,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await axios.get(maps_req_url)
   .then(response => {
     maps = response.data.pools[0].mapIds;
-  })
+  }).catch(error => {
+    toast.error('Error fetching maps, Cannot run scrimmages:', error.message);
+  });
 
   return {
     props: {
