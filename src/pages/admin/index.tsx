@@ -9,6 +9,13 @@ import { toast } from 'react-toastify';
 import useSWR from 'swr';
 import MatchTable from '@components/MatchTable';
 
+interface ConfigData {
+  disabled_bracket_switching: boolean;
+  disabled_team_modifications: boolean;
+  disabled_scrimmage_requests: boolean;
+  disabled_code_submissions: boolean;
+}
+
 const Admin: NextPage = () => {
   const { status, data } = useSession();
 
@@ -90,6 +97,98 @@ const Admin: NextPage = () => {
       });
   };
 
+  const modifyBracketSwitching = async (enabled : boolean) => {
+    axios.post('/api/admin/modify-permissions', { disabled_bracket_switching: enabled })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          const effect = enabled ? 'Enabled' : 'Disabled';
+          toast.success(`Bracket Switching ${effect}!`);
+        }
+        else {
+          toast.error('Unable to modify permission: Bracket Switching');
+        }
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response?.status === 500) {
+          toast.error('Internal Error, please try again later');
+        } else {
+          toast.error('Unable to modify permission: Bracket Switching');
+        }
+      });
+  }
+
+  const enableBracketSwitching = async () => { modifyBracketSwitching(true); }
+  const disableBracketSwitching = async () => { modifyBracketSwitching(false); }
+
+  const modifyTeamModifications = async (enabled : boolean) => {
+    axios.post('/api/admin/modify-permissions', { disabled_team_modifications: enabled })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          const effect = enabled ? 'Enabled' : 'Disabled';
+          toast.success(`Team Modifications ${effect}!`);
+        }
+        else {
+          toast.error('Unable to modify permission: Team Modifications');
+        }
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response?.status === 500) {
+          toast.error('Internal Error, please try again later');
+        } else {
+          toast.error('Unable to modify permission: Team Modifications');
+        }
+      });
+  }
+
+  const enableTeamModifications = async () => { modifyTeamModifications(true); }
+  const disableTeamModifications = async () => { modifyTeamModifications(false); }
+
+  const modifyScrimmageRequests = async (enabled : boolean) => {
+    axios.post('/api/admin/modify-permissions', { disabled_scrimmage_requests: enabled })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          const effect = enabled ? 'Enabled' : 'Disabled';
+          toast.success(`Scrimmage Requests ${effect}!`);
+        }
+        else {
+          toast.error('Unable to modify permission: Scrimmage Requests');
+        }
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response?.status === 500) {
+          toast.error('Internal Error, please try again later');
+        } else {
+          toast.error('Unable to modify permission: Scrimmage Requests');
+        }
+      });
+  }
+
+  const enableScrimmageRequests = async () => { modifyScrimmageRequests(true); }
+  const disableScrimmageRequests = async () => { modifyScrimmageRequests(false); }
+
+  const modifyCodeSubmissions = async (enabled : boolean) => {
+    axios.post('/api/admin/modify-permissions', { disabled_code_submissions: enabled })
+      .then((response: AxiosResponse) => {
+        if (response.status === 200) {
+          const effect = enabled ? 'Enabled' : 'Disabled';
+          toast.success(`Code Submissions ${effect}!`);
+        }
+        else {
+          toast.error('Unable to modify permission: Code Submissions');
+        }
+      })
+      .catch((reason: AxiosError) => {
+        if (reason.response?.status === 500) {
+          toast.error('Internal Error, please try again later');
+        } else {
+          toast.error('Unable to modify permission: Code Submissions');
+        }
+      });
+  }
+
+  const enableCodeSubmissions = async () => { modifyCodeSubmissions(true); }
+  const disableCodeSubmissions = async () => { modifyCodeSubmissions(false); }
+
   if (status === 'authenticated') {
     if (data?.user?.role === 'user') {
       Router.replace('/unauthorized');
@@ -99,7 +198,56 @@ const Admin: NextPage = () => {
           <Card>
             <Card.Body>
               <Card.Title>Admin</Card.Title>
-              <Card.Text>Run ranked scrimmages and tournaments here.</Card.Text>
+              <Card.Text>Manage Permissions and run ranked scrimmages and tournaments here.</Card.Text>
+            </Card.Body>
+          </Card>
+          <br />
+          <Card>
+            <Card.Body>
+              <Card.Title>Permissions</Card.Title>
+              <Card.Text>
+                <div className='mb-3'>
+                  <Button onClick={enableBracketSwitching} variant='dark'>
+                    Enable Bracket Switching
+                  </Button>
+                  <Button onClick={disableBracketSwitching} variant='dark'>
+                    Disable Bracket Switching
+                  </Button>
+                </div>
+              </Card.Text>
+
+              <Card.Text>
+                <div className='mb-3'>
+                  <Button onClick={enableTeamModifications} variant='dark'>
+                    Enable Team Modifications
+                  </Button>
+                  <Button onClick={disableTeamModifications} variant='dark'>
+                    Disable Team Modifications
+                  </Button>
+                </div>
+              </Card.Text>
+
+              <Card.Text>
+                <div className='mb-3'>
+                  <Button onClick={enableScrimmageRequests} variant='dark'>
+                    Enable Scrimmage Requests
+                  </Button>
+                  <Button onClick={disableScrimmageRequests} variant='dark'>
+                    Disable Scrimmage Requests
+                  </Button>
+                </div>
+              </Card.Text>
+
+              <Card.Text>
+                <div className='mb-3'>
+                  <Button onClick={enableCodeSubmissions} variant='dark'>
+                    Enable Code Submissions
+                  </Button>
+                  <Button onClick={disableCodeSubmissions} variant='dark'>
+                    Disable Code Submissions
+                  </Button>
+                </div>
+              </Card.Text>
             </Card.Body>
           </Card>
           <br />

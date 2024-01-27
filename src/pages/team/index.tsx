@@ -38,8 +38,15 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 });
 
+interface ConfigData {
+  disabled_bracket_switching: boolean;
+  disabled_team_modifications: boolean;
+  disabled_scrimmage_requests: boolean;
+  disabled_code_submissions: boolean;
+}
+
 const TeamHub: NextPage = ({
-  team,
+  team, configData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [createTeamname, setCreateTeamname] = useState<string>('');
   const [joinTeamname, setJoinTeamname] = useState<string>('');
@@ -54,6 +61,11 @@ const TeamHub: NextPage = ({
   const createTeam = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if(configData.disabled_team_modifications) {
+      toast.error('Team modifications are currently disabled.');
+      return
+    }
 
     await axios
       .post('/api/team/create-team', {
@@ -83,6 +95,11 @@ const TeamHub: NextPage = ({
   const joinTeam = async (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if(configData.disabled_team_modifications) {
+      toast.error('Team modifications are currently disabled.');
+      return
+    }
 
     await axios
       .post('/api/team/join-team', {
@@ -218,6 +235,36 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
+    // query for config data
+  const configParams: GetCommandInput = {
+    TableName: process.env.AWS_TABLE_NAME,
+    Key: {
+      pk: 'config:config_profile_1',
+      sk: 'config:config_profile_1',
+    },
+  };
+
+  const configCommand = new GetCommand(configParams);
+  const configResult = await client.send(configCommand);
+
+  const configData = configResult.Item;
+
+  let config: ConfigData = {
+    disabled_bracket_switching: false,
+    disabled_code_submissions: false,
+    disabled_scrimmage_requests: false,
+    disabled_team_modifications: false,
+  };
+
+  if (configData) {
+    config = {
+      disabled_bracket_switching: !configData.bracket_switching,
+      disabled_code_submissions: !configData.code_submissions,
+      disabled_scrimmage_requests: !configData.scrimmage_requests,
+      disabled_team_modifications: !configData.team_modifications,
+    };
+  }
+
   const getParams: GetCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     Key: {
@@ -230,12 +277,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const result = await client.send(command);
   if (!result || !result.Item || !result.Item.team || result.Item.team === '') {
     return {
-      props: { team: null },
+      props: { team: null, configData: config },
     };
   }
 
   return {
-    props: { team: result.Item.team },
+    props: { team: result.Item.team, configData: config },
   };
 };
 
