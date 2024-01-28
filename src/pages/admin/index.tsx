@@ -2,13 +2,23 @@ import { UserLayout } from '@layout';
 import { NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Button, Card } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import useSWR from 'swr';
 import MatchTable from '@components/MatchTable';
 import BotTable from '@components/BotTable';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts';
 
 const Admin: NextPage = () => {
   const { status, data } = useSession();
@@ -204,6 +214,47 @@ const Admin: NextPage = () => {
     modifyCodeSubmissions(false);
   };
 
+  const aggregateMatchesByMinute = (data: Record<string, AttributeValue>[]) => {
+    if (!data) {
+      return [];
+    }
+    const aggregatedData: { [id: string]: number } = {};
+    // Loop through initial data and count matches within each minute
+    // for (let i = 0; i < data.length; i++) {
+    //   const item = data[i];
+    //   const minute = item.timestamp.S?.substring(0, 16) as keyof object; // Extract YYYY-MM-DDTHH:MM
+    //   if (aggregatedData[minute]) {
+    //     aggregatedData[minute]++;
+    //   } else {
+    //     aggregatedData[minute] = 1;
+    //   }
+    // }
+    data.forEach((item: Record<string, AttributeValue>) => {
+      const minute = new Date(item.timestamp).toLocaleString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      }) as keyof object; // Extract YYYY-MM-DDTHH:MM
+      if (aggregatedData[minute]) {
+        aggregatedData[minute]++;
+      } else {
+        aggregatedData[minute] = 1;
+      }
+    });
+    // Convert aggregated data to array format required by Recharts
+    const chartData = Object.keys(aggregatedData).map((time) => ({
+      time,
+      matches: aggregatedData[time],
+    }));
+    return chartData;
+  };
+
+  const aggregatedData = useMemo(
+    () => aggregateMatchesByMinute(MatchData),
+    [MatchData],
+  );
+
   if (status === 'authenticated') {
     if (data?.user?.role === 'user') {
       Router.replace('/unauthorized');
@@ -345,6 +396,42 @@ const Admin: NextPage = () => {
                 Refresh
               </Button>
               <BotTable data={BotData} />
+            </Card.Body>
+          </Card>
+          <br />
+          <Card>
+            <Card.Body>
+              <Card.Title>Statistics</Card.Title>
+              <Button
+                variant='dark'
+                className='mb-3'
+                onClick={async () => {
+                  mutateMatch();
+                }}
+              >
+                Refresh
+              </Button>
+              <div>
+                <Card.Subtitle className='mb-3'>
+                  Number of Matches Over Time (Aggregated by Minute)
+                </Card.Subtitle>
+                <LineChart
+                  width={1100}
+                  height={300}
+                  data={aggregatedData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <XAxis
+                    dataKey='time'
+                    tick={{ angle: 350, textAnchor: 'end' }}
+                  />
+                  <YAxis />
+                  <CartesianGrid strokeDasharray='3 3' />
+                  <Tooltip />
+                  <Legend />
+                  <Line type='monotone' dataKey='matches' stroke='#8884d8' />
+                </LineChart>
+              </div>
             </Card.Body>
           </Card>
         </UserLayout>
