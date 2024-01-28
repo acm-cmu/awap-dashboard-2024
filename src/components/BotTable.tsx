@@ -5,14 +5,16 @@ import {
   type MRT_ColumnDef,
 } from 'material-react-table';
 import { TeamBot } from '@pages/api/admin/admin-bot-history';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const DownloadCell = (cell: { row: { original: { bot: any } } }) => {
-  const url = cell.row.original.bot;
+  const { row } = cell;
+  const url = row.original.bot;
   if (url === 'unknown') {
     return <div>N/A</div>;
-  } else {
-    return <a href={url}>Download</a>;
   }
+  return <a href={url}>Download</a>;
 };
 
 const BotTable = (props: { data: TeamBot[] }) => {
@@ -26,7 +28,7 @@ const BotTable = (props: { data: TeamBot[] }) => {
         size: 400,
       },
       {
-        accessorFn: (originalRow) => new Date(originalRow.upload_time), //convert to date for sorting and filtering
+        accessorFn: (originalRow) => new Date(originalRow.upload_time), // convert to date for sorting and filtering
         id: 'upload_time',
         header: 'Upload Time',
         filterVariant: 'datetime-range',
@@ -56,9 +58,6 @@ const BotTable = (props: { data: TeamBot[] }) => {
 
   return <MaterialReactTable table={table} />;
 };
-
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const BotTableWithLocalizationProvider = (props: { data: TeamBot[] }) => {
   const { data } = props;

@@ -5,6 +5,8 @@ import {
   type MRT_ColumnDef,
 } from 'material-react-table';
 import { Match } from '@pages/api/admin/admin-match-history';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const ReplayCell = ({ cell }: { cell: any }) => (
   <a href={cell.getValue()}>Download</a>
@@ -66,7 +68,7 @@ const MatchTable = (props: { data: Match[] }) => {
         size: 130,
       },
       {
-        accessorFn: (originalRow) => new Date(originalRow.timestamp), //convert to date for sorting and filtering
+        accessorFn: (originalRow) => new Date(originalRow.timestamp), // convert to date for sorting and filtering
         id: 'timestamp',
         header: 'Timestamp',
         filterVariant: 'datetime-range',
@@ -88,9 +90,6 @@ const MatchTable = (props: { data: Match[] }) => {
 
   return <MaterialReactTable table={table} />;
 };
-
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const MatchTableWithLocalizationProvider = (props: { data: Match[] }) => {
   const { data } = props;

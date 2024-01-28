@@ -2,14 +2,13 @@ import { UserLayout } from '@layout';
 import { NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
-import { useEffect, useMemo } from 'react';
+import { FunctionComponent, useEffect, useMemo } from 'react';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Button, Card } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import useSWR from 'swr';
 import MatchTable from '@components/MatchTable';
 import BotTable from '@components/BotTable';
-import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import {
   LineChart,
   Line,
@@ -17,8 +16,20 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from 'recharts';
+import { Match } from '@pages/api/admin/admin-match-history';
+
+const CustomizedAxisTick: FunctionComponent<any> = (props: any) => {
+  const { x, y, payload } = props;
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={16} textAnchor='end' transform='rotate(-20)'>
+        {payload.value}
+      </text>
+    </g>
+  );
+};
 
 const Admin: NextPage = () => {
   const { status, data } = useSession();
@@ -214,22 +225,12 @@ const Admin: NextPage = () => {
     modifyCodeSubmissions(false);
   };
 
-  const aggregateMatchesByMinute = (data: Record<string, AttributeValue>[]) => {
-    if (!data) {
+  const aggregateMatchesByMinute = (matches: Match[]) => {
+    if (!matches) {
       return [];
     }
     const aggregatedData: { [id: string]: number } = {};
-    // Loop through initial data and count matches within each minute
-    // for (let i = 0; i < data.length; i++) {
-    //   const item = data[i];
-    //   const minute = item.timestamp.S?.substring(0, 16) as keyof object; // Extract YYYY-MM-DDTHH:MM
-    //   if (aggregatedData[minute]) {
-    //     aggregatedData[minute]++;
-    //   } else {
-    //     aggregatedData[minute] = 1;
-    //   }
-    // }
-    data.forEach((item: Record<string, AttributeValue>) => {
+    matches.forEach((item: Match) => {
       const minute = new Date(item.timestamp).toLocaleString('en-US', {
         month: 'numeric',
         day: 'numeric',
@@ -237,7 +238,7 @@ const Admin: NextPage = () => {
         minute: 'numeric',
       }) as keyof object; // Extract YYYY-MM-DDTHH:MM
       if (aggregatedData[minute]) {
-        aggregatedData[minute]++;
+        aggregatedData[minute] += 1;
       } else {
         aggregatedData[minute] = 1;
       }
@@ -419,16 +420,12 @@ const Admin: NextPage = () => {
                   width={1100}
                   height={300}
                   data={aggregatedData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 5, right: 30, left: 10, bottom: 50 }}
                 >
-                  <XAxis
-                    dataKey='time'
-                    tick={{ angle: 350, textAnchor: 'end' }}
-                  />
+                  <XAxis dataKey='time' tick={<CustomizedAxisTick />} />
                   <YAxis />
                   <CartesianGrid strokeDasharray='3 3' />
                   <Tooltip />
-                  <Legend />
                   <Line type='monotone' dataKey='matches' stroke='#8884d8' />
                 </LineChart>
               </div>
