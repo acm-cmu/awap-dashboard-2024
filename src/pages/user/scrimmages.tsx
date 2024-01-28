@@ -411,7 +411,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await axios
     .get(`${process.env.MATCHMAKING_SERVER_IP}/maps/list?pool=unranked`)
     .then((response: AxiosResponse) => {
-      if (response.status === 200) maps = response.data.pools[0].mapIds;
+      if (response.status === 200 && response.data.pools && response.data.pools.length > 0) maps = response.data.pools[0].mapIds;
     });
 
   return {
