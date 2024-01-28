@@ -95,7 +95,11 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => {
 
 const TableBody: React.FC<{ data: Match[] }> = ({ data }) => (
   // eslint-disable-next-line react/jsx-key
-  <tbody>{data && data.map((item: Match) => <TableRow match={item} />)}</tbody>
+  <tbody>{data && data.map((item: Match) => {
+    // filter out matches that are tournament matches
+    if (item.type.toLowerCase() === 'tournament') return null;
+    return (<TableRow match={item} key={item.id} />);
+})}</tbody>
 );
 
 // Team Info Component Card and button to request match
