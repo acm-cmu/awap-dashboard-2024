@@ -27,8 +27,8 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
 
 export interface Match {
   id: string;
-  player: string;
-  opponent: string;
+  player1: string;
+  player2: string;
   map: string;
   outcome: string;
   type: string;
@@ -84,10 +84,8 @@ export default async function handler(
     if (matchHistoryResult.Items) {
       teamMatchData = matchHistoryResult.Items.map((item: any) => ({
         id: item.match_id.N,
-        player: teamname,
-        opponent: item.players.L[0].M.current.B
-          ? item.players.L[1].M.teamName.S
-          : item.players.L[0].M.teamName.S,
+        player1: item.players.L[0].M.teamName.S,
+        player2: item.players.L[1].M.teamName.S,
         map: item.map ? item.map.S : 'Unknown',
         outcome: item.placement ? item.placement.N.toString() : 'PENDING',
         type: item.category.S,

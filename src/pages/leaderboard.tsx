@@ -278,7 +278,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
 
   const params: QueryInput = {
     TableName: process.env.AWS_TABLE_NAME,
-    IndexName: process.env.AWS_RECORD_INDEX,
+    IndexName: process.env.AWS_GSI_TYPENUM_INDEX,
     KeyConditionExpression: 'record_type = :record',
     ExpressionAttributeValues: {
       ':record': { S: 'team' },
@@ -289,6 +289,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       '#rating': 'num',
       '#bracket': 'bracket',
     },
+    ScanIndexForward: false,
   };
 
   const command = new QueryCommand(params);

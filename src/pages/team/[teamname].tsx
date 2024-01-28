@@ -169,26 +169,28 @@ const Team: NextPage = ({
 
   const changeBracket = async (team: string | null | undefined) => {
     if (!team) return;
-    const newBracket = document.getElementById(
-      'newbracket',
-    ) as HTMLInputElement;
-    const newBracketValue = newBracket.value;
+    toast.error('Bracket changes are currently disabled!');
+    // return;
+    // const newBracket = document.getElementById(
+    //   'newbracket',
+    // ) as HTMLInputElement;
+    // const newBracketValue = newBracket.value;
 
-    await axios
-      .post('/api/team/bracket-change', {
-        team,
-        bracket: newBracketValue,
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          toast.dismiss();
-          toast.success('Bracket changed successfully!', { autoClose: 2000 });
-          setTimeout(refreshData, 500);
-        }
-      })
-      .catch(() => {
-        toast.error('Bracket change not successful!');
-      });
+    // await axios
+    //   .post('/api/team/bracket-change', {
+    //     team,
+    //     bracket: newBracketValue,
+    //   })
+    //   .then((res) => {
+    //     if (res.status === 200) {
+    //       toast.dismiss();
+    //       toast.success('Bracket changed successfully!', { autoClose: 2000 });
+    //       setTimeout(refreshData, 500);
+    //     }
+    //   })
+    //   .catch(() => {
+    //     toast.error('Bracket change not successful!');
+    //   });
   };
 
   const handleChangeBracket = async (e: any) => {
