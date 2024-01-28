@@ -225,11 +225,11 @@ const Admin: NextPage = () => {
     modifyCodeSubmissions(false);
   };
 
-  const aggregateMatchesByMinute = (data: Match[]) => {
-    if (!data) {
+  const aggregateMatchesByMinute = (matchArr: Match[]) => {
+    if (!matchArr) {
       return [];
     }
-    const matchesProcessed = data
+    const matchesProcessed = matchArr
       .map((elem) => ({
         timestamp: new Date(elem.timestamp),
       }))
@@ -250,7 +250,7 @@ const Admin: NextPage = () => {
       }
     });
     // Convert aggregated data to array format required by Recharts
-    let chartData = Object.keys(aggregatedData).map((time) => ({
+    const chartData = Object.keys(aggregatedData).map((time) => ({
       time,
       matches: aggregatedData[time],
     }));
