@@ -26,16 +26,11 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 });
 
-export interface Match {
-  id: string;
-  player1: string;
-  player2: string;
-  category: string;
-  map: string;
-  status: string;
-  outcome: string;
-  replay: string;
-  timestamp: string;
+export interface TeamBot {
+  team: string;
+  upload_time: string;
+  upload_name: string;
+  bot: string;
 }
 
 export default async function handler(
@@ -51,9 +46,9 @@ export default async function handler(
   const params: QueryCommandInput = {
     TableName: process.env.AWS_TABLE_NAME,
     IndexName: process.env.AWS_RECORD_INDEX,
-    KeyConditionExpression: 'record_type = :matchTeam',
+    KeyConditionExpression: 'record_type = :bot',
     ExpressionAttributeValues: {
-      ':matchTeam': { S: 'matchTeam' },
+      ':bot': { S: 'bot' },
     },
   };
 
@@ -61,36 +56,19 @@ export default async function handler(
   const result: QueryCommandOutput = await client.send(command);
 
   if (result.Items) {
-    const matchData = result.Items.map(
+    const botData = result.Items.map(
       (item: Record<string, AttributeValue>) => ({
-        id: item.match_id ? item.match_id.N?.toString() : '-1',
-        player1:
-          item.players &&
-          item.players.L &&
-          item.players.L[0] &&
-          item.players.L[0].M
-            ? item.players.L[0].M.teamName.S
-            : 'unknown',
-        player2:
-          item.players &&
-          item.players.L &&
-          item.players.L[1] &&
-          item.players.L[1].M
-            ? item.players.L[1].M.teamName.S
-            : 'unknown',
-        category: item.category ? item.category.S : 'unknown',
-        map: item.map && item.map.S ? item.map.S : 'unknown',
-        status: item.item_status ? item.item_status.S : 'unknown',
-        outcome: item.placement ? item.placement.N?.toString() : '-1',
-        replay:
+        team: item.pk ? item.pk.S?.slice(5) : 'unknown',
+        upload_time: item.timeStamp ? item.timeStamp.S : 'unknown',
+        upload_name: item.upload_name ? item.upload_name.S : 'unknown',
+        bot:
           item.s3_key && item.s3_key.S
-            ? process.env.REPLAY_S3_URL_TEMPLATE + item.s3_key.S
+            ? process.env.S3_URL_TEMPLATE + item.s3_key.S
             : 'unknown',
-        timestamp: item.timestamp ? item.timestamp.S : 'unknown',
       }),
     );
 
-    return res.status(200).json(matchData);
+    return res.status(200).json(botData);
   }
 
   return res.status(200).json([]);

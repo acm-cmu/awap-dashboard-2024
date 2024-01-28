@@ -34,6 +34,7 @@ export interface Match {
   type: string;
   replay: string | null;
   status: string;
+  timestamp: string;
 }
 
 export default async function handler(
@@ -93,6 +94,7 @@ export default async function handler(
           ? process.env.REPLAY_S3_URL_TEMPLATE + item.s3_key.S
           : null,
         status: item.item_status.S,
+        timestamp: item.timestamp ? item.timestamp.S : 'unknown',
       }));
     }
 

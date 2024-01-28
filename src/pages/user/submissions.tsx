@@ -392,7 +392,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       fileName: sorted[i].upload_name as string,
       s3Key: sorted[i].s3_key,
       submissionURL: (process.env.S3_URL_TEMPLATE + sorted[i].s3_key) as string,
-      timeStamp: new Date(sorted[i].timeStamp).toLocaleString(),
+      timeStamp: new Date(sorted[i].timeStamp).toLocaleString('en-US'),
       isActive: (sorted[i].s3_key === activeVersion) as boolean,
     };
     submissionData.push(submission);

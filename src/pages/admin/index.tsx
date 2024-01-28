@@ -2,20 +2,47 @@ import { UserLayout } from '@layout';
 import { NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import Router from 'next/router';
-import { useEffect } from 'react';
+import { FunctionComponent, useEffect, useMemo } from 'react';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Button, Card } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import useSWR from 'swr';
 import MatchTable from '@components/MatchTable';
+import BotTable from '@components/BotTable';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from 'recharts';
+import { Match } from '@pages/api/admin/admin-match-history';
+
+const CustomizedAxisTick: FunctionComponent<any> = (props: any) => {
+  const { x, y, payload } = props;
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={16} textAnchor='end' transform='rotate(-20)'>
+        {payload.value}
+      </text>
+    </g>
+  );
+};
 
 const Admin: NextPage = () => {
   const { status, data } = useSession();
 
   const fetcher = async (url: string) => axios.get(url).then((res) => res.data);
 
-  const { data: MatchData, mutate } = useSWR(
+  const { data: MatchData, mutate: mutateMatch } = useSWR(
     '/api/admin/admin-match-history',
+    fetcher,
+  );
+
+  const { data: BotData, mutate: mutateBot } = useSWR(
+    '/api/admin/admin-bot-history',
     fetcher,
   );
 
@@ -198,6 +225,37 @@ const Admin: NextPage = () => {
     modifyCodeSubmissions(false);
   };
 
+  const aggregateMatchesByMinute = (matches: Match[]) => {
+    if (!matches) {
+      return [];
+    }
+    const aggregatedData: { [id: string]: number } = {};
+    matches.forEach((item: Match) => {
+      const minute = new Date(item.timestamp).toLocaleString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      }) as keyof object; // Extract YYYY-MM-DDTHH:MM
+      if (aggregatedData[minute]) {
+        aggregatedData[minute] += 1;
+      } else {
+        aggregatedData[minute] = 1;
+      }
+    });
+    // Convert aggregated data to array format required by Recharts
+    const chartData = Object.keys(aggregatedData).map((time) => ({
+      time,
+      matches: aggregatedData[time],
+    }));
+    return chartData;
+  };
+
+  const aggregatedData = useMemo(
+    () => aggregateMatchesByMinute(MatchData),
+    [MatchData],
+  );
+
   if (status === 'authenticated') {
     if (data?.user?.role === 'user') {
       Router.replace('/unauthorized');
@@ -222,7 +280,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableBracketSwitching}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Bracket Switching
                   </Button>
@@ -235,7 +293,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableTeamModifications}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Team Modifications
                   </Button>
@@ -248,7 +306,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableScrimmageRequests}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Scrimmage Requests
                   </Button>
@@ -265,7 +323,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableCodeSubmissions}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Code Submissions
                   </Button>
@@ -317,12 +375,60 @@ const Admin: NextPage = () => {
                 variant='dark'
                 className='mb-3'
                 onClick={async () => {
-                  mutate();
+                  mutateMatch();
                 }}
               >
                 Refresh
               </Button>
               <MatchTable data={MatchData} />
+            </Card.Body>
+          </Card>
+          <br />
+          <Card>
+            <Card.Body>
+              <Card.Title>Global Bot History</Card.Title>
+              <Button
+                variant='dark'
+                className='mb-3'
+                onClick={async () => {
+                  mutateBot();
+                }}
+              >
+                Refresh
+              </Button>
+              <BotTable data={BotData} />
+            </Card.Body>
+          </Card>
+          <br />
+          <Card>
+            <Card.Body>
+              <Card.Title>Statistics</Card.Title>
+              <Button
+                variant='dark'
+                className='mb-3'
+                onClick={async () => {
+                  mutateMatch();
+                }}
+              >
+                Refresh
+              </Button>
+              <div>
+                <Card.Subtitle className='mb-3'>
+                  Number of Matches Over Time (Aggregated by Minute)
+                </Card.Subtitle>
+                <LineChart
+                  width={1100}
+                  height={300}
+                  data={aggregatedData}
+                  margin={{ top: 5, right: 30, left: 10, bottom: 50 }}
+                >
+                  <XAxis dataKey='time' tick={<CustomizedAxisTick />} />
+                  <YAxis />
+                  <CartesianGrid strokeDasharray='3 3' />
+                  <Tooltip />
+                  <Line type='monotone' dataKey='matches' stroke='#8884d8' />
+                </LineChart>
+              </div>
             </Card.Body>
           </Card>
         </UserLayout>
