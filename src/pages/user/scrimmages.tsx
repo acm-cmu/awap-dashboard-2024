@@ -75,7 +75,8 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => {
   return (
     <tr style={{ backgroundColor }}>
       <td>{match.id}</td>
-      <td>{match.opponent}</td>
+      <td>{match.player1}</td>
+      <td>{match.player2}</td>
       <td>{match.map}</td>
       <td>{match.status}</td>
       <td>{match.outcome}</td>
@@ -225,7 +226,8 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
     <thead>
       <tr>
         <th>Match ID</th>
-        <th>Opponent</th>
+        <th>Player 1</th>
+        <th>Player 2</th>
         <th>Map</th>
         <th>Status</th>
         <th>Outcome</th>
