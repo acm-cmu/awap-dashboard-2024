@@ -8,14 +8,20 @@ import { Button, Card } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import useSWR from 'swr';
 import MatchTable from '@components/MatchTable';
+import BotTable from '@components/BotTable';
 
 const Admin: NextPage = () => {
   const { status, data } = useSession();
 
   const fetcher = async (url: string) => axios.get(url).then((res) => res.data);
 
-  const { data: MatchData, mutate } = useSWR(
+  const { data: MatchData, mutate: mutateMatch } = useSWR(
     '/api/admin/admin-match-history',
+    fetcher,
+  );
+
+  const { data: BotData, mutate: mutateBot } = useSWR(
+    '/api/admin/admin-bot-history',
     fetcher,
   );
 
@@ -317,12 +323,28 @@ const Admin: NextPage = () => {
                 variant='dark'
                 className='mb-3'
                 onClick={async () => {
-                  mutate();
+                  mutateMatch();
                 }}
               >
                 Refresh
               </Button>
               <MatchTable data={MatchData} />
+            </Card.Body>
+          </Card>
+          <br />
+          <Card>
+            <Card.Body>
+              <Card.Title>Global Bot History</Card.Title>
+              <Button
+                variant='dark'
+                className='mb-3'
+                onClick={async () => {
+                  mutateBot();
+                }}
+              >
+                Refresh
+              </Button>
+              <BotTable data={BotData} />
             </Card.Body>
           </Card>
         </UserLayout>
