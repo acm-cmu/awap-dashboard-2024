@@ -225,13 +225,19 @@ const Admin: NextPage = () => {
     modifyCodeSubmissions(false);
   };
 
-  const aggregateMatchesByMinute = (matches: Match[]) => {
-    if (!matches) {
+  const aggregateMatchesByMinute = (data: Match[]) => {
+    if (!data) {
       return [];
     }
+    const matchesProcessed = data
+      .map((elem) => ({
+        timestamp: new Date(elem.timestamp),
+      }))
+      .sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+
     const aggregatedData: { [id: string]: number } = {};
-    matches.forEach((item: Match) => {
-      const minute = new Date(item.timestamp).toLocaleString('en-US', {
+    matchesProcessed.forEach((item) => {
+      const minute = item.timestamp.toLocaleString('en-US', {
         month: 'numeric',
         day: 'numeric',
         hour: 'numeric',
@@ -244,10 +250,11 @@ const Admin: NextPage = () => {
       }
     });
     // Convert aggregated data to array format required by Recharts
-    const chartData = Object.keys(aggregatedData).map((time) => ({
+    let chartData = Object.keys(aggregatedData).map((time) => ({
       time,
       matches: aggregatedData[time],
     }));
+
     return chartData;
   };
 
