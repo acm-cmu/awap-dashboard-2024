@@ -45,13 +45,17 @@ function processData(items: Record<string, AttributeValue>[] | undefined) {
 
   const procItems = items.map((item: Record<string, AttributeValue>) => ({
     id: item.match_id ? item.match_id.N?.toString() : '-1',
-    player1:
-      item.players && item.players.L && item.players.L[0] && item.players.L[0].M
-        ? item.players.L[0].M.teamName.S
-        : 'unknown',
+    player1: item.sk ? item.sk.S?.slice(5) : 'unknown',
     player2:
-      item.players && item.players.L && item.players.L[1] && item.players.L[1].M
-        ? item.players.L[1].M.teamName.S
+      item.players &&
+      item.players.L &&
+      item.players.L[0] &&
+      item.players.L[0].M &&
+      item.players.L[1] &&
+      item.players.L[1].M
+        ? item.players.L[0].M.current.BOOL
+          ? item.players.L[1].M.teamName.S
+          : item.players.L[0].M.teamName.S
         : 'unknown',
     category: item.category ? item.category.S : 'unknown',
     map: item.map && item.map.S ? item.map.S : 'unknown',
