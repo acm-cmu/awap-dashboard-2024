@@ -222,7 +222,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableBracketSwitching}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Bracket Switching
                   </Button>
@@ -235,7 +235,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableTeamModifications}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Team Modifications
                   </Button>
@@ -248,7 +248,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableScrimmageRequests}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Scrimmage Requests
                   </Button>
@@ -265,7 +265,7 @@ const Admin: NextPage = () => {
                   <Button
                     onClick={enableCodeSubmissions}
                     variant='dark'
-                    className='mr-3'
+                    className='me-3'
                   >
                     Enable Code Submissions
                   </Button>
