@@ -38,6 +38,35 @@ export interface Match {
   timestamp: string;
 }
 
+function processData(items: Record<string, AttributeValue>[] | undefined) {
+  if (!items) {
+    return [];
+  }
+
+  const proc_items = items.map((item: Record<string, AttributeValue>) => ({
+    id: item.match_id ? item.match_id.N?.toString() : '-1',
+    player1:
+      item.players && item.players.L && item.players.L[0] && item.players.L[0].M
+        ? item.players.L[0].M.teamName.S
+        : 'unknown',
+    player2:
+      item.players && item.players.L && item.players.L[1] && item.players.L[1].M
+        ? item.players.L[1].M.teamName.S
+        : 'unknown',
+    category: item.category ? item.category.S : 'unknown',
+    map: item.map && item.map.S ? item.map.S : 'unknown',
+    status: item.item_status ? item.item_status.S : 'unknown',
+    outcome: item.placement ? item.placement.N?.toString() : '-1',
+    replay:
+      item.s3_key && item.s3_key.S
+        ? process.env.REPLAY_S3_URL_TEMPLATE + item.s3_key.S
+        : 'unknown',
+    timestamp: item.timestamp ? item.timestamp.S : 'unknown',
+  }));
+
+  return proc_items;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -58,40 +87,24 @@ export default async function handler(
   };
 
   const command = new QueryCommand(params);
-  const result: QueryCommandOutput = await client.send(command);
+  var result: QueryCommandOutput = await client.send(command);
+  var matchData = processData(result.Items);
 
-  if (result.Items) {
-    const matchData = result.Items.map(
-      (item: Record<string, AttributeValue>) => ({
-        id: item.match_id ? item.match_id.N?.toString() : '-1',
-        player1:
-          item.players &&
-          item.players.L &&
-          item.players.L[0] &&
-          item.players.L[0].M
-            ? item.players.L[0].M.teamName.S
-            : 'unknown',
-        player2:
-          item.players &&
-          item.players.L &&
-          item.players.L[1] &&
-          item.players.L[1].M
-            ? item.players.L[1].M.teamName.S
-            : 'unknown',
-        category: item.category ? item.category.S : 'unknown',
-        map: item.map && item.map.S ? item.map.S : 'unknown',
-        status: item.item_status ? item.item_status.S : 'unknown',
-        outcome: item.placement ? item.placement.N?.toString() : '-1',
-        replay:
-          item.s3_key && item.s3_key.S
-            ? process.env.REPLAY_S3_URL_TEMPLATE + item.s3_key.S
-            : 'unknown',
-        timestamp: item.timestamp ? item.timestamp.S : 'unknown',
-      }),
-    );
-
-    return res.status(200).json(matchData);
+  while (result.LastEvaluatedKey) {
+    const newParams: QueryCommandInput = {
+      TableName: process.env.AWS_TABLE_NAME,
+      IndexName: process.env.AWS_RECORD_INDEX,
+      ExclusiveStartKey: result.LastEvaluatedKey,
+      KeyConditionExpression: 'record_type = :matchTeam',
+      ExpressionAttributeValues: {
+        ':matchTeam': { S: 'matchTeam' },
+      },
+    };
+    const newCommand = new QueryCommand(newParams);
+    result = await client.send(newCommand);
+    matchData = matchData.concat(processData(result.Items));
   }
+  matchData = matchData.concat(processData(result.Items));
 
-  return res.status(200).json([]);
+  return res.status(200).json(matchData);
 }
