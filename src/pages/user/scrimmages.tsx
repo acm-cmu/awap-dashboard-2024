@@ -88,6 +88,7 @@ const TableRow: React.FC<{ match: Match }> = ({ match }) => {
           'N/A'
         )}
       </td>
+      <td>{new Date(match.timestamp).toLocaleString('en-US')}</td>
     </tr>
   );
 };
@@ -225,7 +226,7 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
   <Table striped bordered hover className='text-center'>
     <thead>
       <tr>
-        <th>Match ID</th>
+        <th>ID</th>
         <th>Player 1</th>
         <th>Player 2</th>
         <th>Map</th>
@@ -233,6 +234,7 @@ const ScrimmagesTable: React.FC<{ data: Match[] }> = ({ data }) => (
         <th>Outcome</th>
         <th>Type</th>
         <th>Replay</th>
+        <th>Timestamp</th>
       </tr>
     </thead>
     <TableBody data={data} />
@@ -413,7 +415,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   await axios
     .get(`${process.env.MATCHMAKING_SERVER_IP}/maps/list?pool=unranked`)
     .then((response: AxiosResponse) => {
-      if (response.status === 200 && response.data.pools && response.data.pools.length > 0) maps = response.data.pools[0].mapIds;
+      if (
+        response.status === 200 &&
+        response.data.pools &&
+        response.data.pools.length > 0
+      )
+        maps = response.data.pools[0].mapIds;
     });
 
   return {
