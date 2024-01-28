@@ -46,6 +46,7 @@ function processData(items: Record<string, AttributeValue>[] | undefined) {
   const procItems = items.map((item: Record<string, AttributeValue>) => ({
     id: item.match_id ? item.match_id.N?.toString() : '-1',
     player1: item.sk ? item.sk.S?.slice(5) : 'unknown',
+    /* eslint-disable no-nested-ternary */
     player2:
       item.players &&
       item.players.L &&
