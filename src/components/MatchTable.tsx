@@ -18,7 +18,7 @@ const MatchTable = (props: { data: Match[] }) => {
         accessorKey: 'id',
         header: 'ID',
         filterVariant: 'autocomplete',
-        size: 80,
+        size: 130,
       },
       {
         accessorKey: 'player1',
@@ -35,6 +35,12 @@ const MatchTable = (props: { data: Match[] }) => {
         maxSize: 140,
       },
       {
+        accessorKey: 'outcome',
+        header: 'Winner',
+        filterVariant: 'select',
+        size: 140,
+      },
+      {
         accessorKey: 'category',
         header: 'Category',
         filterVariant: 'select',
@@ -47,23 +53,25 @@ const MatchTable = (props: { data: Match[] }) => {
         size: 150,
       },
       {
+        accessorKey: 'replay',
+        header: 'Replay',
+        Cell: ReplayCell,
+        filterVariant: 'select',
+        size: 130,
+      },
+      {
         accessorKey: 'status',
         header: 'Status',
         filterVariant: 'select',
         size: 130,
       },
       {
-        accessorKey: 'outcome',
-        header: 'Winner',
-        filterVariant: 'select',
-        size: 140,
-      },
-      {
-        accessorKey: 'replay',
-        header: 'Replay',
-        Cell: ReplayCell,
-        filterVariant: 'select',
-        size: 130,
+        accessorFn: (originalRow) => new Date(originalRow.timestamp), //convert to date for sorting and filtering
+        id: 'timestamp',
+        header: 'Timestamp',
+        filterVariant: 'datetime-range',
+        Cell: ({ cell }) => cell.getValue<Date>().toLocaleString(), // convert back to string for display
+        size: 500,
       },
     ],
     [],
@@ -81,4 +89,16 @@ const MatchTable = (props: { data: Match[] }) => {
   return <MaterialReactTable table={table} />;
 };
 
-export default MatchTable;
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+
+const MatchTableWithLocalizationProvider = (props: { data: Match[] }) => {
+  const { data } = props;
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <MatchTable data={data} />
+    </LocalizationProvider>
+  );
+};
+
+export default MatchTableWithLocalizationProvider;

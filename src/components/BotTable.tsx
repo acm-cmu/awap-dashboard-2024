@@ -30,18 +30,14 @@ const BotTable = (props: { data: TeamBot[] }) => {
         id: 'upload_time',
         header: 'Upload Time',
         filterVariant: 'datetime-range',
-        filterFn: 'between',
         Cell: ({ cell }) => cell.getValue<Date>().toLocaleString(), // convert back to string for display
         size: 500,
       },
       {
-        // accessorKey: 'bot',
         accessorFn: (originalRow) => originalRow.upload_name,
         header: 'Bot',
         Cell: DownloadCell,
         filterVariant: 'select',
-        filterFn: (row, id, filterValue) =>
-          row.original.upload_name === filterValue,
         grow: true,
         size: 180,
       },
