@@ -70,7 +70,7 @@ const MatchTable = (props: { data: Match[] }) => {
         id: 'timestamp',
         header: 'Timestamp',
         filterVariant: 'datetime-range',
-        Cell: ({ cell }) => cell.getValue<Date>().toLocaleString(), // convert back to string for display
+        Cell: ({ cell }) => cell.getValue<Date>().toLocaleString('en-US'), // convert back to string for display
         size: 500,
       },
     ],

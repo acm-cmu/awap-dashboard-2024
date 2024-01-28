@@ -30,7 +30,7 @@ const BotTable = (props: { data: TeamBot[] }) => {
         id: 'upload_time',
         header: 'Upload Time',
         filterVariant: 'datetime-range',
-        Cell: ({ cell }) => cell.getValue<Date>().toLocaleString(), // convert back to string for display
+        Cell: ({ cell }) => cell.getValue<Date>().toLocaleString('en-US'), // convert back to string for display
         size: 500,
       },
       {
