@@ -3,9 +3,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import {
   DynamoDB,
   DynamoDBClientConfig,
-  QueryCommand,
-  QueryCommandInput,
-  QueryCommandOutput,
 } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, GetCommand } from '@aws-sdk/lib-dynamodb';
 
