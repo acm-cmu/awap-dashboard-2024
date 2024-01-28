@@ -43,7 +43,7 @@ function processData(items: Record<string, AttributeValue>[] | undefined) {
     return [];
   }
 
-  const proc_items = items.map((item: Record<string, AttributeValue>) => ({
+  const procItems = items.map((item: Record<string, AttributeValue>) => ({
     id: item.match_id ? item.match_id.N?.toString() : '-1',
     player1:
       item.players && item.players.L && item.players.L[0] && item.players.L[0].M
@@ -64,13 +64,15 @@ function processData(items: Record<string, AttributeValue>[] | undefined) {
     timestamp: item.timestamp ? item.timestamp.S : 'unknown',
   }));
 
-  return proc_items;
+  return procItems;
 }
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  let result: QueryCommandOutput;
+  let matchData;
   const session = await unstable_getServerSession(req, res, authOptions);
 
   if (!session || !session.user || !session.user.name) {
@@ -87,9 +89,10 @@ export default async function handler(
   };
 
   const command = new QueryCommand(params);
-  var result: QueryCommandOutput = await client.send(command);
-  var matchData = processData(result.Items);
+  result = await client.send(command);
+  matchData = processData(result.Items);
 
+  /* eslint-disable no-await-in-loop */
   while (result.LastEvaluatedKey) {
     const newParams: QueryCommandInput = {
       TableName: process.env.AWS_TABLE_NAME,

@@ -27,7 +27,6 @@ export default function HeaderProfileNav({ img }: { img: string }) {
   const logout = async () => {
     await signOut({ callbackUrl: '/api/auth/logout' });
   };
-  console.log(img);
 
   return (
     <Nav>
